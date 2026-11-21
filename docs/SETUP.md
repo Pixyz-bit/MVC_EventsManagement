@@ -17,7 +17,7 @@ Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); prog
 
 ## GitHub repository
 
-The configured `origin` fetch/push URL is `https://github.com/Pixyz-bit/MVC_EventsManagement.git`. On 2026-11-22, `git ls-remote --symref origin HEAD` succeeded and returned no refs (empty repository). The local branch is `master`; no upstream branch is set and no commits have been pushed. Remote publication remains a separate action.
+The configured `origin` fetch/push URL is `https://github.com/Pixyz-bit/MVC_EventsManagement.git`. On 2026-11-22, `git ls-remote --symref origin HEAD` succeeded and returned no refs (empty repository). The local `master` branch was pushed on 2026-11-22 and tracks `origin/master`. Future pushes remain separate user-authorized actions.
 
 ## Database configuration
 
