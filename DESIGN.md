@@ -36,7 +36,7 @@ The white admin sidebar is 16rem wide on desktop. It follows the supplied Web Fo
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
 | Admin | Shared sidebar | Admin.Master | [White sidebar reference](MVC_QCUEventsManagement/DesignReferences/Admin/sidebar-white.png) and [header detail](MVC_QCUEventsManagement/DesignReferences/Admin/sidebar-white-header.png), with the first MVC branding | See [testing](docs/TESTING.md) |
 | Admin | Event Directory | AdminEvents.aspx | User-directed redesign using the shared white QCU admin styling and the original toolbar screenshot | The results panel fills the available space beside the sidebar with responsive gutters and compact typography and controls. Registration tabs and search share a row on wide screens and stack on smaller screens. The active tab is underlined. Counts show on the unsearched directory, and the results show the matching count. Desktop results align in columns and stack on smaller screens. See [testing](docs/TESTING.md). |
-| Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
+| Admin | Create event | CreateEvent.aspx | [Layout](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-layout.png), [bottom actions](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-actions.png), [steps](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-steps.png), supplied 2026-11-21 | Implemented at `/admin/events/create`. Compact numbered step tabs, reference-led details/banner columns and bottom actions. Remaining steps reuse this visual direction. Rendered viewport verification pending. |
 | Admin | Event details/edit/sponsors/cancellation | EventDetails.aspx | Pending | Awaiting reference |
 | Admin | Student directory/import/export | StudentList.aspx | Pending | Awaiting reference |
 | Admin | Account management | AccountManagement.aspx | Pending | Awaiting reference |
@@ -55,7 +55,9 @@ Admin filenames above are under source Frontend/Admin; Student filenames are und
 
 ### Established design decisions
 
-The Event Directory header includes a plus-icon “Create new event” button beside the heading on desktop and below the introduction on mobile. It is disabled with a visible “Coming soon” description until the creation workflow is implemented. Browser verification of this addition remains pending.
+The Event Directory header includes an enabled blue plus-icon “Create new event” link beside the heading on desktop and below the introduction on mobile. The sidebar Create Event entry links to the same workflow and has its own active state.
+
+The Create Event workspace occupies the viewport beside the shared sidebar (below the compact mobile header). The form has a fixed step-navigation row, a scrolling content area and bottom Cancel/Back/Next/Publish actions. At narrow widths, numbered tabs and the current step label replace long tab labels, and Cancel uses shorter copy. Short viewports use reduced heading spacing. The mobile menu overlays the workspace. Step tabs support arrow keys and Home/End; forward navigation validates prior steps. Schedule, audience, sponsors and review retain the supplied white/blue visual direction. Drafts stay in the current browser page; leaving a changed draft prompts before discarding.
 
 - Framework: Tailwind CSS with server-rendered Razor MVC.
 - Visual direction: page-specific references. The account layout and color tokens are established for login. The admin and student portal design decisions follow their own references.

@@ -21,7 +21,7 @@
     </aside>
 
     <header class="border-b border-campus-line bg-white lg:hidden">
-        <details class="group">
+        <details class="group relative">
             <summary class="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-campus-focus [&::-webkit-details-marker]:hidden">
                 <span class="flex min-w-0 items-center gap-3">
                     <img src="~/images/qcu-logo.png" alt="" class="size-8 shrink-0" width="32" height="32" />
@@ -31,7 +31,7 @@
                     Menu<span aria-hidden="true" class="size-2 -translate-y-0.5 rotate-45 border-r-2 border-b-2 group-open:translate-y-0.5 group-open:rotate-225"></span>
                 </span>
             </summary>
-            <div class="border-t border-campus-line">
+            <div class="border-t border-campus-line @(ViewData["ViewportForm"] is true ? "absolute inset-x-0 top-16 z-30 max-h-[calc(100dvh-4rem)] overflow-y-auto bg-white shadow-lg" : "")">
                 <partial name="_AdminNavigation" />
             </div>
         </details>

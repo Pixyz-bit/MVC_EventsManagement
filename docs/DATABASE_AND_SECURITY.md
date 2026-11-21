@@ -2,6 +2,10 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
+Event creation is administrator-only and antiforgery-protected. A dedicated input model excludes creator, counters, lifecycle and image paths; the service derives these and rechecks the active administrator. Server validation enforces lengths, positive capacity, ordered same-day times, SQL DATETIME bounds, registration dates strictly before the event day, supported audience combinations, target year 1-5 and at most 20 sponsor names of 150 characters. Event and sponsor insertion uses one EF SaveChanges transaction. No migration was needed.
+
+Optional banners allow PNG/JPEG/WEBP up to 5 MiB. SkiaSharp 4.153.1 decodes the actual bytes, accepts only those codecs, bounds dimensions to 8192 per side / 16 million pixels, rejects incomplete decoding, and re-encodes pixels to PNG. Generated GUID filenames are stored outside wwwroot; request filenames never become paths. An administrator-only endpoint serves PNG with `nosniff`. Failed database saves remove their uploaded file; failed file writes remove partial output. A process crash between file write and database save can leave an orphan file; automated orphan reconciliation is not implemented. Configure persistent image storage as documented in [setup](SETUP.md).
+
 - Create a NEW, EMPTY SQL Server database named MVC_EventsManagement through EF Core migrations. Do not connect the application to UniversityEventDB, copy existing data, add sample data, or seed users/events. This supersedes the previous existing-database adoption plan.
 - Use the source schema/behavior as reference, with explicit EF mappings and justified constraints. No live old-database inspection or adoption is required. Preserve records created in the NEW database during future changes.
 - Initial scaffolding is an option for discovery, not an instruction to overwrite reviewed files. Organize mappings into Data/Configurations and use a request-scoped DbContext registered through DI.

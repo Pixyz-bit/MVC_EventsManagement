@@ -52,6 +52,7 @@ builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountCookieEvents>();
 builder.Services.AddScoped<EventService>();
+builder.Services.AddSingleton<EventBannerStore>();
 
 await using var app = builder.Build();
 

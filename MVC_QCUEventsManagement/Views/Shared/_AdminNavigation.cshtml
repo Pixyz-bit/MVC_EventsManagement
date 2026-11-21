@@ -1,12 +1,12 @@
 @{
-    var eventsIsCurrent = string.Equals(ViewData["AdminSection"] as string, "Events", StringComparison.Ordinal);
+    var currentSection = ViewData["AdminSection"] as string;
     var accountName = User.Identity?.Name is { Length: > 0 } name ? name : "Administrator";
     (string Title, (string Label, string Icon, string? Route)[] Links)[] groups =
     [
         ("Core Management",
         [
             ("Event Directory", "M4 10h16M8 3v4m8-4v4M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z", "AdminEvents"),
-            ("Create Event", "M12 8v8m-4-4h8m5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", null),
+            ("Create Event", "M12 8v8m-4-4h8m5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "AdminCreateEvent"),
             ("Events History", "M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", null)
         ]),
         ("Attendance & Users",
@@ -26,15 +26,17 @@
             <ul class="mt-1.5 space-y-0.5 text-sm">
                 @foreach (var link in group.Links)
                 {
+                    var isCurrent = link.Route == "AdminEvents" && currentSection == "Events"
+                        || link.Route == "AdminCreateEvent" && currentSection == "Create";
                     <li class="relative">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                             class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 @(link.Route is not null && eventsIsCurrent ? "text-blue-700" : "text-slate-500")">
+                             class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 @(isCurrent ? "text-blue-700" : "text-slate-500")">
                             <path d="@link.Icon" />
                         </svg>
                         @if (link.Route is not null)
                         {
-                            <a asp-route="@link.Route" aria-current="@(eventsIsCurrent ? "page" : null)"
-                               class="@row font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus @(eventsIsCurrent ? "border-blue-600 bg-blue-50 text-blue-700" : "border-transparent text-campus-ink hover:bg-campus-input")">
+                            <a asp-route="@link.Route" aria-current="@(isCurrent ? "page" : null)"
+                               class="@row font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus @(isCurrent ? "border-blue-600 bg-blue-50 text-blue-700" : "border-transparent text-campus-ink hover:bg-campus-input")">
                                 @link.Label
                             </a>
                         }

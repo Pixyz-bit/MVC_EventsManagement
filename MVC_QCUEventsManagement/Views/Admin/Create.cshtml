@@ -1,0 +1,167 @@
+@using MVC_QCUEventsManagement.ViewModels.Admin
+@model CreateEventInput
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Publish New Campus Event";
+    ViewData["AdminSection"] = "Create";
+    ViewData["ViewportForm"] = true;
+    string[] steps = ["Event details", "Schedule & registration", "Target audience", "Sponsors", "Review & publish"];
+}
+
+<main class="event-workspace">
+    <header class="event-page-heading">
+        <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-2 text-xs text-campus-muted">
+            <a asp-route="AdminEvents" class="rounded hover:text-campus-action focus-visible:outline-2 focus-visible:outline-campus-focus">Event Directory</a>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true" class="size-3"><path d="m6 3 5 5-5 5" /></svg>
+            <span aria-current="page">Create event</span>
+        </nav>
+        <h1 class="text-xl font-extrabold tracking-tight text-campus-navy sm:text-2xl">Publish New Campus Event</h1>
+    </header>
+
+    <form asp-route="AdminCreateEvent" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" novalidate>
+        <div class="event-stepper-wrap">
+            <nav aria-label="Event creation steps" class="event-stepper" role="tablist">
+                @for (var i = 0; i < steps.Length; i++)
+                {
+                    <button type="button" id="event-tab-@i" class="event-step" role="tab" aria-selected="@(i == 0 ? "true" : "false")"
+                            aria-controls="event-panel-@i" tabindex="@(i == 0 ? "0" : "-1")" data-step="@i">
+                        <span class="event-step-number">@(i + 1)</span>
+                        <span class="event-step-name">@steps[i]</span>
+                    </button>
+                }
+            </nav>
+            <p id="event-current-step" class="mt-2 text-xs font-semibold text-campus-action sm:hidden">1 of 5 · Event details</p>
+        </div>
+
+        <div class="event-editor-body" id="event-editor-body" tabindex="-1">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800" role="alert" tabindex="-1" id="event-errors">
+                    <p class="mb-1 font-bold">Please check the event details.</p>
+                    <div asp-validation-summary="All"></div>
+                </div>
+            }
+            <noscript><p class="mb-4 text-sm text-campus-muted">All steps are shown below. Complete the form and select Publish event.</p></noscript>
+
+            <section id="event-panel-0" class="event-panel" role="tabpanel" aria-labelledby="event-tab-0" data-panel="0">
+                <div class="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+                    <div class="space-y-5">
+                        <div>
+                            <label asp-for="Title" class="event-label">Event title <span aria-hidden="true" class="text-red-600">*</span></label>
+                            <input asp-for="Title" class="event-input" required maxlength="200" placeholder="e.g. QCU Research and Innovation Forum" autocomplete="off" />
+                            <span asp-validation-for="Title" class="event-error"></span>
+                        </div>
+                        <div>
+                            <label asp-for="Description" class="event-label">Event description <span class="event-optional">Optional</span></label>
+                            <textarea asp-for="Description" class="event-input event-description" rows="4" maxlength="10000" placeholder="Describe the event, topics, speakers, or student prerequisites."></textarea>
+                            <span asp-validation-for="Description" class="event-error"></span>
+                        </div>
+                        <div class="grid gap-5 sm:grid-cols-2">
+                            <div>
+                                <label asp-for="VenueLocation" class="event-label">Venue location <span aria-hidden="true" class="text-red-600">*</span></label>
+                                <input asp-for="VenueLocation" class="event-input" required maxlength="200" placeholder="e.g. Central Auditorium, Hall A" />
+                                <span asp-validation-for="VenueLocation" class="event-error"></span>
+                                <p class="event-hint">Room, auditorium, or campus venue.</p>
+                            </div>
+                            <div>
+                                <label asp-for="MaxCapacity" class="event-label">Maximum capacity <span aria-hidden="true" class="text-red-600">*</span></label>
+                                <input asp-for="MaxCapacity" class="event-input" required min="1" max="2147483647" step="1" inputmode="numeric" />
+                                <span asp-validation-for="MaxCapacity" class="event-error"></span>
+                                <p class="event-hint">Total seats available for registration.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-banner-panel">
+                        <label for="Banner" class="event-label">Promotional banner / poster <span class="event-optional">Optional</span></label>
+                        <div class="event-upload">
+                            <input asp-for="Banner" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="banner-hint banner-error" />
+                            <div id="banner-placeholder" class="pointer-events-none flex flex-col items-center gap-3 px-4 text-center">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-8 text-campus-action"><path d="M12 16V3m-5 5 5-5 5 5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" /></svg>
+                                <strong class="text-sm font-semibold text-campus-navy">Choose a promotional banner</strong>
+                                <span class="text-xs text-campus-muted">PNG, JPG or WEBP · Up to 5 MB</span>
+                            </div>
+                            <img id="banner-preview" alt="Selected event banner preview" class="pointer-events-none absolute inset-0 hidden h-full w-full object-contain p-3" />
+                        </div>
+                        <p id="banner-hint" class="event-hint">Choose a clear image for the event listing.</p>
+                        <p id="banner-file-name" class="mt-1 truncate text-xs text-campus-muted" aria-live="polite"></p>
+                        <button type="button" id="remove-banner" class="event-text-button mt-1 hidden">Remove image</button>
+                        <span asp-validation-for="Banner" id="banner-error" class="event-error"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="event-panel-1" class="event-panel" role="tabpanel" aria-labelledby="event-tab-1" data-panel="1">
+                <div class="event-section-intro"><h2>Schedule & registration</h2><p>Set the event day and booking window. All times are Philippine time.</p></div>
+                <div class="grid gap-8 xl:grid-cols-2">
+                    <fieldset class="space-y-5"><legend class="mb-4 text-sm font-bold text-campus-navy">Event schedule</legend>
+                        <div><label asp-for="EventDate" class="event-label">Event date *</label><input asp-for="EventDate" type="date" class="event-input" required min="1753-01-01" max="9998-12-31" /><span asp-validation-for="EventDate" class="event-error"></span></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label asp-for="StartTime" class="event-label">Starts at *</label><input asp-for="StartTime" type="time" class="event-input" required /><span asp-validation-for="StartTime" class="event-error"></span></div>
+                            <div><label asp-for="EndTime" class="event-label">Ends at *</label><input asp-for="EndTime" type="time" class="event-input" required /><span asp-validation-for="EndTime" class="event-error"></span></div>
+                        </div>
+                        <p class="event-hint">The event must start and end on the same day.</p>
+                    </fieldset>
+                    <fieldset class="space-y-5"><legend class="mb-4 text-sm font-bold text-campus-navy">Registration window</legend>
+                        <div><label asp-for="RegStart" class="event-label">Registration opens *</label><input asp-for="RegStart" type="datetime-local" class="event-input" required min="1753-01-01T00:00" max="9998-12-31T23:59" /><span asp-validation-for="RegStart" class="event-error"></span></div>
+                        <div><label asp-for="RegEnd" class="event-label">Registration closes *</label><input asp-for="RegEnd" type="datetime-local" class="event-input" required min="1753-01-01T00:00" max="9998-12-31T23:59" /><span asp-validation-for="RegEnd" class="event-error"></span></div>
+                        <p class="event-hint">Both registration dates must be before the event day.</p>
+                    </fieldset>
+                </div>
+            </section>
+
+            <section id="event-panel-2" class="event-panel" role="tabpanel" aria-labelledby="event-tab-2" data-panel="2">
+                <div class="event-section-intro"><h2>Target audience</h2><p>Leave a selection open to welcome all eligible students in that group.</p></div>
+                <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                    <div><label asp-for="TargetBranch" class="event-label">Campus</label><select asp-for="TargetBranch" class="event-input"><option value="">All campuses</option>@foreach (var branch in CreateEventInput.Branches) { <option value="@branch">@branch</option> }</select><span asp-validation-for="TargetBranch" class="event-error"></span></div>
+                    <div><label asp-for="TargetDepartment" class="event-label">Academic college</label><select asp-for="TargetDepartment" class="event-input"><option value="">All colleges</option>@foreach (var department in CreateEventInput.ProgramOptions.Select(p => p.Department).Distinct()) { <option value="@department">@department</option> }</select><span asp-validation-for="TargetDepartment" class="event-error"></span></div>
+                    <div><label asp-for="TargetYearLevel" class="event-label">Year level</label><select asp-for="TargetYearLevel" class="event-input"><option value="">All year levels</option>@for (var year = 1; year <= 5; year++) { <option value="@year">Year @year</option> }</select><span asp-validation-for="TargetYearLevel" class="event-error"></span></div>
+                </div>
+                <fieldset class="mt-6"><legend class="event-label">Programs <span class="event-optional">Optional</span></legend><p class="mb-3 text-xs text-campus-muted">Select one or more, or leave all unchecked for every program in the selected college.</p>
+                    <div class="grid gap-x-5 gap-y-2 sm:grid-cols-2 xl:grid-cols-3">
+                        @foreach (var program in CreateEventInput.ProgramOptions)
+                        {
+                            <label class="event-program" data-department="@program.Department"><input type="checkbox" name="Programs" value="@program.Code" checked="@Model.Programs.Contains(program.Code)" /><span><strong class="block text-sm">@program.Code</strong><span class="text-xs text-campus-muted">@program.Name</span></span></label>
+                        }
+                    </div><span asp-validation-for="Programs" class="event-error"></span>
+                </fieldset>
+            </section>
+
+            <section id="event-panel-3" class="event-panel" role="tabpanel" aria-labelledby="event-tab-3" data-panel="3">
+                <div class="event-section-intro"><h2>Sponsors & partners</h2><p>Add supporting organizations, or continue without sponsors.</p></div>
+                <div class="max-w-2xl">
+                    <label for="sponsor-name" class="event-label">Organization name</label>
+                    <div class="flex gap-2"><input id="sponsor-name" class="event-input" maxlength="150" placeholder="Enter a sponsor or partner name" /><button type="button" id="add-sponsor" class="event-secondary shrink-0">Add sponsor</button></div>
+                    <p id="sponsor-feedback" class="event-error" aria-live="polite"></p>
+                    <ul id="sponsor-list" class="mt-4 flex flex-wrap gap-2" aria-label="Selected sponsors">
+                        @for (var i = 0; i < Model.Sponsors.Count; i++)
+                        {
+                            <li class="event-sponsor"><span>@Model.Sponsors[i]</span><input type="hidden" name="Sponsors[@i]" value="@Model.Sponsors[i]" /><button type="button" class="event-sponsor-remove" aria-label="Remove @Model.Sponsors[i]">×</button></li>
+                        }
+                    </ul>
+                    <p id="no-sponsors" class="event-hint">No sponsors added.</p>
+                    <span asp-validation-for="Sponsors" class="event-error"></span>
+                    <h3 class="mt-7 mb-3 text-sm font-bold text-campus-navy">Quick add</h3>
+                    <div class="flex flex-wrap gap-2">@foreach (var preset in CreateEventInput.SponsorPresets) { <button type="button" class="event-preset" data-sponsor="@preset">+ @preset</button> }</div>
+                </div>
+            </section>
+
+            <section id="event-panel-4" class="event-panel" role="tabpanel" aria-labelledby="event-tab-4" data-panel="4">
+                <div class="event-section-intro"><h2>Review & publish</h2><p>Check the details before making this event available in the directory.</p></div>
+                <dl id="event-summary" class="event-summary"></dl>
+                <label class="mt-6 flex min-h-11 items-start gap-3 text-sm"><input asp-for="Confirm" class="mt-1 size-4 accent-campus-action" required /><span>I’ve reviewed the details and am ready to publish this event.</span></label>
+                <span asp-validation-for="Confirm" class="event-error"></span>
+            </section>
+        </div>
+
+        <footer class="event-editor-footer">
+            <a asp-route="AdminEvents" id="discard-event" class="event-secondary"><span class="sm:hidden">Cancel</span><span class="hidden sm:inline">Cancel & discard</span></a>
+            <div class="flex items-center gap-2">
+                <span id="event-progress" class="mr-2 hidden text-xs text-campus-muted lg:inline">Step 1 of 5</span>
+                <button type="button" id="event-back" class="event-secondary hidden">Back</button>
+                <button type="button" id="event-next" class="event-primary hidden"><span>Schedule & registration</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="size-4"><path d="m6 3 5 5-5 5" /></svg></button>
+                <button type="submit" id="event-publish" class="event-primary">Publish event</button>
+            </div>
+        </footer>
+    </form>
+</main>
+@section Scripts { <script src="~/js/admin/create-event.js" asp-append-version="true" defer></script> }

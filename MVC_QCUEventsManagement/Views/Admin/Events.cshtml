@@ -28,16 +28,20 @@
         <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Find upcoming campus events and check when registration opens or closes.</p>
         </div>
         <div class="shrink-0 sm:text-right">
-            <button type="button" disabled aria-describedby="create-event-availability"
-                    class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-campus-input px-4 text-sm font-semibold text-campus-muted disabled:cursor-not-allowed">
+            <a asp-route="AdminCreateEvent"
+               class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-campus-action px-4 text-sm font-semibold text-white hover:bg-campus-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" class="size-4.5">
                     <path d="M12 5v14M5 12h14" />
                 </svg>
                 Create new event
-            </button>
-            <p id="create-event-availability" class="mt-1 text-xs text-campus-muted">Coming soon</p>
+            </a>
         </div>
     </header>
+
+    @if (TempData["EventCreated"] is string message)
+    {
+        <p role="status" class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">@message</p>
+    }
 
     <section aria-label="Event results" class="mt-5 rounded-xl border border-campus-line bg-white">
         <div class="rounded-t-xl border-b border-campus-line xl:grid xl:grid-cols-[max-content_minmax(0,1fr)]">

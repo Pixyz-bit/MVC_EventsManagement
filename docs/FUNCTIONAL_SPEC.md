@@ -83,8 +83,8 @@ Acceptance: exactly RegStart/RegEnd, just after deadline, exactly EventEnd, full
 
 ### EVENT-02: Creation and editing
 
-- [ ] Inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero.
-- [ ] Same-day event start precedes end. Registration opening precedes deadline, and BOTH registration calendar dates must be strictly before the event date. Preserve SQL DATETIME range while mapping.
+- [x] Creation inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero. `/admin/events/create` provides five steps and a final confirmation; successful publishing redirects to the directory with feedback. Editing remains pending.
+- [x] Creation validation: same-day event start precedes end; registration opening precedes deadline, and BOTH registration calendar dates are strictly before the event date. SQL DATETIME bounds are validated, and events that have already ended are rejected. Apply these rules to editing when implemented.
 - [ ] Edit only unfinished Upcoming events and recheck at save. Capacity cannot fall below current reservations, including concurrent bookings. Preserve creator, lifecycle and counts during edits.
 - [ ] Missing/invalid event IDs return unavailable/not-found; database errors never fabricate example records.
 
@@ -99,10 +99,10 @@ Acceptance: historical evidence/counts survive, admission/booking stop immediate
 
 ### EVENT-04: Audience, sponsors and images
 
-- [ ] Blank/null audience dimensions are unrestricted. Support multiple programs and optional target year using ELIGIBLE-01.
-- [ ] Stage sponsor add/preset/remove in forms. Sponsor rows belong to an event, have CreatedAt, and display by insertion order; there is no separate global sponsor-catalog entity.
-- [ ] Upload/preview/replace event image; retain existing image when absent. Source wide/square inputs ultimately write one EventPhotoPath, not two persisted images.
-- [ ] Coordinate event/sponsor writes in one transaction with explicit failure handling; source currently saves them separately and can swallow sponsor errors. Coordinate file cleanup with DB failure.
+- [x] Creation supports unrestricted audience dimensions, multiple known program codes, and optional year 1-5. College selection filters programs; the server rejects mismatched combinations. Eligibility enforcement for student booking remains in ELIGIBLE-01.
+- [x] Creation stages sponsor add/preset/remove, caps input at 20 names of 150 characters, and removes case-insensitive duplicates at save. Sponsor rows have CreatedAt and identity insertion order; there is no global sponsor catalog. Editing remains pending.
+- [ ] Creation upload/preview/remove is implemented with one EventPhotoPath. Banner replacement and retention during editing remain pending. Creation accepts PNG/JPEG/WEBP up to 5 MiB and validates/re-encodes pixels; see [database and security](DATABASE_AND_SECURITY.md).
+- [ ] Creation saves event/sponsors in one EF transaction and removes uploaded files after failed saves. Sponsor replacement during editing remains pending.
 
 Acceptance: failure cannot leave partial sponsor replacement; valid associations persist; unsafe images fail; existing paths still resolve after migration.
 

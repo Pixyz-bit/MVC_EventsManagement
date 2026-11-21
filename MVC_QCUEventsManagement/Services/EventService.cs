@@ -1,12 +1,44 @@
 using Microsoft.EntityFrameworkCore;
 using MVC_QCUEventsManagement.Data;
 using MVC_QCUEventsManagement.ViewModels.Admin;
+using MVC_QCUEventsManagement.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace MVC_QCUEventsManagement.Services;
 
 public sealed class EventService(ApplicationDbContext db, EventClock clock)
 {
     private const int PageSize = 25;
+
+    public async Task<int> CreateAsync(CreateEventInput input, int adminId, string? bannerName, CancellationToken cancellationToken)
+    {
+        Validator.ValidateObject(input, new ValidationContext(input), validateAllProperties: true);
+        var start = input.EventDate!.Value.ToDateTime(input.StartTime!.Value);
+        var end = input.EventDate.Value.ToDateTime(input.EndTime!.Value);
+        if (end <= clock.Now) throw new ValidationException("Choose an event that has not ended.");
+        if (!await db.Users.AnyAsync(user => user.UserId == adminId && user.Role == "Admin" && user.IsActive, cancellationToken))
+            throw new UnauthorizedAccessException();
+        static string? Optional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+        var ev = new Event
+        {
+            Title = input.Title.Trim(), Description = Optional(input.Description), VenueLocation = input.VenueLocation.Trim(),
+            MaxCapacity = input.MaxCapacity, CreatedByUserId = adminId, EventStart = start, EventEnd = end,
+            RegStart = DateTime.SpecifyKind(input.RegStart!.Value, DateTimeKind.Unspecified),
+            RegEnd = DateTime.SpecifyKind(input.RegEnd!.Value, DateTimeKind.Unspecified),
+            TargetBranch = Optional(input.TargetBranch), TargetDepartment = Optional(input.TargetDepartment),
+            TargetProgram = input.Programs.Count == 0 ? null : string.Join(",", input.Programs.Distinct()),
+            TargetYearLevel = input.TargetYearLevel, EventPhotoPath = bannerName,
+            Sponsors = input.Sponsors.Select(name => name.Trim()).Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(name => new Sponsor { SponsorName = name, CreatedAt = clock.Now }).ToList()
+        };
+        db.Events.Add(ev);
+        // EF writes the event and all sponsors in the same SaveChanges transaction.
+        await db.SaveChangesAsync(cancellationToken);
+        return ev.EventId;
+    }
+
+    public Task<string?> GetBannerAsync(int id, CancellationToken cancellationToken) => db.Events.AsNoTracking()
+        .Where(ev => ev.EventId == id).Select(ev => ev.EventPhotoPath).SingleOrDefaultAsync(cancellationToken);
 
     public async Task<EventListViewModel> GetUpcomingAsync(string? query, string? status, int page, CancellationToken cancellationToken)
     {

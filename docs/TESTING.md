@@ -31,6 +31,8 @@ Detailed expected business outcomes have one owner: [functional specification](F
 
 ## Checks actually performed
 
+2026-11-21, five-step event creation: Release build succeeded without warnings/errors; all 36 tests passed. New coverage verifies administrator-only access, antiforgery, rejected invalid input without writes, authenticated creator/counter/status enforcement despite forged fields, saved audience and sponsor associations, banner decode/re-encode and protected serving, invalid image rejection, and invalid schedule/SQL-range/audience/sponsor validation. SQL test records roll back and temporary image files are removed. Rendered desktop/mobile viewport and keyboard verification is pending. The design detector reported the pinned Plus Jakarta Sans and the intentionally hidden JS image-preview element; neither changes the established reference direction.
+
 2026-11-21, Create new event button: Tailwind compilation, Release build/publish and all 28 existing tests passed. The local preview on port 5314 was restarted from the updated publish and its protected directory redirected an unauthenticated HTTP request to login. The button is disabled pending the creation workflow. Visual verification remains pending because Computer Use could not establish the browser URL in the implementation turn.
 
 2026-11-21, M1 static inspection: counted 17 Frontend ASPX pages plus Default.aspx; enumerated 67 procedure definitions in six repository SQL files; checked C# repository referenced names and combined installer coverage (none missing); checked declared OnClick/OnItemCommand/OnSelectedIndexChanged/OnTextChanged portal handlers against code-behind (none unresolved in this bounded audit). No source SQL or old application workflow was executed.
