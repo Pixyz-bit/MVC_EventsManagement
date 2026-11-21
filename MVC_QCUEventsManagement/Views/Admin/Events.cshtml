@@ -17,6 +17,8 @@
     var hasFilters = Model.Status is not null || hasSearch;
     var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
     const string eventColumns = "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.25fr)]";
+    var directoryRoute = ViewData["PreviewMode"] is true ? "PreviewAdminEvents" : "AdminEvents";
+    var createRoute = ViewData["PreviewMode"] is true ? "PreviewCreateEvent" : "AdminCreateEvent";
     string DisplayTime(DateTime time) => time.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture);
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 }
@@ -28,7 +30,7 @@
         <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Find upcoming campus events and check when registration opens or closes.</p>
         </div>
         <div class="shrink-0 sm:text-right">
-            <a asp-route="AdminCreateEvent"
+            <a asp-route="@createRoute"
                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-campus-action px-4 text-sm font-semibold text-white hover:bg-campus-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" class="size-4.5">
                     <path d="M12 5v14M5 12h14" />
@@ -49,7 +51,7 @@
                 @foreach (var filter in filters)
                 {
                     var current = filter.Status == Model.Status;
-                    <a asp-route="AdminEvents" asp-route-q="@(hasSearch ? Model.Search : null)" asp-route-status="@filter.Status"
+                    <a asp-route="@directoryRoute" asp-route-q="@(hasSearch ? Model.Search : null)" asp-route-status="@filter.Status"
                        aria-current="@(current ? "page" : null)"
                        class="-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-1 text-sm font-semibold whitespace-nowrap focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:border-campus-field hover:text-campus-ink")">
                         @if (filter.Status is null)
@@ -68,7 +70,7 @@
                     </a>
                 }
             </nav>
-            <form asp-route="AdminEvents" method="get" role="search" class="bg-campus-input px-3 py-2.5 sm:px-4 xl:rounded-tr-xl xl:bg-white">
+            <form asp-route="@directoryRoute" method="get" role="search" class="bg-campus-input px-3 py-2.5 sm:px-4 xl:rounded-tr-xl xl:bg-white">
                 @if (Model.Status is { } selected)
                 {
                     <input type="hidden" name="status" value="@selected" />
@@ -88,7 +90,7 @@
                     <button type="submit" class="@focus min-h-11 shrink-0 rounded-lg bg-campus-action px-3 text-sm font-semibold text-white hover:bg-campus-navy">Search</button>
                     @if (hasFilters)
                     {
-                        <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-sm font-semibold whitespace-nowrap text-campus-action hover:underline">Clear filters</a>
+                        <a asp-route="@directoryRoute" class="@focus inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-sm font-semibold whitespace-nowrap text-campus-action hover:underline">Clear filters</a>
                     }
                 </div>
             </form>
@@ -169,12 +171,12 @@
                 <span class="mr-auto text-campus-muted">Page @Model.Page of @Model.TotalPages</span>
                 @if (Model.Page > 1)
                 {
-                    <a asp-route="AdminEvents" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)"
+                    <a asp-route="@directoryRoute" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)"
                        class="@focus inline-flex min-h-11 items-center rounded-lg border border-campus-line px-3 font-semibold text-campus-action hover:bg-campus-input">Previous</a>
                 }
                 @if (Model.Page < Model.TotalPages)
                 {
-                    <a asp-route="AdminEvents" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)"
+                    <a asp-route="@directoryRoute" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)"
                        class="@focus inline-flex min-h-11 items-center rounded-lg border border-campus-line px-3 font-semibold text-campus-action hover:bg-campus-input">Next</a>
                 }
             </nav>

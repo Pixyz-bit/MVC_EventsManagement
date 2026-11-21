@@ -2,6 +2,8 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
+For the user's temporary no-login design workflow, read-only previews are enabled in `appsettings.Development.json` through `DevelopmentPreview:Enabled`. They require a loopback request and Development environment, return 404 when unavailable, and accept GET only. A synthetic display name is scoped to rendering and has no authenticated identity or role. Publishing is disabled in the preview UI; normal administrator routes still require sign-in and antiforgery. See [setup](SETUP.md) for direct URLs.
+
 Event creation is administrator-only and antiforgery-protected. A dedicated input model excludes creator, counters, lifecycle and image paths; the service derives these and rechecks the active administrator. Server validation enforces lengths, positive capacity, ordered same-day times, SQL DATETIME bounds, registration dates strictly before the event day, supported audience combinations, target year 1-5 and at most 20 sponsor names of 150 characters. Event and sponsor insertion uses one EF SaveChanges transaction. No migration was needed.
 
 Optional banners allow PNG/JPEG/WEBP up to 5 MiB. SkiaSharp 4.153.1 decodes the actual bytes, accepts only those codecs, bounds dimensions to 8192 per side / 16 million pixels, rejects incomplete decoding, and re-encodes pixels to PNG. Generated GUID filenames are stored outside wwwroot; request filenames never become paths. An administrator-only endpoint serves PNG with `nosniff`. Failed database saves remove their uploaded file; failed file writes remove partial output. A process crash between file write and database save can leave an orphan file; automated orphan reconciliation is not implemented. Configure persistent image storage as documented in [setup](SETUP.md).

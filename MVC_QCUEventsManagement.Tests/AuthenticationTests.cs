@@ -10,6 +10,10 @@ using MVC_QCUEventsManagement.Models;
 using MVC_QCUEventsManagement.Services;
 using MVC_QCUEventsManagement.ViewModels.Admin;
 using Microsoft.Extensions.Configuration;
+using MVC_QCUEventsManagement.Controllers;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
 
 namespace MVC_QCUEventsManagement.Tests;
 
@@ -299,6 +303,48 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var file = new Microsoft.AspNetCore.Http.FormFile(bytes, 0, bytes.Length, "Banner", "banner.png");
         await Assert.ThrowsAsync<InvalidDataException>(() => store.SaveAsync(file, CancellationToken.None));
         Assert.False(Directory.Exists(_bannerRoot));
+    }
+
+    [Fact]
+    public async Task Local_development_previews_open_without_login_and_cannot_publish()
+    {
+        using var client = NewClient();
+        var directory = await client.GetStringAsync("/preview/admin/events");
+        Assert.Contains("/preview/admin/events/create", directory);
+        using var create = await client.GetAsync("/preview/admin/events/create");
+        Assert.Equal(HttpStatusCode.OK, create.StatusCode);
+        var html = await create.Content.ReadAsStringAsync();
+        Assert.Contains("Design preview", html);
+        Assert.Contains("data-preview=\"true\"", html);
+        Assert.Matches("id=\"event-publish\"[^>]*disabled", html);
+        using var post = await client.PostAsync("/preview/admin/events/create", Form());
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, post.StatusCode);
+        using var protectedPage = await client.GetAsync("/admin/events/create");
+        Assert.StartsWith("/login?", RedirectPath(protectedPage));
+    }
+
+    [Fact]
+    public void Previews_are_unavailable_when_disabled_in_production_or_to_remote_clients()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+        var original = environment.EnvironmentName;
+        try
+        {
+            var configuration = new ConfigurationBuilder().AddInMemoryCollection(
+                new Dictionary<string, string?> { ["DevelopmentPreview:Enabled"] = "true" }).Build();
+            var controller = new DevelopmentPreviewController(environment, configuration, scope.ServiceProvider.GetRequiredService<EventService>())
+            { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+            environment.EnvironmentName = "Production";
+            Assert.IsType<NotFoundResult>(controller.Create());
+            environment.EnvironmentName = "Development";
+            controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.10");
+            Assert.IsType<NotFoundResult>(controller.Create());
+            controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Loopback;
+            configuration["DevelopmentPreview:Enabled"] = "false";
+            Assert.IsType<NotFoundResult>(controller.Create());
+        }
+        finally { environment.EnvironmentName = original; }
     }
 
     private ApplicationDbContext CreateContext()

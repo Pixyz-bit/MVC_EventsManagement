@@ -213,6 +213,7 @@
         checkSchedule();
     });
     form.addEventListener("submit", event => {
+        if (form.dataset.preview === "true") { event.preventDefault(); if (current !== 4) go(current + 1); return; }
         if (submitting) { event.preventDefault(); return; }
         if (current !== 4) { event.preventDefault(); go(current + 1); return; }
         for (let i = 0; i < panels.length; i++) {

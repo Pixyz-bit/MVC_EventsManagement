@@ -6,31 +6,37 @@
     ViewData["AdminSection"] = "Create";
     ViewData["ViewportForm"] = true;
     string[] steps = ["Event details", "Schedule & registration", "Target audience", "Sponsors", "Review & publish"];
+    var previewMode = ViewData["PreviewMode"] is true;
+    var directoryRoute = previewMode ? "PreviewAdminEvents" : "AdminEvents";
 }
 
 <main class="event-workspace">
     <header class="event-page-heading">
-        <nav aria-label="Breadcrumb" class="mb-2 flex items-center gap-2 text-xs text-campus-muted">
-            <a asp-route="AdminEvents" class="rounded hover:text-campus-action focus-visible:outline-2 focus-visible:outline-campus-focus">Event Directory</a>
+        <nav aria-label="Breadcrumb" class="mb-2 items-center gap-2 text-xs text-campus-muted">
+            <a asp-route="@directoryRoute" class="rounded hover:text-campus-action focus-visible:outline-2 focus-visible:outline-campus-focus">Event Directory</a>
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" aria-hidden="true" class="size-3"><path d="m6 3 5 5-5 5" /></svg>
             <span aria-current="page">Create event</span>
         </nav>
         <h1 class="text-xl font-extrabold tracking-tight text-campus-navy sm:text-2xl">Publish New Campus Event</h1>
+        @if (previewMode)
+        {
+            <p class="mt-1 text-xs text-campus-muted">Design preview · <a href="/login?returnUrl=%2Fadmin%2Fevents%2Fcreate" class="font-semibold text-campus-action underline">Sign in to publish</a></p>
+        }
     </header>
 
-    <form asp-route="AdminCreateEvent" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" novalidate>
+    <form asp-route="@(previewMode ? "PreviewCreateEvent" : "AdminCreateEvent")" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" data-preview="@(previewMode ? "true" : "false")" novalidate>
         <div class="event-stepper-wrap">
             <nav aria-label="Event creation steps" class="event-stepper" role="tablist">
                 @for (var i = 0; i < steps.Length; i++)
                 {
-                    <button type="button" id="event-tab-@i" class="event-step" role="tab" aria-selected="@(i == 0 ? "true" : "false")"
+                    <button type="button" id="event-tab-@i" class="event-step" role="tab" aria-label="Step @(i + 1): @steps[i]" aria-selected="@(i == 0 ? "true" : "false")"
                             aria-controls="event-panel-@i" tabindex="@(i == 0 ? "0" : "-1")" data-step="@i">
                         <span class="event-step-number">@(i + 1)</span>
                         <span class="event-step-name">@steps[i]</span>
                     </button>
                 }
             </nav>
-            <p id="event-current-step" class="mt-2 text-xs font-semibold text-campus-action sm:hidden">1 of 5 · Event details</p>
+            <p id="event-current-step" class="mt-2 text-xs font-semibold text-campus-action sm:hidden" aria-live="polite">1 of 5 · Event details</p>
         </div>
 
         <div class="event-editor-body" id="event-editor-body" tabindex="-1">
@@ -154,12 +160,12 @@
         </div>
 
         <footer class="event-editor-footer">
-            <a asp-route="AdminEvents" id="discard-event" class="event-secondary"><span class="sm:hidden">Cancel</span><span class="hidden sm:inline">Cancel & discard</span></a>
+            <a asp-route="@directoryRoute" id="discard-event" class="event-secondary"><span class="sm:hidden">Cancel</span><span class="hidden sm:inline">Cancel & discard</span></a>
             <div class="flex items-center gap-2">
                 <span id="event-progress" class="mr-2 hidden text-xs text-campus-muted lg:inline">Step 1 of 5</span>
                 <button type="button" id="event-back" class="event-secondary hidden">Back</button>
                 <button type="button" id="event-next" class="event-primary hidden"><span>Schedule & registration</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="size-4"><path d="m6 3 5 5-5 5" /></svg></button>
-                <button type="submit" id="event-publish" class="event-primary">Publish event</button>
+                <button type="submit" id="event-publish" class="event-primary" disabled="@previewMode">Publish event</button>
             </div>
         </footer>
     </form>

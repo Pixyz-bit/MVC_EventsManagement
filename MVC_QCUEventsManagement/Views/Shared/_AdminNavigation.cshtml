@@ -1,5 +1,6 @@
 @{
     var currentSection = ViewData["AdminSection"] as string;
+    var previewMode = ViewData["PreviewMode"] is true;
     var accountName = User.Identity?.Name is { Length: > 0 } name ? name : "Administrator";
     (string Title, (string Label, string Icon, string? Route)[] Links)[] groups =
     [
@@ -35,7 +36,8 @@
                         </svg>
                         @if (link.Route is not null)
                         {
-                            <a asp-route="@link.Route" aria-current="@(isCurrent ? "page" : null)"
+                            var route = previewMode ? link.Route == "AdminEvents" ? "PreviewAdminEvents" : "PreviewCreateEvent" : link.Route;
+                            <a asp-route="@route" aria-current="@(isCurrent ? "page" : null)"
                                class="@row font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus @(isCurrent ? "border-blue-600 bg-blue-50 text-blue-700" : "border-transparent text-campus-ink hover:bg-campus-input")">
                                 @link.Label
                             </a>
@@ -59,6 +61,12 @@
         <p class="wrap-break-word text-sm leading-tight font-semibold">@accountName</p>
         <p class="mt-1 text-xs font-medium text-emerald-700">Administrator</p>
     </div>
+    @if (previewMode)
+    {
+        <a href="/login" class="inline-flex min-h-11 items-center rounded-lg px-2 text-xs font-semibold text-campus-action underline focus-visible:outline-2 focus-visible:outline-campus-focus">Sign in</a>
+    }
+    else
+    {
     <form asp-controller="Account" asp-action="Logout" method="post">
         <button type="submit" aria-label="Sign out" title="Sign out"
                 class="grid size-11 place-items-center rounded-lg text-slate-600 hover:bg-campus-input hover:text-campus-ink focus-visible:outline-2 focus-visible:outline-campus-focus">
@@ -67,4 +75,5 @@
             </svg>
         </button>
     </form>
+    }
 </div>

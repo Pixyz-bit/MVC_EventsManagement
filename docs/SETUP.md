@@ -76,6 +76,14 @@ Enter and confirm a password of 15 to 128 characters at the prompts. Input is hi
 
 ## Login and Tailwind
 
+For quick design review without signing in, the Development configuration enables loopback-only previews. With the current local preview running on port 5314:
+
+- Event Directory: `http://localhost:5314/preview/admin/events`
+- Create Event (all five steps): `http://localhost:5314/preview/admin/events/create`
+- Login design: `http://localhost:5314/login`
+
+Preview pages support navigation, filtering and form-step interactions, but do not publish events. Use `/admin/events/create` after signing in for persistence. Set `DevelopmentPreview__Enabled=false` to disable previews. They return 404 outside Development or for remote clients. Future pages need their own implemented routes before being listed here.
+
 The app starts at `/login`. Administrators can use email and land on the upcoming events list at `/admin`. The same list is available at `/admin/events`. Students can use their email or student ID once their account and profile exist.
 
 Run these commands in `MVC_QCUEventsManagement` when changing Razor styles. Node.js 24.14.0 and npm 11.9.0 were used with Tailwind and its CLI pinned to 4.3.5.
