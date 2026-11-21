@@ -47,3 +47,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, white login preview: Tailwind compiled and the Release publish served `/login`. Edge checks at 390px, 1024px, and 1366px verified the white background, image visibility at desktop widths, no horizontal overflow, visible keyboard focus, and password reveal and masking using Space. Sign-in is disabled for the design preview.
 
 2026-11-21, outer margin removal: Edge verified that the published login reaches all four viewport edges at 390 × 800 and 1366 × 900, with no horizontal overflow.
+
+2026-11-21, viewport fit: Edge verified the published login fits without scrolling at 1366 × 900, 1024 × 480, 390 × 800, 320 × 568, 667 × 375, and 568 × 320. At 320 × 240, scrolling kept the bottom of the form reachable.

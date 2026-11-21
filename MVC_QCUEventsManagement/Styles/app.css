@@ -26,7 +26,64 @@
 }
 
 @layer components {
+  .login-content {
+    padding-block: clamp(0.75rem, 4dvh, 2.25rem);
+  }
+
+  .login-section {
+    padding-block-start: clamp(0.75rem, 7dvh, 4rem);
+  }
+
+  .login-intro {
+    margin-block-end: clamp(0.5rem, 4dvh, 2rem);
+  }
+
+  .login-title {
+    font-size: clamp(1.75rem, min(6dvh, 7vw), 3rem);
+    line-height: 1.1;
+  }
+
+  .login-form {
+    gap: clamp(0.5rem, 2.6dvh, 1.25rem);
+  }
+
   .login-field {
-    @apply mt-2 block min-h-13 w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
+    @apply block w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
+    margin-block-start: clamp(0.25rem, 1dvh, 0.5rem);
+    min-block-size: clamp(2.75rem, 7dvh, 3.25rem);
+  }
+
+  .login-submit {
+    min-block-size: clamp(2.75rem, 6dvh, 3rem);
+  }
+}
+
+@media (min-width: 34rem) and (max-height: 27rem) {
+  .login-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .login-photo {
+    display: none;
+  }
+
+  .login-content {
+    display: grid;
+    grid-template-columns: minmax(0, 12rem) minmax(0, 25rem);
+    align-items: start;
+    align-content: center;
+    justify-content: center;
+    gap: clamp(1rem, 6vw, 4rem);
+  }
+
+  .login-section {
+    margin-block: 0;
+    padding-block-start: 0;
+  }
+}
+
+@media (min-width: 34rem) and (max-height: 22.5rem) {
+  .login-intro p {
+    display: none;
   }
 }

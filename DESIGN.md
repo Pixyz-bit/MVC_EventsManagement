@@ -24,7 +24,7 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-The login fills the viewport edge to edge. The seal and form sit on the left with their own padding, and the QCU campus photo fades into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. Below the large breakpoint, the photo is hidden and the form stays prominent. Plus Jakarta Sans is served locally. Credential submission is deferred to M4.
+The login fills the viewport edge to edge. The seal and form sit on the left with their own padding, and the QCU campus photo fades into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Credential submission is deferred to M4.
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
