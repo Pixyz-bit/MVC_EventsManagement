@@ -24,7 +24,7 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-All references are pending. The rows are a source-derived starting inventory; M1 must confirm every action and supporting page. Status progresses through Awaiting reference -> Reference reviewed -> Implementing -> Implemented -> Verified.
+All design references are pending. The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md); this register owns reference readiness and visual verification only. Status progresses through Awaiting reference -> Reference reviewed -> Implementing -> Implemented -> Verified.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |

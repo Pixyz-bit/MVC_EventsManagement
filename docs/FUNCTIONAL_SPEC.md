@@ -2,15 +2,261 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
-Initial inventory below is not yet a verified exhaustive specification. During M1 expand each capability with precise inputs, allowed roles, conditions, state transitions, database effects, failure cases, and testable acceptance criteria. Record the discovered rules here once; tests reference those rules.
+## Evidence and status
 
-- [ ] Account access: login, logout, role-specific entry routing, access denial, inactive accounts.
-- [ ] Administrator events: create/update/detail/list, registration periods, capacity, campus/department/program/year restrictions, sponsors, image uploads, cancellations, event outcomes/history.
-- [ ] Student administration: maintain records and linked accounts, CSV roster import, exports, password resets, transaction/failure behavior.
-- [ ] Account administration: administrator/student account maintenance, roles, activation, passwords, profile photos where supported.
-- [ ] Student portal: discover eligible events, filter/view details, profile information and password changes.
-- [ ] Registration: steps and year/section capture, duplicates, capacity, eligibility, date windows, eligible cancellation, ticket-reference generation.
-- [ ] Passes: owned registrations only, QR payload compatibility, downloads and responsive ticket content.
-- [ ] Attendance: preregistered lists, manual/QR lookup, attendee review, confirmation, rejected passes, one-time attendance recording.
-- [ ] Analytics/history: registration, attendance, cancellation and check-in counts/charts/filters with source-equivalent semantics.
-- [ ] Shared: validation, notifications, error handling, navigation, development diagnostics, preserved date and image behavior.
+M1 is a static source-code inventory, not a claim of successful execution. Evidence includes 17 portal page/action inventories plus Default.aspx, shared helpers/models, repository operations and SQL definitions, and functional scripts for filtering, scanning, charts and ticket downloads. A static audit found 67 repository procedure definitions across six repository SQL files, no C# referenced procedure missing a definition, and no unresolved declared portal server handlers among the audited event attributes.
+
+Source paths are relative to the application in [project scope](PROJECT_SCOPE.md). Database mappings/security details belong in [database and security](DATABASE_AND_SECURITY.md); visual references in [DESIGN.md](../DESIGN.md); progress in [milestones](MILESTONES.md). Live schema/data and browser behavior remain unverified. Checkboxes below mean MVC implementation acceptance, not inventory completion.
+
+## Page and action inventory
+
+Destination ownership is proposed until implementation establishes routes. Every Admin action, including JSON/export, requires administrator authorization; every Student action requires student authorization.
+
+| Source | Functional actions | Destination ownership | Rules |
+| --- | --- | --- | --- |
+| Default.aspx | Entry routing | Home/AccountService | AUTH-01 |
+| Frontend/Login/Login.aspx | Login, local return URL, role redirect | Account/AccountService | AUTH-01, AUTH-02 |
+| Frontend/AccessDenied.aspx | Denial reason and portal return | Account | AUTH-01 |
+| Frontend/Admin/Admin.Master | Identity/navigation/logout | Shared layouts/Account | AUTH-01 |
+| Frontend/Admin/AdminEvents.aspx | Status tabs, search/reset, details navigation, cancellation confirmation | Admin/EventService | EVENT-01, EVENT-03 |
+| Frontend/Admin/CreateEvent.aspx | Form steps, sponsors add/preset/remove, image preview/upload, publish | Admin/EventService | EVENT-02, EVENT-04 |
+| Frontend/Admin/EventDetails.aspx | View/edit/save/cancel edit, sponsors, banner replacement, cancellation navigation | Admin/EventService | EVENT-02, EVENT-04 |
+| Frontend/Admin/StudentList.aspx | Search/filter/reset, add/edit, status, password reset, CSV template/import/export | Admin/StudentService | STUDENT-01, CSV-01 |
+| Frontend/Admin/AccountManagement.aspx | Search/filter/reset, manage account/profile/role/status/password, create admin, export | Admin/AccountService | ACCOUNT-01, ACCOUNT-02 |
+| Frontend/Admin/EventPreRegistered.aspx | Active/revoked cohorts, search/demographic filters, attendee details, void | Admin/RegistrationService | ROSTER-01, CANCEL-02 |
+| Frontend/Admin/EventAttendance.aspx | Confirmed roster, filters, latest arrival, turnout | Admin/AttendanceService | ROSTER-01 |
+| Frontend/Admin/AttendanceScanner.aspx | Camera/manual lookup, review, explicit confirmation | Admin JSON/AttendanceService | SCAN-01, CHECKIN-01 |
+| Frontend/Admin/EventAnalytics.aspx | Metrics, cohorts, demographic charts/inspection, arrival intervals, history return | Admin/AttendanceService and EventService | REPORT-01 |
+| Frontend/Admin/EventHistory.aspx | Search/year/outcome filters/reset, totals, report navigation | Admin/EventService | HISTORY-01 |
+| Frontend/Admin/TestConnection.aspx | Connectivity/retest, latency, masked settings, errors | Admin/development diagnostics | SHARED-01 |
+| Frontend/User/Dashboard.aspx | Eligible catalog/category filter, registered events, pass navigation, cancel, logout | Student/EventService and RegistrationService | DISCOVER-01, CANCEL-01 |
+| Frontend/User/EventRegistration.aspx | Event/profile/confirmation steps | Student/RegistrationService | REGISTER-01, ELIGIBLE-01 |
+| Frontend/User/EventPass.aspx | Owned pass, status, QR, PNG export | Student/RegistrationService | PASS-01 |
+| Frontend/User/StudentProfile.aspx | Read-only profile and own password change | Student/StudentService and AccountService | PROFILE-01 |
+
+## Authentication and account rules
+
+### AUTH-01: Login, roles and logout
+
+- [ ] Accept a trimmed student ID OR email plus password. Despite an email-only source comment, usp_User_GetUserByIdentifier matches either UserTable.Email or StudentTable.StudentId. Missing input, wrong/unknown credentials and inactive accounts fail without authentication.
+- [ ] Supported roles are Admin and Student. Return only to validated local URLs or the correct portal; unknown roles are denied. Replace Default.aspx's broad non-Admin-to-student fallback. Reject wrong-role requests before any operation, including exports/JSON.
+- [ ] Logout clears authentication. Account deactivation/role changes must affect existing access; source session checks alone do not refresh account state per request.
+
+Acceptance: both identifier forms work, inactive/unknown accounts fail, direct wrong-role endpoints are denied, external return URLs are rejected, and protected requests require login after logout.
+
+Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, SessionHelper/AdminPage/StudentPage, UserRepository.cs/.sql.
+
+### AUTH-02: Credential compatibility
+
+- [ ] Preserve verification of existing PBKDF2 hashes using the legacy format in the database/security document. Plaintext PasswordHash fallback in source login needs a controlled upgrade/reset; it is not a requirement to retain unsafe authentication.
+- [ ] New/reset passwords use a fresh salt. Most form paths enforce six characters, but trimming and reset validation differ. Establish a consistent policy without silently breaking existing hashes; never expose hashes/salts in forms or exports.
+
+Acceptance: verify legacy fixtures, incorrect passwords, malformed hashes, salt regeneration and any approved seed-account transition. Test password whitespace intentionally.
+
+### ACCOUNT-01: Account maintenance
+
+- [ ] List/search/filter/reset by role and Active/Locked status; show total accounts, active admins, students, locked accounts. Create active admins with email, password and matching confirmation; reject duplicates and invalid input.
+- [ ] Manage email, role, active state, optional new password and student demographics when Student is selected. Validate email shape, supported role, lengths and required profile fields.
+- [ ] Save managed user/profile/password changes atomically. Acting admin must remain active; block self-demotion/self-deactivation and leaving no active administrator. Recheck guards inside the transaction to protect concurrent changes.
+- [ ] Preserve existing StudentId and BirthDate through account management. Create an absent student profile when converting to Student; reject duplicate profiles. Promotion to Admin does not automatically delete a linked profile/history.
+
+Acceptance: invalid email/profile causes full rollback; forged IDs cannot bypass guards; concurrent changes cannot remove the last active admin. No persisted account-photo field/write was found in the five-table schema/current account save handler; an unused upload control is not a completed feature.
+
+### ACCOUNT-02: Account CSV export
+
+- [ ] Export current filtered accounts with columns UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program. Never export passwords.
+
+Acceptance: filtered counts match, quoted/Unicode fields round-trip, and spreadsheet formula payload handling is deliberate.
+
+Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAdminUser/GetAllUsers/GetAccountStatistics; StudentRepository.SaveManagedProfile; related SQL.
+
+## Event management
+
+### EVENT-01: Matrix and lifecycle
+
+- [ ] All/Open/Soon/Close tabs, metadata search/reset, event navigation and chronological ordering remain available. Cancelled events retain their distinct state.
+- [ ] Stored outcomes are Upcoming, Cancelled, Completed. Source repository access synchronizes expired Upcoming events to Completed. Effective completion occurs at now >= EventEnd. Select an explicit equivalent EF service strategy.
+- [ ] Matrix state is Cancelled for cancelled events; Close for completed/ended events, now > RegEnd, or full capacity; Soon for now < RegStart; otherwise Open. Opening and deadline are inclusive.
+
+Acceptance: exactly RegStart/RegEnd, just after deadline, exactly EventEnd, full, cancelled and completed fixtures produce correct states. Open/Soon/Close are display states, not stored outcomes.
+
+### EVENT-02: Creation and editing
+
+- [ ] Inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero.
+- [ ] Same-day event start precedes end. Registration opening precedes deadline, and BOTH registration calendar dates must be strictly before the event date. Preserve SQL DATETIME range while mapping.
+- [ ] Edit only unfinished Upcoming events and recheck at save. Capacity cannot fall below current reservations, including concurrent bookings. Preserve creator, lifecycle and counts during edits.
+- [ ] Missing/invalid event IDs return unavailable/not-found; database errors never fabricate example records.
+
+Acceptance: invalid fields/dates/capacity write nothing; cancelled/completed events reject edits; create/edit survives reload with correct identity, associations and image.
+
+### EVENT-03: Event cancellation
+
+- [ ] Explicit admin confirmation plus trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
+- [ ] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history. Block further registration/admission, show reason on passes, and include the event in history. Source sends no automatic emails on cancellation.
+
+Acceptance: historical evidence/counts survive, admission/booking stop immediately, repeated/finished-event cancellation fails safely.
+
+### EVENT-04: Audience, sponsors and images
+
+- [ ] Blank/null audience dimensions are unrestricted. Support multiple programs and optional target year using ELIGIBLE-01.
+- [ ] Stage sponsor add/preset/remove in forms. Sponsor rows belong to an event, have CreatedAt, and display by insertion order; there is no separate global sponsor-catalog entity.
+- [ ] Upload/preview/replace event image; retain existing image when absent. Source wide/square inputs ultimately write one EventPhotoPath, not two persisted images.
+- [ ] Coordinate event/sponsor writes in one transaction with explicit failure handling; source currently saves them separately and can swallow sponsor errors. Coordinate file cleanup with DB failure.
+
+Acceptance: failure cannot leave partial sponsor replacement; valid associations persist; unsafe images fail; existing paths still resolve after migration.
+
+Evidence: AdminEvents/CreateEvent/EventDetails.aspx/.cs; EventModel; EventCancellationModel/Repository; RegistrationDateTime; EventRepository/SponsorRepository.cs and related SQL.
+
+## Students and CSV
+
+### STUDENT-01: Student directory
+
+- [ ] Search/filter/reset by available demographics/status, create/edit, linked account activate/deactivate and password reset. Department selection controls program choices.
+- [ ] Add requires student ID, institutional email, first/last names and valid birthdate in the page flow; middle name is optional. Preserve gender/campus/department/program/state. Reject duplicate IDs/emails. Edit preserves the student identity and registration history.
+- [ ] Year and section belong to event registrations, not current StudentTable. Student profile explains year is selected during event registration.
+- [ ] Source default initial/reset password is uppercase middle-name initial (or X) plus MMddyyyy birthdate (or 01012000 if absent); admins may supply a reset password. Its predictability and display in success feedback need an explicit compatibility/security decision, not logging or exporting credentials.
+- [ ] Create linked account/profile atomically. Coordinate full student email/state/password updates rather than allowing partial success from the separate source UI calls.
+
+Acceptance: no orphan account/profile on failure; duplicate prevention survives concurrent requests; updated state/password is consistent across directory/account management; history remains linked.
+
+### CSV-01: Roster exchange
+
+- [ ] UTF-8 CSV upload/template uses StudentId,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate.
+- [ ] Retain twelve-column legacy format: same first eight fields, then YearLevel,Section,Email,BirthDate. Ignore legacy year/section for profile persistence.
+- [ ] Source skips header/blank lines, requires ID/first/last/email, rejects existing IDs/emails, and processes rows independently. Preserve valid rows when others fail; report accurate success/failure counts and row errors.
+- [ ] Imported blank gender/campus defaults to Not Specified/San Bartolome. Source invalid/missing birthdate can become null and influence default credentials; explicitly report malformed dates rather than silently guessing identity data.
+- [ ] Replace line.Split(',') with proper CSV parsing and header/schema validation; support accepted formats and quoted/Unicode content. Count success only when persistence succeeds.
+- [ ] Filtered student export columns are StudentId,FullName,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate(MM/dd/yyyy),AccountStatus. This export differs from the import format; do not promise direct re-import.
+
+Acceptance: template and both roster formats work; quotes/commas/Unicode, blank/malformed/duplicate rows and partial success are accurate; failed rows leave no orphan accounts.
+
+Evidence: StudentList.aspx/.cs; StudentRepository.cs/.sql; account and student export handlers.
+
+## Student discovery and reservations
+
+### ELIGIBLE-01: Eligibility
+
+- [ ] Every restricted dimension must match: trimmed campus/department, whole comma-delimited program token with spaces removed and known alias equivalences, and selected year. Blank/null target means unrestricted.
+- [ ] Browse with omitted year; final commit must supply/recheck year 1-5. One matching dimension cannot bypass another restriction.
+- [ ] Preserve program aliases: BSIT/BS Information Technology; BSCS/BS Computer Science; BSIS/BS Information Systems; BSIE/BS Industrial Engineering; BSCpE/BS Computer Engineering; BSECE/BS Electronics Engineering; BSA/BS Accountancy; BSBA/BS Business Administration; BSEntrep/BS Entrepreneurship; BECEd/Bachelor of Early Childhood Education; BSEd/BS Secondary Education or Bachelor of Secondary Education. Check actual SQL collation before choosing case semantics.
+
+Acceptance: independent dimension mismatches reject, unrestricted values allow, aliases match, substrings do not, and browse/preflight/commit use consistent predicates.
+
+### DISCOVER-01: Dashboard
+
+- [ ] Discover eligible Upcoming events with image/sponsors/venue/schedule/availability and category filter. Order Open, Soon, closed, preserving schedule order within groups.
+- [ ] Non-cancelled owned registrations appear in My Registered Events rather than available catalog. Cancelled bookings allow rediscovery if otherwise eligible.
+- [ ] Owned passes remain reachable when booking closes/full; represent ended/cancelled/checked-in states honestly. Missing profile/data does not produce sample events or bookings.
+
+Acceptance: no duplicate current-pass/catalog item, cancelled bookings release visibility, filters work, and owned tickets remain accessible after deadline.
+
+### REGISTER-01: Booking
+
+- [ ] Preserve three functional steps: event information, read-only student profile, current year/section and terms confirmation. Presentation follows supplied references.
+- [ ] Require terms, nonblank section within column length, year 1-5, real event/profile and authenticated student identity. Do not trust posted student IDs.
+- [ ] Recheck Upcoming/unfinished event, inclusive registration window, capacity, eligibility and no active booking inside the commit operation. Existing active holders navigate to their pass even when closed/full.
+- [ ] Insert NoShow with null CheckInTimestamp and increment CurrentRegistrations together. NoShow means reserved/unscanned here, not a finalized absence. Distinguish full/closed/ineligible/duplicate failures without side effects.
+- [ ] Allow new booking after cancellation if still eligible; preserve old cancelled row and generate a new reference. Protect simultaneous submissions and final-seat races.
+
+Acceptance: one registration/seat for concurrent duplicate submissions; never exceed capacity; no count change on failure; selected year/section persist per booking.
+
+### CANCEL-01: Student cancellation
+
+- [ ] Owner only, NoShow only, event Upcoming/unfinished and now <= RegEnd. Source does not separately require now >= RegStart; do not silently add that condition.
+- [ ] Transition to Cancelled and decrement counter (never below zero) atomically. Reject Present/already-cancelled/expired/wrong-owner requests without another decrement.
+
+Acceptance: deadline boundary honored, repeat requests release at most one seat, and forged ownership fails.
+
+### CANCEL-02: Administrator void
+
+- [ ] Source permits voiding any non-cancelled registration, including Present, regardless of deadline/event state, retaining any CheckInTimestamp and decrementing the counter once. This is broader than student cancellation and changes historical cohort counts.
+- [ ] Retain this documented capability unless the user changes policy. MVC must verify registration belongs to the selected event instead of trusting a hidden registration ID alone.
+
+Acceptance: correct attendee/event is confirmed, one transition/decrement occurs, cancelled rows stay stable and reports reflect the new status.
+
+### PASS-01: Admission pass
+
+- [ ] Resolve a real registration by ID/reference and enforce ownership. Source fallback chooses the student's first event-date-sorted registration if lookup fails; handle explicit invalid IDs deliberately rather than silently showing an unrelated pass. Never fabricate a pass.
+- [ ] Reference/QR payload is TCK-{EventId:D4}-{EventRegistrationId:D5}. Redirect ticketId GUID and displayed SEC/GetHashCode token are not stored admission secrets. Query-string tokens/success flags cannot confer validity.
+- [ ] Valid admission requires Upcoming/not-ended event and uncancelled/unconsumed registration. Checked-in passes remain visible as evidence with reuse warning; event cancellation invalidates admission and displays its reason.
+- [ ] Show real student/program/registered year-section, event schedule/venue/reference. Preserve QR generation and PNG download functionality using compatible assets and the new design.
+
+Acceptance: cross-student access fails; known reference resolves correctly; forged flags do not activate a pass; PNG QR decodes to same reference; inactive status is clear.
+
+### PROFILE-01: Own profile/password
+
+- [ ] Academic/account details are read-only; source offers no self-edit demographic save. Own password change requires correct current hash verification, matching confirmation and minimum length, then saves fresh salt/hash.
+
+Acceptance: forged user IDs cannot affect another account; mismatch/wrong current password writes nothing; new password works and old fails after success.
+
+Evidence: Dashboard/EventRegistration/EventPass/StudentProfile.aspx/.cs; EventRegistrationModel; RegistrationRepository; EventRepository eligibility procedures; local QR/PNG assets and scripts.
+
+## Attendance and reporting
+
+### ROSTER-01: Lists
+
+- [ ] Preregistered includes all non-Cancelled, including Present; revoked rows are separate. Preserve search, department/program/year filters/reset and attendee details/void action.
+- [ ] Attendance includes Present ordered by timestamp descending, search/department/program filters, latest check-in and turnout. Available booking seats use CurrentRegistrations; physical occupancy uses Present counts.
+
+Acceptance: check-in stays in preregistered and appears in attendance; void moves to revoked; counts and filter scope are correct, including empty lists.
+
+### SCAN-01: Lookup/review
+
+- [ ] Admin selects a real event and scans with camera or queries by ticket reference, numeric registration ID, student ID or email. Search selected event first, then other events to identify wrong-event passes.
+- [ ] Lookup only stages attendee details; it does not commit attendance. Preserve Unauthorized/NotFound/WrongEventWarning/CancelledWarning(inactive)/DuplicateWarning/ValidPending outcomes and explicit university-ID review before confirmation.
+- [ ] Validate encoded ticket event as well as registration ID. Source parser primarily extracts final numeric component, tolerating trailing pipe/space text; this is not proof of signed/authenticated admission.
+
+Acceptance: lookup never changes status/time; warnings block confirmation; manual/camera paths agree; expired auth blocks both endpoints; wrong-event matches are distinguishable.
+
+### CHECKIN-01: Confirmation
+
+- [ ] Confirm only the selected event's real registration and recheck current state server-side. Source commit receives registration ID and verificationMethod, but no selected gate event ID; do not rely on UI warning alone.
+- [ ] Atomically transition eligible NoShow to Present and store check-in time. Reject not found, duplicate, cancelled pass, inactive/cancelled/completed/ended event. Source has no EventStart lower bound; adding a door-opening time is a separate product policy.
+- [ ] Return persisted time/reference/attendee and updated count. Source returns verificationMethod/admin identity but does not persist them; do not claim a stored attendance audit log exists.
+
+Acceptance: concurrent confirmations yield one success and stable timestamp; selected-event tampering fails; changes after lookup are revalidated.
+
+### REPORT-01: Analytics
+
+- [ ] Reserved/preregistered = non-Cancelled (Present + NoShow), attended = Present, cancelled = Cancelled, unscanned = reserved - attended. No registration creation date exists; check-in time must not be used as ticket creation time.
+- [ ] Turnout = attended/reserved; occupancy/saturation = attended/capacity; booking fill = CurrentRegistrations/capacity; attrition = cancelled/(reserved+cancelled). Zero denominators yield zero.
+- [ ] Active-cohort department/program/campus/year distributions, cohort lists and demographic audit remain. Program chart groups top five plus Other Programs only if more than six groups; department audit ranks attendance rate then count.
+- [ ] Confirmed-arrival intervals support 5/15/30 minutes (default 15), floor to bucket start, fill empty buckets between first/last, handle multiple days, and choose first tied peak label. No arrivals means awaiting/empty state.
+- [ ] Retain useful chart inspection/filtering and history navigation. Do not invent registration-time series or persistent live push absent source/data support.
+
+Acceptance: deterministic mixed-status/zero/multi-department/cross-midnight fixtures produce matching totals, denominators, cohorts and intervals.
+
+### HISTORY-01: History
+
+- [ ] Completed/Cancelled only, newest EventStart first, totals/attendee summaries and analytics navigation. UI supports search, academic year and outcome/reset; semester filtering exists in repository but is not an existing visible filter.
+- [ ] Academic year starts August; Aug-Dec first semester, Jan-May second, Jun-Jul summer. Retain cancellation reasons and history.
+
+Acceptance: August/January/June fixtures and filters agree with reports and outcome totals.
+
+### SHARED-01: Supporting behavior
+
+- [ ] Preserve useful validation/toasts/navigation through MVC. Source diagnostics is Admin-protected; destination plan scopes it to development with retest/latency and safe errors, avoiding secrets/raw SQL exceptions.
+- [ ] Replace Web Forms control IDs/postbacks/WebMethods with MVC forms and authorized JSON actions. Reuse compatible functional libraries/data only. Distinguish DB failure from truly empty lists; do not fabricate examples.
+
+Acceptance: malformed IDs fail safely, modifying requests have CSRF protection, secrets never appear in client errors and unavailable data is represented accurately.
+
+Evidence: EventPreRegistered/EventAttendance/AttendanceScanner/EventAnalytics/EventHistory/TestConnection.aspx/.cs; RegistrationRepository.sql; EventRepository.sql; source inline scripts.
+
+## Migration gaps and remaining decisions
+
+These are findings and implementation obligations, not completed fixes. Preserve intended functionality while correcting server integrity/security defects; record deliberate product changes in the owning rule.
+
+| ID | Finding / required follow-up | Milestone |
+| --- | --- | --- |
+| GAP-01 | Live database/schema and running-browser verification unavailable in M1 | M2 and integration checks through M11 |
+| GAP-02 | Duplicate booking check is outside SQL transaction; schema has no unique active-registration constraint | M2/M8: transaction/constraint design must allow cancelled history and rebooking |
+| GAP-03 | Gate commit/admin void do not bind the target registration to selected event server-side | M8/M9 |
+| GAP-04 | Predictable initial passwords, plaintext login fallback and inconsistent trim/reset checks | M4/M6: explicit compatibility policy |
+| GAP-05 | Event/sponsor and some student edits can partially succeed; upload/sponsor errors may be swallowed | M5/M6 |
+| GAP-06 | CSV quoted fields/header/date handling and unchecked false return distort results | M6 |
+| GAP-07 | App local time and SQL GETDATE may differ; stored DATETIME has no timezone | M2: consistent clock preserving Philippine schedule meaning |
+| GAP-08 | Admin void can affect Present after deadline; no check-in start-time guard | Preserve unless user changes policy; M8/M9 verification |
+| GAP-09 | Photo controls/security tokens not backed by persistence; student profile can survive Admin promotion | M2/M4/M6: avoid inventing fields/deleting history |
+| GAP-10 | Email/student-user uniqueness are app assumptions, not source SQL unique constraints | M2: audit data before unique constraints or one-to-one mapping |
+
+Reference readiness belongs in DESIGN.md. The source application is unchanged.

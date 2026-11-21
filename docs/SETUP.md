@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
-Verified now: destination/source identified; source files inspected at overview level; accepted architecture, EF choice, Tailwind choice, reference-led redesign and development rules documented. Local Git initialized at the solution root for the documentation checkpoint; the initial checkpoint included AGENTS.md and .gitignore. Documentation is now divided by topic according to AGENTS.md. Existing application files remain untracked until their contents are reviewed for an application baseline checkpoint. Starter project and Bootstrap layout were read without edits.
+Local Git is initialized at the solution root. Documentation ownership and navigation are defined in [AGENTS.md](../AGENTS.md); current progress/handoff belongs in [milestones](MILESTONES.md). Existing starter files remain untracked pending a reviewed application baseline. No source/destination application code, packages, database configuration or database data was changed during documentation and M1 inventory work.
 
 Not yet verified: starter build/run, database connectivity/live schema, frontend tools, EF packages, migrations, app workflows, deployment target, camera access. No application implementation changes or package installations are part of the documentation checkpoint.
 

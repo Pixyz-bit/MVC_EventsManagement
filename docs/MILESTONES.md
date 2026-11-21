@@ -9,7 +9,7 @@ Status vocabulary: Not started, In progress, Blocked, Complete. A blocker identi
 | ID | Milestone | Status | Acceptance / remaining work |
 | --- | --- | --- | --- |
 | M0 | Working agreement, documentation, Git | Complete | Topic-based documentation established and reviewed; local Git initialized; initial checkpoint 7819c18 recorded. Selected skill installation is pending tooling work in M2. |
-| M1 | Functional inventory and migration specification | Not started | Inspect every page/action, helper, repository, script and SQL procedure. Record inputs, permissions, rules, side effects, failures, dependencies, and acceptance cases in docs/FUNCTIONAL_SPEC.md. Compare with running source when available. |
+| M1 | Functional inventory and migration specification | Complete | Static page/action inventory, functional rules/acceptance cases, schema/procedure coverage and gap register documented. 17 portal pages plus entry page and 67 repository procedures inventoried; static name audits passed. Running-source/live-schema verification remains explicitly pending in M2/testing. |
 | M2 | MVC foundation and EF data model | Not started | Build starter; verify tool/package versions; configure DI, context, services, logging/errors/secrets; map actual schema; verify reads/writes and both database-baseline paths without data loss. |
 | M3 | Tailwind pipeline and reference-led shared UI | Not started | Install/configure local Tailwind tooling, reproducible production build, CSS source/output paths, remove Bootstrap coupling, establish tokens/layouts/partials from first supplied references; verify mobile/desktop. |
 | M4 | Authentication and authorization | Not started | Cookie login/logout, role redirects, access denial, hashes, legacy-password handling, active-account/session checks, ownership foundations, antiforgery, reference-led login. |
@@ -25,6 +25,6 @@ M2 and M3 can advance independently where dependencies allow. Authentication can
 
 ## Current handoff
 
-Documentation is divided by topic, with one authoritative file per topic. M0 is complete; M1-M11 remain unstarted. Application code is unchanged and untracked pending a reviewed starter baseline. No new skills or packages have been installed. Page reference readiness is tracked in [DESIGN.md](../DESIGN.md).
+M0 and the M1 static inventory are complete; M2-M11 remain unstarted. Application code is unchanged and untracked pending a reviewed starter baseline. No new skills or packages have been installed. Page reference readiness is tracked in [DESIGN.md](../DESIGN.md). Database and running-browser equivalence have not been verified; inventory completion does not imply implementation or runtime verification.
 
-Next work: M1 functional inventory and M2 framework/database/tooling verification, including a reviewed baseline commit of the existing starter application. Incorporate supplied page references in the design document as they arrive. Independent backend/inventory work can continue while references are pending.
+Next work: M2 framework/database/tooling verification, beginning with a reviewed baseline commit of the existing starter application, compatible SDK/EF tooling selection and initial build. Then inspect a safe development database/schema and prepare EF mappings/adoption strategy. Incorporate supplied page references in the design document as they arrive; independent backend work can continue while references are pending. Use the functional gap register to avoid porting source integrity defects into MVC.
