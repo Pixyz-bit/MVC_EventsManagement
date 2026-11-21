@@ -59,3 +59,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, M5 admin sidebar: all 27 tests passed, and the Tailwind build and Release publish succeeded. In the published app, Edge verified the sticky desktop sidebar at 1366 × 900, the active Event list link, and the mobile Menu at 390 × 800. Space opened the menu and Tab reached the Event list link. Neither viewport had horizontal overflow.
 
 2026-11-21, sidebar reference and login fade: all 27 tests passed, and the Tailwind build and Release publish succeeded. Edge verified the blue photo fade and viewport fit at 1366 × 900 and the photo-free layout and viewport fit at 390 × 800. After sign-in, Edge verified the navy sidebar, active Event Directory link, bottom account footer, and mobile Menu opening with Space. Neither sidebar viewport had horizontal overflow.
+
+2026-11-21, horizontal blue login fade: all 27 tests passed, and the Tailwind build and Release publish succeeded. Edge verified the left-to-right fade and checked viewport fit at 1366 × 900, 1024 × 480, 568 × 320, and 390 × 800.

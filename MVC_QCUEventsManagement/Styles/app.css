@@ -23,20 +23,10 @@
   --color-campus-focus: #28649a;
   --color-campus-action: #155bb1;
   --color-campus-input: #f4f7fb;
+  --color-campus-login-blue: #1d4ed8;
 }
 
 @layer components {
-  .login-photo-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgb(29 78 216 / 88%),
-      rgb(37 99 235 / 75%) 22%,
-      rgb(37 99 235 / 42%) 40%,
-      rgb(37 99 235 / 10%) 58%,
-      rgb(37 99 235 / 0%) 72%
-    );
-  }
-
   .login-content {
     padding-block: clamp(0.75rem, 4dvh, 2.25rem);
   }
@@ -59,7 +49,7 @@
   }
 
   .login-field {
-    @apply block w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
+    @apply block w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
     margin-block-start: clamp(0.25rem, 1dvh, 0.5rem);
     min-block-size: clamp(2.75rem, 7dvh, 3.25rem);
   }

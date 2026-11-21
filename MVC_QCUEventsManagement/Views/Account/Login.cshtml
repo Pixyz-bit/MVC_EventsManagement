@@ -5,11 +5,11 @@
 }
 
 <main class="grid min-h-dvh">
-    <div class="login-layout relative isolate grid overflow-hidden bg-white lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div class="login-photo pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-1/2 bg-campus-navy lg:block" aria-hidden="true">
+    <div class="login-layout relative isolate grid overflow-hidden bg-campus-login-blue text-white lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div class="login-photo pointer-events-none absolute inset-y-0 right-0 -z-10 hidden w-[55%] lg:block" aria-hidden="true">
             <img src="~/images/qcu-campus.png" alt="" width="1920" height="1080"
                  class="absolute inset-0 size-full object-cover object-center" />
-            <div class="login-photo-overlay absolute inset-0"></div>
+            <div class="login-photo-overlay absolute inset-0 bg-linear-to-r from-campus-login-blue from-3% via-campus-login-blue/45 via-34% to-campus-login-blue/0 to-78%"></div>
         </div>
 
         <div class="login-content flex min-w-0 flex-col px-6 sm:px-10 lg:pl-14 lg:pr-5 xl:pl-18">
@@ -17,26 +17,26 @@
                 <img src="~/images/qcu-logo.png" alt="" width="48" height="48" class="size-11 shrink-0 object-contain" />
                 <div>
                     <p class="text-sm font-bold">Quezon City University</p>
-                    <p class="mt-0.5 text-sm text-campus-muted">Events Management</p>
+                    <p class="mt-0.5 text-sm text-blue-50">Events Management</p>
                 </div>
             </div>
 
             <section aria-labelledby="login-title" class="login-section mx-auto w-full max-w-100 lg:mx-0">
                 <div class="login-intro">
                     <h1 id="login-title" class="login-title font-extrabold tracking-tight">Sign in</h1>
-                    <p class="mt-2 text-sm leading-5 text-campus-muted">Use your QCU account to access the events portal.</p>
+                    <p class="mt-2 text-sm leading-5 text-blue-50">Use your QCU account to access the events portal.</p>
                 </div>
 
                 <form asp-controller="Account" asp-action="Login" method="post" class="login-form grid">
                     <input asp-for="ReturnUrl" type="hidden" />
                     @if (ViewData.ModelState.TryGetValue(string.Empty, out var errors) && errors.Errors.Count > 0)
                     {
-                        <div asp-validation-summary="ModelOnly" role="alert" class="text-sm font-semibold text-red-800"></div>
+                        <div asp-validation-summary="ModelOnly" role="alert" class="text-sm font-semibold text-rose-100"></div>
                     }
                     <div>
                         <label for="identifier" class="block text-sm font-semibold">Student ID or email</label>
                         <input asp-for="Identifier" id="identifier" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="150" required aria-describedby="identifier-error" class="login-field" />
-                        <span asp-validation-for="Identifier" id="identifier-error" class="mt-1 block text-sm text-red-800 empty:hidden"></span>
+                        <span asp-validation-for="Identifier" id="identifier-error" class="mt-1 block text-sm font-semibold text-rose-100 empty:hidden"></span>
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-semibold">Password</label>
@@ -45,9 +45,9 @@
                             <button id="password-visibility" type="button" hidden aria-controls="password"
                                     aria-label="Show password" class="absolute inset-y-0 right-1 min-w-15 rounded-lg px-2 text-sm font-bold text-campus-action focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-campus-focus">Show</button>
                         </div>
-                        <span asp-validation-for="Password" id="password-error" class="mt-1 block text-sm text-red-800 empty:hidden"></span>
+                        <span asp-validation-for="Password" id="password-error" class="mt-1 block text-sm font-semibold text-rose-100 empty:hidden"></span>
                     </div>
-                    <button type="submit" class="login-submit w-full rounded-full bg-campus-action px-4 py-2 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">
+                    <button type="submit" class="login-submit w-full rounded-full bg-white px-4 py-2 text-sm font-bold text-campus-login-blue hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
                         Sign in
                     </button>
                 </form>

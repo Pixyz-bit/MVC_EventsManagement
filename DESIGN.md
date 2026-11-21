@@ -24,7 +24,7 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-The login fills the viewport edge to edge. On desktop the seal stays at the top left and the form is vertically centered on the white panel. The QCU campus photo fills the right half, with the royal-blue overlay from the Web Forms login fading toward the bottom. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Validation appears by the affected field or above the form for failed credentials.
+The login fills the viewport edge to edge. On desktop the seal stays at the top left and the form is vertically centered. The Web Forms royal blue behind the form fades left to right into the QCU campus photo. White headings, labels, and button contrast with the blue, and the form uses softly filled fields and a keyboard-accessible Show/Hide password control. The solid blue background fills the screen below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Validation appears by the affected field or above the form for failed credentials.
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
@@ -32,7 +32,7 @@ The navy admin sidebar follows the supplied sidebar screenshot for the Core Mana
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
-| Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png) with a white form panel and the Web Forms blue photo fade | See [testing](docs/TESTING.md) |
+| Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png) with a horizontal fade using Web Forms royal blue | See [testing](docs/TESTING.md) |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
 | Admin | Shared sidebar | Admin.Master | User-supplied sidebar screenshot (`codex-clipboard-1c811e19-01aa-4de9-977f-0866ffe69da3.png`), adapted to QCU navy | See [testing](docs/TESTING.md) |
 | Admin | Event Directory | AdminEvents.aspx | Pending | Functional preview uses existing QCU styles |

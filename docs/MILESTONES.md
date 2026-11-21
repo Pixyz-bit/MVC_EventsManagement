@@ -27,4 +27,4 @@ M2 and M3 can advance independently where dependencies allow. Authentication can
 
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.
 
-M4 authentication is complete, and the login photo uses the Web Forms blue fade. The M5 sidebar follows the supplied reference. The next design reference is for the Event Directory, the administrator landing page. Its search, filters, and results can establish patterns for the other admin pages.
+M4 authentication is complete, and the royal-blue login background fades horizontally into the campus photo. The M5 sidebar follows the supplied reference. The next design reference is for the Event Directory, the administrator landing page. Its search, filters, and results can establish patterns for the other admin pages.
