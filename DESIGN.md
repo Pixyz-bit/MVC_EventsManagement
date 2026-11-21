@@ -28,7 +28,7 @@ The login fills the viewport edge to edge. On desktop the seal stays at the top 
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
-The white admin sidebar follows the supplied Web Forms reference for the Core Management and Attendance & Users groups, line icons, and active row with a light-blue fill and blue left edge. The header adapts the first MVC sidebar's QCU seal, QCU Events name, and Administrator portal label. The white account footer contains the signed-in user's initial, role, and icon-only sign-out. On smaller screens, the navigation opens under a compact Menu control. Event Directory and sign-out are available now. The other visible destinations are indicated as unavailable until implemented. Attendance-specific workflows remain in the functional specification.
+The white admin sidebar is 16rem wide on desktop. It follows the supplied Web Forms reference for the Core Management and Attendance & Users groups, line icons, and active row with a light-blue fill and blue left edge. The header adapts the first MVC sidebar's QCU seal, QCU Events name, and Administrator portal label. The white account footer contains the signed-in user's initial, role, and icon-only sign-out. Navigation rows and sign-out retain 44px minimum click targets. On smaller screens, the navigation opens under a compact Menu control. Event Directory and sign-out are available now. The other visible destinations are indicated as unavailable until implemented. Attendance-specific workflows remain in the functional specification.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
