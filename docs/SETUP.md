@@ -33,7 +33,7 @@ dotnet restore MVC_QCUEventsManagement.slnx --locked-mode
 dotnet ef database update --project MVC_QCUEventsManagement -- --environment Development
 ```
 
-Applied migration: `20261121070748_InitialCreate`. Repeating database update reports up-to-date and does not insert application rows. Migrations are not applied on web startup. Do not execute source SQL installers, use EnsureCreated/EnsureDeleted, or apply an old-database adoption baseline.
+Applied migrations: `20261121070748_InitialCreate` and `20261121145121_RegistrationDatesOnly`. The latter stores registration opening/deadline as SQL date; see [database and security](DATABASE_AND_SECURITY.md) for conversion semantics. Repeating database update reports up-to-date and does not insert application rows. Migrations are not applied on web startup. Do not execute source SQL installers, use EnsureCreated/EnsureDeleted, or apply an old-database adoption baseline.
 
 To review future model/schema changes before application:
 

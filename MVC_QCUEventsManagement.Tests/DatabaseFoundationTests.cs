@@ -50,7 +50,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         var (ev, student) = await CreateGraphAsync();
         var registration = NewRegistration(ev, student);
         _db.EventRegistrations.Add(registration);
-        _db.Sponsors.Add(new Sponsor { Event = ev, SponsorName = "Campus Research Council", CreatedAt = ev.RegStart });
+        _db.Sponsors.Add(new Sponsor { Event = ev, SponsorName = "Campus Research Council", CreatedAt = ev.RegStart.ToDateTime(TimeOnly.MinValue) });
         await _db.SaveChangesAsync();
         var eventId = ev.EventId;
         _db.ChangeTracker.Clear();
@@ -65,6 +65,8 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Null(saved.CheckInTimestamp);
         Assert.Equal("Campus Research Council", Assert.Single(saved.Event.Sponsors).SponsorName);
         Assert.Equal(8, saved.RowVersion.Length);
+        Assert.Equal(new DateOnly(2030, 6, 1), saved.Event.RegStart);
+        Assert.Equal(new DateOnly(2030, 6, 30), saved.Event.RegEnd);
 
         var error = await Assert.ThrowsAsync<SqlException>(() => _db.Events.Where(item => item.EventId == eventId).ExecuteDeleteAsync());
         Assert.Equal(547, error.Number);
@@ -145,7 +147,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         switch (invalidField)
         {
             case "capacity": ev.CurrentRegistrations = ev.MaxCapacity + 1; break;
-            case "schedule": ev.RegEnd = ev.EventStart; break;
+            case "schedule": ev.RegEnd = DateOnly.FromDateTime(ev.EventStart); break;
             case "status": ev.Status = "Open"; break;
             case "cancelled reason": ev.Status = "Cancelled"; ev.CancellationReason = null; break;
         }
@@ -205,7 +207,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
             Title = title, VenueLocation = $"Venue {marker}", TargetDepartment = $"Department {marker}",
             CreatedByUser = owner, MaxCapacity = 5,
             EventStart = start ?? now.AddDays(3), EventEnd = (start ?? now.AddDays(3)).AddHours(1),
-            RegStart = regStart, RegEnd = regEnd
+            RegStart = DateOnly.FromDateTime(regStart), RegEnd = DateOnly.FromDateTime(regEnd)
         };
 
         var full = MakeEvent($"Full {marker}", now.AddDays(-1), now.AddDays(1));
@@ -218,13 +220,13 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         _db.Events.AddRange(
             MakeEvent($"Opening boundary {marker}", now, now.AddDays(1), now.AddDays(4)),
             MakeEvent($"Deadline boundary {marker}", now.AddDays(-1), now),
-            MakeEvent($"Opening soon {marker}", now.AddHours(1), now.AddDays(1)),
-            MakeEvent($"Past deadline {marker}", now.AddDays(-1), now.AddSeconds(-1), now.AddDays(2)),
+            MakeEvent($"Opening soon {marker}", now.AddDays(1), now.AddDays(1)),
+            MakeEvent($"Past deadline {marker}", now.AddDays(-2), now.AddDays(-1), now.AddDays(2)),
             MakeEvent($"Ended {marker}", now.AddDays(-2), now.AddDays(-1), now.AddHours(-1)),
             full, cancelled, completed);
         for (var i = 0; i < 26; i++)
         {
-            _db.Events.Add(MakeEvent($"Page {i:D2} {marker}", now.AddHours(1), now.AddDays(1), now.AddDays(5 + i)));
+            _db.Events.Add(MakeEvent($"Page {i:D2} {marker}", now.AddDays(1), now.AddDays(1), now.AddDays(5 + i)));
         }
         await _db.SaveChangesAsync();
 
@@ -240,6 +242,27 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal(31, all.MatchingCount);
     }
 
+    [Theory]
+    [InlineData("2037-03-31T15:59:59Z", RegistrationStatus.Soon)]
+    [InlineData("2037-03-31T16:00:00Z", RegistrationStatus.Open)]
+    [InlineData("2037-04-01T15:59:59Z", RegistrationStatus.Open)]
+    [InlineData("2037-04-01T16:00:00Z", RegistrationStatus.Closed)]
+    public async Task Registration_dates_cover_the_entire_Philippine_day_including_one_day_windows(string utc, RegistrationStatus expected)
+    {
+        var (ev, _) = await CreateGraphAsync();
+        ev.Title = $"Single-day registration {Guid.NewGuid():N}";
+        ev.EventStart = new DateTime(2037, 4, 3, 9, 0, 0);
+        ev.EventEnd = ev.EventStart.AddHours(2);
+        ev.RegStart = new DateOnly(2037, 4, 1);
+        ev.RegEnd = ev.RegStart;
+        await _db.SaveChangesAsync();
+        var clock = new EventClock(new FixedTimeProvider(DateTimeOffset.Parse(utc, System.Globalization.CultureInfo.InvariantCulture)));
+        var result = await new EventService(_db, clock).GetUpcomingAsync(ev.Title, null, 1, default);
+        Assert.Equal(expected, Assert.Single(result.Events).Status);
+        Assert.Equal(new DateOnly(2037, 4, 1), result.Events[0].RegistrationOpensAt);
+        Assert.Equal(new DateOnly(2037, 4, 1), result.Events[0].RegistrationClosesAt);
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");
@@ -251,7 +274,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
             Title = "Campus Research Forum", VenueLocation = "Main Campus Hall", MaxCapacity = 30,
             CreatedByUser = admin, EventStart = new DateTime(2030, 7, 1, 9, 0, 0),
             EventEnd = new DateTime(2030, 7, 1, 17, 0, 0),
-            RegStart = new DateTime(2030, 6, 1, 9, 0, 0), RegEnd = new DateTime(2030, 6, 30, 17, 0, 0)
+            RegStart = new DateOnly(2030, 6, 1), RegEnd = new DateOnly(2030, 6, 30)
         };
         _db.Students.Add(student);
         _db.Events.Add(ev);

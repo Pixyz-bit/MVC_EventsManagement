@@ -79,14 +79,14 @@ Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAd
 - [x] `/admin` and `/admin/events` list unfinished Upcoming events with All upcoming, Open, Soon, and Closed filters, search/reset, and chronological ordering. Search matches title, venue, or department. Filter counts cover all upcoming events, and results paginate at 25 per page.
 - [ ] Add event details navigation. Completed and cancelled events belong in the later history workflow.
 - [ ] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows at read time. Persistent completion and history behavior remain later work.
-- [x] Within the upcoming matrix, registration is Closed if now > RegEnd or capacity has been reached, Soon if now < RegStart, and Open otherwise. Opening and deadline are inclusive.
+- [x] Registration opening/deadline are calendar dates. Using today's date in Asia/Manila, registration is Closed if today > RegEnd or capacity has been reached, Soon if today < RegStart, and Open otherwise. The opening and deadline days are inclusive; a one-day window is supported. Event completion still uses the event end timestamp.
 
-Acceptance: exactly RegStart/RegEnd, just after deadline, exactly EventEnd, full, cancelled and completed fixtures produce correct states. Open/Soon/Close are display states, not stored outcomes.
+Acceptance: Philippine midnight at opening, the last moment of the deadline day, midnight the following day, a one-day window, exactly EventEnd, full, cancelled and completed fixtures produce correct states. Open/Soon/Close are display states, not stored outcomes.
 
 ### EVENT-02: Creation and editing
 
 - [x] Creation inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero. `/admin/events/create` provides five steps and a final confirmation; successful publishing redirects to the directory with feedback. Editing remains pending.
-- [x] Creation validation: same-day event start precedes end; registration opening precedes deadline, and BOTH registration calendar dates are strictly before the event date. SQL DATETIME bounds are validated, and events that have already ended are rejected. Apply these rules to editing when implemented.
+- [x] Creation validation: same-day event start precedes end; registration opening is on or before the deadline, and BOTH registration dates are strictly before the event date. Inputs use date-only registration controls and DateOnly values. Supported form years are 1753-9998, and events that have already ended are rejected. Apply these rules to editing when implemented.
 - [ ] Edit only unfinished Upcoming events and recheck at save. Capacity cannot fall below current reservations, including concurrent bookings. Preserve creator, lifecycle and counts during edits.
 - [ ] Missing/invalid event IDs return unavailable/not-found; database errors never fabricate example records.
 
@@ -165,7 +165,7 @@ Acceptance: one registration/seat for concurrent duplicate submissions; never ex
 
 ### CANCEL-01: Student cancellation
 
-- [ ] Owner only, NoShow only, event Upcoming/unfinished and now <= RegEnd. Source does not separately require now >= RegStart; do not silently add that condition.
+- [ ] Owner only, NoShow only, event Upcoming/unfinished and today's Philippine date <= RegEnd. Source does not separately require the opening date to have arrived; do not silently add that condition.
 - [ ] Transition to Cancelled and decrement counter (never below zero) atomically. Reject Present/already-cancelled/expired/wrong-owner requests without another decrement.
 
 Acceptance: deadline boundary honored, repeat requests release at most one seat, and forged ownership fails.

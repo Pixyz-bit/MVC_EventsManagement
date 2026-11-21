@@ -42,7 +42,7 @@
         const open = field("RegStart").value;
         const close = field("RegEnd").value;
         if (start && end && start >= end) field("EndTime").setCustomValidity("End time must be after start time on the same day.");
-        if (open && close && open >= close) field("RegEnd").setCustomValidity("Registration must close after it opens.");
+        if (open && close && open > close) field("RegEnd").setCustomValidity("The registration deadline must be on or after the opening date.");
         for (const name of ["RegStart", "RegEnd"]) {
             if (date && field(name).value && field(name).value.slice(0, 10) >= date)
                 field(name).setCustomValidity("Registration dates must be before the event day.");
@@ -189,7 +189,7 @@
         const entries = [
             ["Event", text("Title")], ["Venue & capacity", `${text("VenueLocation")} · ${text("MaxCapacity")} seats`],
             ["Event schedule · Philippine time", `${text("EventDate")} · ${text("StartTime")}–${text("EndTime")}`],
-            ["Registration · Philippine time", `${text("RegStart").replace("T", " ")} to ${text("RegEnd").replace("T", " ")}`],
+            ["Registration dates · inclusive", `${text("RegStart")} to ${text("RegEnd")}`],
             ["Audience", [text("TargetBranch") || "All campuses", text("TargetDepartment") || "All colleges", text("TargetYearLevel") ? `Year ${text("TargetYearLevel")}` : "All year levels", programs.length ? programs.join(", ") : "All programs"].join(" · ")],
             ["Sponsors", sponsors.join(", ") || "No sponsors"], ["Description", text("Description") || "No description"],
             ["Promotional banner", banner.files[0]?.name || "No image selected"]

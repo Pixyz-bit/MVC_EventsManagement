@@ -5,8 +5,8 @@ public sealed record EventListItem(
     string Venue,
     string? Department,
     DateTime StartsAt,
-    DateTime RegistrationOpensAt,
-    DateTime RegistrationClosesAt,
+    DateOnly RegistrationOpensAt,
+    DateOnly RegistrationClosesAt,
     int Registered,
     int Capacity,
     RegistrationStatus Status);

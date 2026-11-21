@@ -11,8 +11,8 @@ public sealed class Event
     public int CreatedByUserId { get; set; }
     public DateTime EventStart { get; set; }
     public DateTime EventEnd { get; set; }
-    public DateTime RegStart { get; set; }
-    public DateTime RegEnd { get; set; }
+    public DateOnly RegStart { get; set; }
+    public DateOnly RegEnd { get; set; }
     public string Status { get; set; } = "Upcoming";
     public string? CancellationReason { get; set; }
     public string? TargetBranch { get; set; }

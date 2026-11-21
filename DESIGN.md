@@ -61,6 +61,8 @@ The Create Event workspace occupies the viewport beside the shared sidebar (belo
 
 Local preview pages use the same views, CSS and scripts as the protected workflows. They show a Design preview label, keep navigation within preview routes, and disable publishing. Mobile step tabs retain full accessible names when their visual labels collapse to numbers.
 
+Creation refinements supplied 2026-11-21 remove the [breadcrumbs](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-breadcrumb.png), [venue/capacity helper text](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-venue-hints.png), [upload helper text](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-upload-hint.png) and [standalone upload subtitle](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-upload-subtitle.png). Inline optional labels use “(Optional)”. The [registration-window image](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-registration-cleanup.png) prompted date-only storage/controls, not removal of the section. The [step-label reference](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-step-labels.png) adds STEP 01–05 above titles, chevron separators, a blue current step and green completed steps. The fifth tab is Summary & Confirm. Compact mobile tabs preserve their full accessible names and 44px targets.
+
 - Framework: Tailwind CSS with server-rendered Razor MVC.
 - Visual direction: page-specific references. The account layout and color tokens are established for login. The admin and student portal design decisions follow their own references.
 - Accessibility and responsive behavior are required for all implemented pages.

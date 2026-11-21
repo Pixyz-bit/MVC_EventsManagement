@@ -137,7 +137,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
                 Title = title, VenueLocation = "Main Campus Hall", MaxCapacity = 30,
                 CreatedByUserId = await db.Users.Where(user => user.Email == _adminEmail).Select(user => user.UserId).SingleAsync(),
                 EventStart = now.AddDays(3), EventEnd = now.AddDays(3).AddHours(2),
-                RegStart = now.AddDays(-1), RegEnd = now.AddDays(1)
+                RegStart = DateOnly.FromDateTime(now.AddDays(-1)), RegEnd = DateOnly.FromDateTime(now.AddDays(1))
             });
             await db.SaveChangesAsync();
         }
@@ -239,7 +239,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         {
             ("__RequestVerificationToken", await TokenAsync(page)), ("Title", title), ("VenueLocation", " Research Hall "),
             ("MaxCapacity", "75"), ("EventDate", day.ToString("yyyy-MM-dd")), ("StartTime", "09:00"), ("EndTime", "12:00"),
-            ("RegStart", day.AddDays(-4).ToString("yyyy-MM-dd") + "T08:00"), ("RegEnd", day.AddDays(-1).ToString("yyyy-MM-dd") + "T17:00"),
+            ("RegStart", day.AddDays(-1).ToString("yyyy-MM-dd")), ("RegEnd", day.AddDays(-1).ToString("yyyy-MM-dd")),
             ("TargetBranch", "San Bartolome"), ("TargetDepartment", "College of Computer Studies"),
             ("Programs", "BSIT"), ("Programs", "BSCS"), ("TargetYearLevel", "2"),
             ("Sponsors[0]", " QCU Alumni Association "), ("Sponsors[1]", "DOST-NCR"), ("Confirm", "true"),
@@ -257,6 +257,8 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal(await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(), ev.CreatedByUserId);
         Assert.Equal(0, ev.CurrentRegistrations);
         Assert.Equal("Upcoming", ev.Status);
+        Assert.Equal(day.AddDays(-1), ev.RegStart);
+        Assert.Equal(day.AddDays(-1), ev.RegEnd);
         Assert.Equal("Research Hall", ev.VenueLocation);
         Assert.Equal("BSIT,BSCS", ev.TargetProgram);
         Assert.Equal(2, ev.TargetYearLevel);
@@ -272,6 +274,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
     [Theory]
     [InlineData("same-day")]
     [InlineData("reverse")]
+    [InlineData("registration-order")]
     [InlineData("audience")]
     [InlineData("sponsors")]
     [InlineData("sql-range")]
@@ -281,13 +284,14 @@ public sealed class AuthenticationTests : IAsyncLifetime
         {
             Title = "Campus Research Forum", VenueLocation = "Hall A", MaxCapacity = 20,
             EventDate = new DateOnly(2030, 1, 10), StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(12, 0),
-            RegStart = new DateTime(2030, 1, 1), RegEnd = new DateTime(2030, 1, 9), Confirm = true
+            RegStart = new DateOnly(2030, 1, 1), RegEnd = new DateOnly(2030, 1, 9), Confirm = true
         };
-        if (scenario == "same-day") input.RegEnd = new DateTime(2030, 1, 10);
+        if (scenario == "same-day") input.RegEnd = new DateOnly(2030, 1, 10);
         if (scenario == "reverse") input.EndTime = new TimeOnly(8, 0);
+        if (scenario == "registration-order") input.RegStart = new DateOnly(2030, 1, 10);
         if (scenario == "audience") { input.TargetDepartment = "College of Education"; input.Programs = ["BSIT"]; }
         if (scenario == "sponsors") input.Sponsors = [new string('x', 151)];
-        if (scenario == "sql-range") input.RegStart = new DateTime(1700, 1, 1);
+        if (scenario == "sql-range") input.RegStart = new DateOnly(1700, 1, 1);
         var errors = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
         Assert.False(System.ComponentModel.DataAnnotations.Validator.TryValidateObject(input,
             new System.ComponentModel.DataAnnotations.ValidationContext(input), errors, true));

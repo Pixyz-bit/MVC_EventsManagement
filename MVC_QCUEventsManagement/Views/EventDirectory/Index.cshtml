@@ -21,6 +21,8 @@
     var createRoute = ViewData["PreviewMode"] is true ? "PreviewCreateEvent" : "AdminCreateEvent";
     string DisplayTime(DateTime time) => time.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture);
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
+    string DisplayDate(DateOnly date) => date.ToString("MMM d, yyyy", CultureInfo.InvariantCulture);
+    string DateValue(DateOnly date) => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }
 
 <main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
@@ -153,11 +155,11 @@
                             </div>
                             @if (item.Status == RegistrationStatus.Soon)
                             {
-                                <p class="mt-1.5 text-campus-muted">Opens <time datetime="@TimeValue(item.RegistrationOpensAt)">@DisplayTime(item.RegistrationOpensAt)</time></p>
+                                <p class="mt-1.5 text-campus-muted">Opens <time datetime="@DateValue(item.RegistrationOpensAt)">@DisplayDate(item.RegistrationOpensAt)</time></p>
                             }
                             else if (item.Status == RegistrationStatus.Open)
                             {
-                                <p class="mt-1.5 text-campus-muted">Closes <time datetime="@TimeValue(item.RegistrationClosesAt)">@DisplayTime(item.RegistrationClosesAt)</time></p>
+                                <p class="mt-1.5 text-campus-muted">Closes <time datetime="@DateValue(item.RegistrationClosesAt)">@DisplayDate(item.RegistrationClosesAt)</time></p>
                             }
                         </div>
                     </li>

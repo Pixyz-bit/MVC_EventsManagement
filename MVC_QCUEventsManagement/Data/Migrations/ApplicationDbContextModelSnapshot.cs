@@ -16,7 +16,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     // If you encounter a merge conflict in the line below, it means you need to
     // discard one of the migration branches and recreate its migrations on top of
     // the other branch. See https://aka.ms/efcore-docs-migrations-conflicts for more info.
-    public override string LastMigrationId => "20261121070748_InitialCreate";
+    public override string LastMigrationId => "20261121145121_RegistrationDatesOnly";
 
     protected override void BuildModel(ModelBuilder modelBuilder)
     {
@@ -63,11 +63,11 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
                 b.Property<int>("MaxCapacity")
                     .HasColumnType("int");
 
-                b.Property<DateTime>("RegEnd")
-                    .HasColumnType("datetime");
+                b.Property<DateOnly>("RegEnd")
+                    .HasColumnType("date");
 
-                b.Property<DateTime>("RegStart")
-                    .HasColumnType("datetime");
+                b.Property<DateOnly>("RegStart")
+                    .HasColumnType("date");
 
                 b.Property<byte[]>("RowVersion")
                     .IsConcurrencyToken()
@@ -119,7 +119,7 @@ partial class ApplicationDbContextModelSnapshot : ModelSnapshot
 
                         t.HasCheckConstraint("CK_EventsTable_Capacity", "[MaxCapacity] > 0 AND [CurrentRegistrations] >= 0 AND [CurrentRegistrations] <= [MaxCapacity]");
 
-                        t.HasCheckConstraint("CK_EventsTable_Schedule", "[EventStart] < [EventEnd] AND [RegStart] < [RegEnd] AND CONVERT(date, [RegStart]) < CONVERT(date, [EventStart]) AND CONVERT(date, [RegEnd]) < CONVERT(date, [EventStart])");
+                        t.HasCheckConstraint("CK_EventsTable_Schedule", "[EventStart] < [EventEnd] AND [RegStart] <= [RegEnd] AND [RegStart] < CONVERT(date, [EventStart]) AND [RegEnd] < CONVERT(date, [EventStart])");
 
                         t.HasCheckConstraint("CK_EventsTable_Status", "([Status] COLLATE Latin1_General_100_BIN2 = 'Upcoming' AND DATALENGTH([Status]) = 8) OR ([Status] COLLATE Latin1_General_100_BIN2 = 'Cancelled' AND DATALENGTH([Status]) = 9) OR ([Status] COLLATE Latin1_General_100_BIN2 = 'Completed' AND DATALENGTH([Status]) = 9)");
 

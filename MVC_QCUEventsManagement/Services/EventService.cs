@@ -23,8 +23,8 @@ public sealed class EventService(ApplicationDbContext db, EventClock clock)
         {
             Title = input.Title.Trim(), Description = Optional(input.Description), VenueLocation = input.VenueLocation.Trim(),
             MaxCapacity = input.MaxCapacity, CreatedByUserId = adminId, EventStart = start, EventEnd = end,
-            RegStart = DateTime.SpecifyKind(input.RegStart!.Value, DateTimeKind.Unspecified),
-            RegEnd = DateTime.SpecifyKind(input.RegEnd!.Value, DateTimeKind.Unspecified),
+            RegStart = input.RegStart!.Value,
+            RegEnd = input.RegEnd!.Value,
             TargetBranch = Optional(input.TargetBranch), TargetDepartment = Optional(input.TargetDepartment),
             TargetProgram = input.Programs.Count == 0 ? null : string.Join(",", input.Programs.Distinct()),
             TargetYearLevel = input.TargetYearLevel, EventPhotoPath = bannerName,
@@ -43,6 +43,7 @@ public sealed class EventService(ApplicationDbContext db, EventClock clock)
     public async Task<EventListViewModel> GetUpcomingAsync(string? query, string? status, int page, CancellationToken cancellationToken)
     {
         var now = clock.Now;
+        var today = DateOnly.FromDateTime(now);
         var search = query?.Trim() ?? "";
         if (search.Length > 150) search = search[..150];
 
@@ -59,9 +60,9 @@ public sealed class EventService(ApplicationDbContext db, EventClock clock)
             .Select(ev => new
             {
                 Event = ev,
-                Status = ev.CurrentRegistrations >= ev.MaxCapacity || ev.RegEnd < now
+                Status = ev.CurrentRegistrations >= ev.MaxCapacity || ev.RegEnd < today
                     ? RegistrationStatus.Closed
-                    : ev.RegStart > now ? RegistrationStatus.Soon : RegistrationStatus.Open
+                    : ev.RegStart > today ? RegistrationStatus.Soon : RegistrationStatus.Open
             });
 
         var counts = await upcoming.GroupBy(row => row.Status)

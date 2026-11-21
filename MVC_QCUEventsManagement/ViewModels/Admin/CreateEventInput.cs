@@ -11,8 +11,8 @@ public sealed class CreateEventInput : IValidatableObject
     [Required, DataType(DataType.Date)] public DateOnly? EventDate { get; set; }
     [Required, DataType(DataType.Time)] public TimeOnly? StartTime { get; set; }
     [Required, DataType(DataType.Time)] public TimeOnly? EndTime { get; set; }
-    [Required] public DateTime? RegStart { get; set; }
-    [Required] public DateTime? RegEnd { get; set; }
+    [Required, DataType(DataType.Date)] public DateOnly? RegStart { get; set; }
+    [Required, DataType(DataType.Date)] public DateOnly? RegEnd { get; set; }
     [StringLength(100)] public string? TargetBranch { get; set; }
     [StringLength(100)] public string? TargetDepartment { get; set; }
     public List<string> Programs { get; set; } = [];
@@ -42,14 +42,14 @@ public sealed class CreateEventInput : IValidatableObject
             yield return new("Choose an event date between 1753 and 9998.", [nameof(EventDate)]);
         if (StartTime is { } start && EndTime is { } end && start >= end)
             yield return new("The end time must be after the start time on the same day.", [nameof(EndTime)]);
-        if (RegStart is { } open && RegEnd is { } close && open >= close)
-            yield return new("Registration must close after it opens.", [nameof(RegEnd)]);
+        if (RegStart is { } open && RegEnd is { } close && open > close)
+            yield return new("The registration deadline must be on or after the opening date.", [nameof(RegEnd)]);
         foreach (var (date, field) in new[] { (RegStart, nameof(RegStart)), (RegEnd, nameof(RegEnd)) })
         {
             if (date is not { } value) continue;
             if (value.Year < 1753 || value.Year > 9998)
                 yield return new("Choose a registration date between 1753 and 9998.", [field]);
-            if (EventDate is { } eventDay && DateOnly.FromDateTime(value) >= eventDay)
+            if (EventDate is { } eventDay && value >= eventDay)
                 yield return new("Registration dates must be before the event day.", [field]);
         }
         if (!string.IsNullOrWhiteSpace(TargetBranch) && !Branches.Contains(TargetBranch))
