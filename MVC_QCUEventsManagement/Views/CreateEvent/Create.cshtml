@@ -6,20 +6,15 @@
     ViewData["AdminSection"] = "Create";
     ViewData["ViewportForm"] = true;
     string[] steps = ["Event Details", "Schedule & Registration", "Target Audience", "Sponsors", "Summary & Confirm"];
-    var previewMode = ViewData["PreviewMode"] is true;
-    var directoryRoute = previewMode ? "PreviewAdminEvents" : "AdminEvents";
+    const string directoryRoute = "AdminEvents";
 }
 
 <main class="event-workspace">
     <header class="event-page-heading">
         <h1 class="text-xl font-extrabold tracking-tight text-campus-navy sm:text-2xl">Publish New Campus Event</h1>
-        @if (previewMode)
-        {
-            <p class="mt-1 text-xs text-campus-muted">Design preview · <a href="/login?returnUrl=%2Fadmin%2Fevents%2Fcreate" class="font-semibold text-campus-action underline">Sign in to publish</a></p>
-        }
     </header>
 
-    <form asp-route="@(previewMode ? "PreviewCreateEvent" : "AdminCreateEvent")" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" data-preview="@(previewMode ? "true" : "false")" novalidate>
+    <form asp-route="AdminCreateEvent" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" novalidate>
         <div class="event-stepper-wrap">
             <nav aria-label="Event creation steps" class="event-stepper" role="tablist">
                 @for (var i = 0; i < steps.Length; i++)
@@ -157,7 +152,7 @@
                 <span id="event-progress" class="mr-2 hidden text-xs text-campus-muted lg:inline">Step 1 of 5</span>
                 <button type="button" id="event-back" class="event-secondary hidden">Back</button>
                 <button type="button" id="event-next" class="event-primary hidden"><span>Schedule & registration</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="size-4"><path d="m6 3 5 5-5 5" /></svg></button>
-                <button type="submit" id="event-publish" class="event-primary" disabled="@previewMode">Publish event</button>
+                <button type="submit" id="event-publish" class="event-primary">Publish event</button>
             </div>
         </footer>
     </form>

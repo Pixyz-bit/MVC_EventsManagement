@@ -85,3 +85,6 @@ The final published preview on port 5314 was then checked directly without an au
 2026-11-21, full-width Event Directory: all 28 tests passed. With Soon selected, Edge verified that the panel used the available width beside the sidebar, the title stayed at 28px, and all four tabs, search, and Clear filters shared one row at 1280px, 1536px, and 1920px. The toolbar stacked without horizontal overflow on mobile.
 
 2026-11-22, final combined checkpoint: after the separate MVC reorganization commit 34a4600, all 52 tests passed with the date-only registration and UI refinements present. Release publish succeeded. The refactor was preserved and committed separately before this checkpoint.
+
+2026-11-22, preview removal: removed the temporary no-login controller/configuration and all preview-specific UI branches. All 51 tests passed, including old preview URLs returning 404 and normal creation requiring sign-in. Tailwind compilation and Release publish passed. No account passwords or credential configuration were changed.
+Live sign-in with the supplied existing administrator account succeeded. Event Directory opened at /admin, and Create Event opened at /admin/events/create with normal navigation, no preview label, and publishing enabled. No credentials were saved to source or documentation.

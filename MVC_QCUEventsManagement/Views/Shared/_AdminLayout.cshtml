@@ -9,7 +9,7 @@
 <div class="min-h-dvh bg-white lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
     <aside class="sticky top-0 hidden h-dvh border-r border-campus-line bg-white lg:flex lg:flex-col" aria-label="Administrator sidebar">
         <div class="shrink-0 border-b border-campus-line px-4 py-2.5">
-            <a asp-route="@(ViewData["PreviewMode"] is true ? "PreviewAdminEvents" : "AdminPortal")" class="flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-campus-focus">
+            <a asp-route="AdminPortal" class="flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-campus-focus">
                 <img src="~/images/qcu-logo.png" alt="" class="size-9 shrink-0 object-contain" width="36" height="36" />
                 <span class="leading-tight">
                     <strong class="block text-base text-campus-navy">QCU Events</strong>

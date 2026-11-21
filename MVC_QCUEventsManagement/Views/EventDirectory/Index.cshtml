@@ -17,8 +17,8 @@
     var hasFilters = Model.Status is not null || hasSearch;
     var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
     const string eventColumns = "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1.25fr)]";
-    var directoryRoute = ViewData["PreviewMode"] is true ? "PreviewAdminEvents" : "AdminEvents";
-    var createRoute = ViewData["PreviewMode"] is true ? "PreviewCreateEvent" : "AdminCreateEvent";
+    const string directoryRoute = "AdminEvents";
+    const string createRoute = "AdminCreateEvent";
     string DisplayTime(DateTime time) => time.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture);
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
     string DisplayDate(DateOnly date) => date.ToString("MMM d, yyyy", CultureInfo.InvariantCulture);

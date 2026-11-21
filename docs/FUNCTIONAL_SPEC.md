@@ -38,7 +38,7 @@ Destination ownership is proposed until implementation establishes routes. Every
 
 ### AUTH-01: Login, roles and logout
 
-Temporary design review may use the local GET-only preview routes without signing in. These show the implemented directory and creation UI, including step interactions, while database publication remains authenticated. This user-requested development exception does not change the role rules for application workflows; see [database and security](DATABASE_AND_SECURITY.md).
+The temporary no-login design preview was removed. All administrator pages, including the directory and creation form, require authenticated administrator sessions.
 
 - [x] Sign in with a trimmed student ID or email and a password. Missing input, wrong or unknown credentials, and inactive accounts fail authentication. If an identifier matches both, the email match takes precedence.
 - [x] Supported roles are Admin and Student. Sign-in accepts validated local return URLs and otherwise routes to the correct portal. Role checks protect both portal entry routes. Apply the same authorization to future export and JSON actions.

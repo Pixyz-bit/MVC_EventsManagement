@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
-For the user's temporary no-login design workflow, read-only previews are enabled in `appsettings.Development.json` through `DevelopmentPreview:Enabled`. They require a loopback request and Development environment, return 404 when unavailable, and accept GET only. A synthetic display name is scoped to rendering and has no authenticated identity or role. Publishing is disabled in the preview UI; normal administrator routes still require sign-in and antiforgery. See [setup](SETUP.md) for direct URLs.
+The temporary no-login preview routes have been removed. Administrator pages require the normal authenticated session; no preview identity, preview configuration, or publish-disabled variant remains.
 
 Event creation is administrator-only and antiforgery-protected. A dedicated input model excludes creator, counters, lifecycle and image paths; the service derives these and rechecks the active administrator. Server validation enforces lengths, positive capacity, ordered same-day event times, supported date bounds, registration dates strictly before the event day, supported audience combinations, target year 1-5 and at most 20 sponsor names of 150 characters. Event and sponsor insertion uses one EF SaveChanges transaction.
 

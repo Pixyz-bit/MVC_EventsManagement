@@ -310,45 +310,16 @@ public sealed class AuthenticationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Local_development_previews_open_without_login_and_cannot_publish()
+    public async Task Removed_preview_routes_return_not_found_and_real_pages_require_login()
     {
         using var client = NewClient();
-        var directory = await client.GetStringAsync("/preview/admin/events");
-        Assert.Contains("/preview/admin/events/create", directory);
-        using var create = await client.GetAsync("/preview/admin/events/create");
-        Assert.Equal(HttpStatusCode.OK, create.StatusCode);
-        var html = await create.Content.ReadAsStringAsync();
-        Assert.Contains("Design preview", html);
-        Assert.Contains("data-preview=\"true\"", html);
-        Assert.Matches("id=\"event-publish\"[^>]*disabled", html);
-        using var post = await client.PostAsync("/preview/admin/events/create", Form());
-        Assert.Equal(HttpStatusCode.MethodNotAllowed, post.StatusCode);
+        foreach (var path in new[] { "/preview/admin/events", "/preview/admin/events/create" })
+        {
+            using var response = await client.GetAsync(path);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
         using var protectedPage = await client.GetAsync("/admin/events/create");
         Assert.StartsWith("/login?", RedirectPath(protectedPage));
-    }
-
-    [Fact]
-    public void Previews_are_unavailable_when_disabled_in_production_or_to_remote_clients()
-    {
-        using var scope = _factory.Services.CreateScope();
-        var environment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
-        var original = environment.EnvironmentName;
-        try
-        {
-            var configuration = new ConfigurationBuilder().AddInMemoryCollection(
-                new Dictionary<string, string?> { ["DevelopmentPreview:Enabled"] = "true" }).Build();
-            var controller = new DevelopmentPreviewController(environment, configuration, scope.ServiceProvider.GetRequiredService<EventService>())
-            { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
-            environment.EnvironmentName = "Production";
-            Assert.IsType<NotFoundResult>(controller.Create());
-            environment.EnvironmentName = "Development";
-            controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.10");
-            Assert.IsType<NotFoundResult>(controller.Create());
-            controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Loopback;
-            configuration["DevelopmentPreview:Enabled"] = "false";
-            Assert.IsType<NotFoundResult>(controller.Create());
-        }
-        finally { environment.EnvironmentName = original; }
     }
 
     private ApplicationDbContext CreateContext()
