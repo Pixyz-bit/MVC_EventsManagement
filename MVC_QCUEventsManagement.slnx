@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="MVC_QCUEventsManagement.Tests/MVC_QCUEventsManagement.Tests.csproj" />
   <Project Path="MVC_QCUEventsManagement/MVC_QCUEventsManagement.csproj" />
 </Solution>

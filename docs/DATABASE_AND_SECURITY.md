@@ -18,7 +18,7 @@ Last updated: 2026-11-21 (Asia/Manila).
 - Keep secrets outside committed settings; use development secrets/environment variables. Do not log passwords, connection credentials, or private import data. Do not trim or transform passwords without reviewing compatibility implications.
 - Preserve event/registration date semantics; document storage and Asia/Manila display conversions after inspecting current behavior.
 
-## Source schema inventory (M1; live database verification pending)
+## Historical source schema inventory (M1)
 
 Evidence: source Backend/Database/Migration/07_FinalDatabaseSchema.sql. This is a fresh-install script, not proof that the existing database is identical. Map explicit table names and SQL types; do not let convention-generated plural names replace them accidentally. All listed foreign keys use NO ACTION on delete/update. Fields are required unless marked nullable in the table below.
 
@@ -30,7 +30,7 @@ Evidence: source Backend/Database/Migration/07_FinalDatabaseSchema.sql. This is 
 | Sponsor | SponsorListTable | SponsorEntryId int identity PK; required EventId FK | SponsorName nvarchar(150), CreatedAt datetime; required |
 | EventRegistration | EventRegistrationTable | EventRegistrationId int identity PK; required EventId and StudentId FKs | CurrentYearLvl int, CurrentSection varchar(50), Status varchar(50) default NoShow required; CheckInTimestamp datetime nullable |
 
-The event status CHECK uses binary collation and exact DATALENGTH for Upcoming/Cancelled/Completed. Explicit secondary index: IX_EventRegistrationTable_StudentId. Source schema does NOT declare unique email, unique StudentTable.UserId, unique active student/event registration, role/registration-status CHECK constraints, capacity/date checks, or rowversion concurrency tokens. Those application assumptions need data audits and reviewed changes before stronger EF/database enforcement. A student-to-user one-to-one navigation is intended by application flows but is not guaranteed by a unique FK in this schema.
+The source event status CHECK uses binary collation and exact DATALENGTH for Upcoming/Cancelled/Completed. Explicit secondary index: IX_EventRegistrationTable_StudentId. Source schema does NOT declare unique email, unique StudentTable.UserId, unique active student/event registration, role/registration-status CHECK constraints, capacity/date checks, or rowversion tokens. These historical deficiencies are addressed where appropriate by the implemented NEW schema below; no old-data audit/import is needed. A student-to-user one-to-one navigation was intended by source application flows but not enforced by its FK.
 
 No separate cancellation table, attendance table, persistent ticket GUID/security-token column, account-photo column, check-in method/admin audit columns, or registration-created timestamp exists in this schema. Event cancellation is a field on Event; attendance is registration status/timestamp. Projection/helper classes do not imply new entities. Student year/section is deliberately per registration, not StudentTable.
 
@@ -51,12 +51,23 @@ Transaction boundaries must move with rules, not disappear with stored procedure
 
 ### Clock, credentials and non-secret source compatibility
 
-RegistrationDateTime states that stored SQL DATETIME represents local app/server time without UTC conversion; UI parsing accepts yyyy-MM-ddTHH:mm with optional seconds. SQL uses GETDATE while model helpers use DateTime.Now. Choose one explicit clock strategy during M2 and verify the deployment timezone before interpreting existing values; avoid double conversion to UTC or assuming existing values already are UTC.
+Source RegistrationDateTime stores SQL DATETIME as local app/server time without UTC conversion; UI parsing accepts yyyy-MM-ddTHH:mm with optional seconds. Source SQL uses GETDATE and models use DateTime.Now. The new EventClock instead converts injected TimeProvider UTC to Asia/Manila and returns an Unspecified-kind DateTime for local SQL fields, independent of machine timezone. Future date-sensitive services must use this clock rather than SQL GETDATE or machine DateTime.Now. No old date values are imported.
 
-Legacy PasswordHelper uses a random 32-byte salt, 10,000 PBKDF2 iterations and 32-byte derived hash, with salt/hash stored separately as Base64. It uses the .NET Framework Rfc2898DeriveBytes(password, saltBytes, iterations) constructor; modern verification must explicitly reproduce its algorithm semantics and use fixtures before changing APIs. The source compares decoded hashes with a constant-work loop. This describes compatibility, not a recommended new password strength policy. Plaintext fallback, predictable temporary credentials and inconsistent trimming are tracked under AUTH-02/STUDENT-01 and GAP-04.
+Legacy PasswordHelper uses a random 32-byte salt, 10,000 PBKDF2 iterations and 32-byte derived hash, stored separately as Base64, via the .NET Framework Rfc2898DeriveBytes(password, saltBytes, iterations) constructor. The source compares decoded hashes with a constant-work loop. This is historical evidence only: no accounts/hashes are imported, so modern verification need not preserve that format. Secure new-account policy remains M4 work; plaintext fallback will not be copied. Predictable temporary credentials and inconsistent trimming remain under AUTH-02/STUDENT-01 and GAP-04.
 
 QR references derive from record IDs; redirect GUIDs and SEC/GetHashCode display tokens are not persisted authentication tokens. Server authorization and database state decide admission. Source profile values may be cached in session, so role/status/ownership cannot rely on stale cached fields alone.
 
-### M2 database acceptance prerequisites
+## Implemented MVC schema (M2)
 
-Verify the new catalog name, migration history, actual tables/types/defaults/checks/indexes/FKs, an empty application dataset and migration repeatability. Validate EF reads/writes and critical constraints inside rolled-back test transactions, leaving all application tables empty. Do not migrate or seed an administrator account: first-admin provisioning is a later explicit setup task. Old-database adoption/data cleanup is out of scope. SQL Server service start was denied by Windows permissions; the available user-owned MSSQLLocalDB instance is the selected development server (exact connection/configuration in setup).
+MVC_EventsManagement was created on the development server documented in [setup](SETUP.md) using migration 20261121070748_InitialCreate (EF Core 11.0.0). It contains the same five explicit table names/column mappings above, with these intentional integrity improvements for the NEW empty database:
+
+- Unique UX_UserTable_Email and UX_StudentTable_UserId indexes enforce email uniqueness and the optional User -> one Student relationship. Other relations remain required dependent-to-principal, with NO ACTION deletion; no automatic history cascade.
+- Filtered unique UX_EventRegistrationTable_ActiveStudentEvent on EventId/StudentId WHERE Status <> 'Cancelled' prevents multiple active passes while allowing cancelled history/rebooking. IX_EventRegistrationTable_StudentId and FK indexes support queries.
+- RowVersion SQL rowversion concurrency tokens on EventsTable and EventRegistrationTable detect stale EF updates. They do not alone implement the future booking counter/check-in transactions.
+- CHECK constraints enforce exact supported user roles/event/registration statuses, positive/bounded event capacity counters, ordered event/registration schedule with registration dates before event date, target/submitted year 1-5, nonblank registration section, and a nonblank reason for cancelled events.
+- NoShow requires null check-in time, Present requires a timestamp, and Cancelled permits the retained timestamp of an administratively voided Present record. This preserves the source's broader admin-void behavior.
+- Existing integer identity/string keys, nvarchar/varchar lengths, date/datetime types, defaults and nullable optional fields remain explicit. Student BirthDate is DateOnly? mapped to SQL date. No new cancellation/attendance tables or seed/procedure installations were added.
+
+The migration creates schema and EF history only. All five application tables have zero rows after tests. First-admin provisioning is a later explicit setup task, not a seed in M2. Migration reapplication reported up-to-date; pending-model check found no changes. SQL inspection confirmed five enabled/trusted FKs, ten enabled/trusted CHECKs and the three unique indexes. Current test results are owned by [testing](TESTING.md).
+
+Full SQL Server services remain stopped because Windows denied service-start permissions. The user-owned LocalDB instance runs without that administrative requirement. Do not run source installers or connect the new application to the old catalog.

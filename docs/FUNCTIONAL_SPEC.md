@@ -6,7 +6,7 @@ Last updated: 2026-11-21 (Asia/Manila).
 
 M1 is a static source-code inventory, not a claim of successful execution. Evidence includes 17 portal page/action inventories plus Default.aspx, shared helpers/models, repository operations and SQL definitions, and functional scripts for filtering, scanning, charts and ticket downloads. A static audit found 67 repository procedure definitions across six repository SQL files, no C# referenced procedure missing a definition, and no unresolved declared portal server handlers among the audited event attributes.
 
-Source paths are relative to the application in [project scope](PROJECT_SCOPE.md). Database mappings/security details belong in [database and security](DATABASE_AND_SECURITY.md); visual references in [DESIGN.md](../DESIGN.md); progress in [milestones](MILESTONES.md). Live schema/data and browser behavior remain unverified. Checkboxes below mean MVC implementation acceptance, not inventory completion.
+Source paths are relative to the application in [project scope](PROJECT_SCOPE.md). Database mappings/security details belong in [database and security](DATABASE_AND_SECURITY.md); visual references in [DESIGN.md](../DESIGN.md); progress in [milestones](MILESTONES.md). The NEW MVC_EventsManagement schema is verified in M2; no old records/accounts are imported. Legacy browser workflows remain unverified. Checkboxes below mean MVC feature acceptance, not inventory or database-foundation completion.
 
 ## Page and action inventory
 
@@ -46,12 +46,12 @@ Acceptance: both identifier forms work, inactive/unknown accounts fail, direct w
 
 Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, SessionHelper/AdminPage/StudentPage, UserRepository.cs/.sql.
 
-### AUTH-02: Credential compatibility
+### AUTH-02: New-account credentials
 
-- [ ] Preserve verification of existing PBKDF2 hashes using the legacy format in the database/security document. Plaintext PasswordHash fallback in source login needs a controlled upgrade/reset; it is not a requirement to retain unsafe authentication.
-- [ ] New/reset passwords use a fresh salt. Most form paths enforce six characters, but trimming and reset validation differ. Establish a consistent policy without silently breaking existing hashes; never expose hashes/salts in forms or exports.
+- [ ] The new database has no imported users/hashes or seed accounts. Select a secure new-account hash policy during M4; source PBKDF2 details remain historical evidence, not a required compatibility mode. Do not copy the plaintext PasswordHash fallback.
+- [ ] New/reset passwords use a fresh salt. Most source form paths enforce six characters, but trimming and reset validation differ. Establish a consistent policy for new accounts; never expose hashes/salts in forms or exports.
 
-Acceptance: verify legacy fixtures, incorrect passwords, malformed hashes, salt regeneration and any approved seed-account transition. Test password whitespace intentionally.
+Acceptance: verify new-account hashes, incorrect passwords, malformed hashes, salt regeneration and deliberate whitespace handling. No source-account upgrade or seed transition is required.
 
 ### ACCOUNT-01: Account maintenance
 
@@ -248,15 +248,15 @@ These are findings and implementation obligations, not completed fixes. Preserve
 
 | ID | Finding / required follow-up | Milestone |
 | --- | --- | --- |
-| GAP-01 | Live database/schema and running-browser verification unavailable in M1 | M2 and integration checks through M11 |
-| GAP-02 | Duplicate booking check is outside SQL transaction; schema has no unique active-registration constraint | M2/M8: transaction/constraint design must allow cancelled history and rebooking |
+| GAP-01 | Source live schema/browser verification was unavailable in M1; old database adoption is no longer required | New M2 schema verified; full workflow checks remain M4-M11 |
+| GAP-02 | Source duplicate booking check is outside SQL transaction | M2 adds verified filtered unique index/rowversion; M8 must still implement counter/booking transactions |
 | GAP-03 | Gate commit/admin void do not bind the target registration to selected event server-side | M8/M9 |
-| GAP-04 | Predictable initial passwords, plaintext login fallback and inconsistent trim/reset checks | M4/M6: explicit compatibility policy |
+| GAP-04 | Predictable source initial passwords, plaintext login fallback and inconsistent trim/reset checks | No imported users; M4/M6 use explicit new-account policy without plaintext fallback |
 | GAP-05 | Event/sponsor and some student edits can partially succeed; upload/sponsor errors may be swallowed | M5/M6 |
 | GAP-06 | CSV quoted fields/header/date handling and unchecked false return distort results | M6 |
-| GAP-07 | App local time and SQL GETDATE may differ; stored DATETIME has no timezone | M2: consistent clock preserving Philippine schedule meaning |
+| GAP-07 | Source app local time and SQL GETDATE may differ | M2 implements tested Asia/Manila EventClock; future services must use it |
 | GAP-08 | Admin void can affect Present after deadline; no check-in start-time guard | Preserve unless user changes policy; M8/M9 verification |
 | GAP-09 | Photo controls/security tokens not backed by persistence; student profile can survive Admin promotion | M2/M4/M6: avoid inventing fields/deleting history |
-| GAP-10 | Email/student-user uniqueness are app assumptions, not source SQL unique constraints | M2: audit data before unique constraints or one-to-one mapping |
+| GAP-10 | Source schema lacks email/student-user uniqueness | M2 enforces verified unique indexes in the NEW empty database; no old-data audit/import needed |
 
 Reference readiness belongs in DESIGN.md. The source application is unchanged.

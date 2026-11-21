@@ -4,7 +4,7 @@ Last updated: 2026-11-21 (Asia/Manila).
 
 Use MVC controllers and Razor views, not Areas, React, Next.js, or a separate SPA. Flow: controller -> service -> ApplicationDbContext -> SQL Server. Controllers handle HTTP requests; services own business operations, queries, and transactions. Views receive view models rather than binding writable EF entities directly. Do not introduce a generic repository layer. Supporting classes may be added to the appropriate existing responsibility when needed.
 
-Planned structure (documentation and Git setup are established; application changes remain pending):
+Target structure: M2 has implemented the five EF entities, context/configurations, generated InitialCreate migration, EventClock service and SQL-backed test project. Feature controllers/view models/services and Tailwind assets remain planned for their milestones. Existing Home starter routes/views remain until the reference-led UI work.
 
 ```text
 MVC_QCUEventsManagement/                  # Solution/repository root
@@ -12,6 +12,8 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |-- DESIGN.md                            # Design rules and page reference register
 |-- docs/                                # Topic documents; see AGENTS.md for ownership
 |-- .gitignore
+|-- global.json                          # SDK 11.0.100, stable patch roll-forward
+|-- dotnet-tools.json                    # Project-local EF CLI 11.0.0
 |-- MVC_QCUEventsManagement.slnx
 |-- MVC_QCUEventsManagement/              # Web application
 |   |-- Controllers/
@@ -28,8 +30,8 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |   |-- SponsorConfiguration.cs
 |   |   |   `-- EventRegistrationConfiguration.cs
 |   |   `-- Migrations/
-|   |       |-- <timestamp>_InitialBaseline.cs
-|   |       |-- <timestamp>_InitialBaseline.Designer.cs
+|   |       |-- 20261121070748_InitialCreate.cs
+|   |       |-- 20261121070748_InitialCreate.Designer.cs
 |   |       `-- ApplicationDbContextModelSnapshot.cs
 |   |-- Models/
 |   |   |-- User.cs
@@ -42,6 +44,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- Admin/
 |   |   `-- Student/
 |   |-- Services/
+|   |   |-- EventClock.cs                # Implemented Philippine wall-clock service
 |   |   |-- AccountService.cs
 |   |   |-- StudentService.cs
 |   |   |-- EventService.cs
@@ -71,6 +74,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |-- package-lock.json                 # Reproducible frontend dependencies
 |   |-- appsettings.json
 |   |-- appsettings.Development.json
+|   |-- packages.lock.json               # Locked .NET dependency graph
 |   `-- Program.cs
 `-- MVC_QCUEventsManagement.Tests/         # Meaningful rule/integration/browser tests
 ```
@@ -78,3 +82,5 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 EF configuration files define table/column mappings, constraints, keys, indexes, and relationships. EF migration files describe versioned schema changes and the snapshot; generate their actual names through EF tooling. Proposed entities must be verified against the schema; display-only or operation-result models do not automatically imply additional tables.
 
 Views/Admin maps naturally to AdminController and Views/Student to StudentController. Keep action methods focused and delegate logic to services. Revisit controller splitting only if growth justifies it and update this section before changing conventions.
+
+M2 configuration: Program registers a request-scoped ApplicationDbContext, singleton TimeProvider.System and singleton EventClock. The EventsDatabase connection must explicitly target MVC_EventsManagement; startup rejects any other catalog, including the old database. Development uses local Windows authentication; deployment must supply its connection through configuration. Migrations are explicit CLI operations, not application-startup side effects. No user/event seeding exists. The five feature services in the target tree will be implemented with their workflows; no empty placeholder service implementations were added.
