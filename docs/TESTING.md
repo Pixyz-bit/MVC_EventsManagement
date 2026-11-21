@@ -43,3 +43,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 - No data was imported or seeded. No camera, redesigned UI, full booking/cancellation/check-in services, or authentication workflows are implemented/verified yet. RowVersion and uniqueness checks do not replace the future transaction/concurrency workflow tests.
 
 2026-11-21, SQL Server switch: InitialCreate applied on `localhost` to the new `MVC_EventsManagement` catalog. All 17 integration suite cases passed with the localhost default. A post-test query confirmed the migration history and zero rows in all five application tables. The development app returned HTTP 200 on `/`.
+
+2026-11-21, login preview: Tailwind compiled and the Release publish served `/login`, its stylesheet, seal, and font with HTTP 200. Edge checks at 390px and 1366px confirmed no horizontal overflow, local font loading, and keyboard focus on both inputs. Sign-in is disabled for the design preview.

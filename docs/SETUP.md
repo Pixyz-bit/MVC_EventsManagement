@@ -61,7 +61,22 @@ Integration tests require the migrated database and default to the same localhos
 dotnet publish MVC_QCUEventsManagement/MVC_QCUEventsManagement.csproj -c Release --no-restore --output MVC_QCUEventsManagement/obj/publish-smoke
 ```
 
-Publish output is ignored build output. A published app requires explicit production connection configuration. Tailwind/watch/production CSS integration is pending M3; do not interpret this current starter publish check as verification of the redesigned UI.
+Publish output is ignored build output. A published app requires explicit production connection configuration.
+
+## Login preview and Tailwind
+
+Start the app using the command above and open `/login`. The preview uses the shared account layout. Authentication is tracked under M4.
+
+Run these commands in `MVC_QCUEventsManagement` when changing Razor styles. Node.js 24.14.0 and npm 11.9.0 were used with Tailwind and its CLI pinned to 4.3.5.
+
+```powershell
+npm ci
+npm run css:build
+# Optional while editing
+npm run css:watch
+```
+
+Commit the regenerated CSS with style changes. The .NET publish includes the committed CSS without running npm.
 
 ## Current limitations
 

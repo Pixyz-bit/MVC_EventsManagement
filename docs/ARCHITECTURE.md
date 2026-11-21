@@ -4,7 +4,7 @@ Last updated: 2026-11-21 (Asia/Manila).
 
 Use MVC controllers and Razor views, not Areas, React, Next.js, or a separate SPA. Flow: controller -> service -> ApplicationDbContext -> SQL Server. Controllers handle HTTP requests; services own business operations, queries, and transactions. Views receive view models rather than binding writable EF entities directly. Do not introduce a generic repository layer. Supporting classes may be added to the appropriate existing responsibility when needed.
 
-Target structure: M2 has implemented the five EF entities, context/configurations, generated InitialCreate migration, EventClock service and SQL-backed test project. Feature controllers/view models/services and Tailwind assets remain planned for their milestones. Existing Home starter routes/views remain until the reference-led UI work.
+M2 implemented the five EF entities, context/configurations, InitialCreate migration, EventClock, and SQL-backed tests. M3 adds `AccountController`, `Views/Account/Login.cshtml`, `Views/Shared/_AccountLayout.cshtml`, and the Tailwind files below. The `/login` GET route serves the preview. Authentication and other feature controllers, views, and services follow their milestones.
 
 ```text
 MVC_QCUEventsManagement/                  # Solution/repository root

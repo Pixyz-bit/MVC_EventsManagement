@@ -1,0 +1,30 @@
+@import "tailwindcss" source(none);
+@source "../Views";
+@source "../wwwroot/js";
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("../fonts/plus-jakarta-sans-latin-variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --color-campus-navy: #142c48;
+  --color-campus-ink: #192b40;
+  --color-campus-muted: #485b70;
+  --color-campus-paper: #f6f5f0;
+  --color-campus-surface: #fffefa;
+  --color-campus-line: #d6dce2;
+  --color-campus-field: #8695a5;
+  --color-campus-gold: #e3b752;
+  --color-campus-focus: #28649a;
+}
+
+@layer components {
+  .login-field {
+    @apply mt-2 block min-h-12 w-full rounded-lg border border-campus-field bg-campus-surface px-3 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
+  }
+}

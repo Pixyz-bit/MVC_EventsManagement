@@ -20,15 +20,17 @@ Tailwind implementation conventions:
 - Provide development watch and production build scripts; integrate production CSS generation with the documented .NET build/publish workflow. Verify a clean checkout can generate CSS with no watch process running.
 - Link generated CSS from shared layouts with cache busting. Replace Bootstrap starter styling during M3 rather than mixing competing layout frameworks. Retain unrelated validation dependencies only when needed.
 - Keep page interaction scripts in wwwroot/js/admin or student and shared scripts in site.js. Keep production images/fonts in their wwwroot folders. Create per-page CSS only when utilities/shared styles cannot reasonably express a requirement.
-- Generated CSS is build output; its final tracking policy must be settled in M3 together with build integration. Regardless of tracking, publishing must reliably include the generated file.
+- Commit the compiled `wwwroot/css/app.css` with its source changes so .NET builds and publishes include styling without requiring Node. Regenerate it with the commands in [setup](docs/SETUP.md).
 
 ### Page reference and verification register
 
-All design references are pending. The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md); this register owns reference readiness and visual verification only. Status progresses through Awaiting reference -> Reference reviewed -> Implementing -> Implemented -> Verified.
+The login preview interprets the reference’s university banner and centered form with the QCU seal, a navy header, a thin gold rule, and a warm neutral background. Plus Jakarta Sans is served locally. Login fields use visible labels and a keyboard focus outline. Credential submission is deferred to M4.
+
+The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
-| Account | Login | Frontend/Login/Login.aspx | Pending | Awaiting reference |
+| Account | Login | Frontend/Login/Login.aspx | [Penn WebLogin reference](https://budget.upenn.edu/wp-content/uploads/PBCS-User-Guide.pdf) | Preview verified at 390px and 1366px |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Pending | Awaiting reference |
 | Admin | Event list | AdminEvents.aspx | Pending | Awaiting reference |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
@@ -51,6 +53,5 @@ Admin filenames above are under source Frontend/Admin; Student filenames are und
 ### Established design decisions
 
 - Framework: Tailwind CSS with server-rendered Razor MVC.
-- Visual direction: page-specific user references; none supplied yet.
-- Typography, palette, spacing scale, breakpoints, component rules, and motion: pending reference review. Record actual shared decisions here as they are established.
+- Visual direction: page-specific references. The account layout and color tokens are established for login. The admin and student portal design decisions follow their own references.
 - Accessibility and responsive behavior are required for all implemented pages.
