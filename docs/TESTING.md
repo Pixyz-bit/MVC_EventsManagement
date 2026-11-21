@@ -61,3 +61,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, sidebar reference and login fade: all 27 tests passed, and the Tailwind build and Release publish succeeded. Edge verified the blue photo fade and viewport fit at 1366 × 900 and the photo-free layout and viewport fit at 390 × 800. After sign-in, Edge verified the navy sidebar, active Event Directory link, bottom account footer, and mobile Menu opening with Space. Neither sidebar viewport had horizontal overflow.
 
 2026-11-21, horizontal blue login fade: all 27 tests passed, and the Tailwind build and Release publish succeeded. Edge verified the left-to-right fade and checked viewport fit at 1366 × 900, 1024 × 480, 568 × 320, and 390 × 800.
+
+2026-11-21, white sidebar and restored white login: all 27 tests passed, and the Tailwind build and Release publish succeeded. Edge verified the desktop white login fade and the mobile login fit, the white sidebar with the restored QCU header and active Event Directory link, and the keyboard-operated mobile Menu. Neither 1366 × 900 nor 390 × 800 had horizontal overflow.

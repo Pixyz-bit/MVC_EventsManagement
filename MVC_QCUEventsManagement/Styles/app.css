@@ -23,7 +23,6 @@
   --color-campus-focus: #28649a;
   --color-campus-action: #155bb1;
   --color-campus-input: #f4f7fb;
-  --color-campus-login-blue: #1d4ed8;
 }
 
 @layer components {
@@ -49,7 +48,7 @@
   }
 
   .login-field {
-    @apply block w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+    @apply block w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
     margin-block-start: clamp(0.25rem, 1dvh, 0.5rem);
     min-block-size: clamp(2.75rem, 7dvh, 3.25rem);
   }

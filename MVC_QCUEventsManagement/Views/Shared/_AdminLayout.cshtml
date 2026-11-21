@@ -6,23 +6,32 @@
     Skip to content
 </a>
 
-<div class="min-h-dvh lg:grid lg:grid-cols-[17.5rem_minmax(0,1fr)]">
-    <aside class="sticky top-0 hidden h-dvh bg-campus-navy text-white lg:flex lg:flex-col" aria-label="Administrator sidebar">
+<div class="min-h-dvh bg-white lg:grid lg:grid-cols-[19.5rem_minmax(0,1fr)]">
+    <aside class="sticky top-0 hidden h-dvh border-r border-campus-line bg-white lg:flex lg:flex-col" aria-label="Administrator sidebar">
+        <div class="shrink-0 border-b border-campus-line px-6 py-3.5">
+            <a asp-route="AdminPortal" class="flex min-h-12 items-center gap-3.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-campus-focus">
+                <img src="~/images/qcu-logo.png" alt="" class="size-12 shrink-0 object-contain" width="48" height="48" />
+                <span class="leading-tight">
+                    <strong class="block text-lg text-campus-navy">QCU Events</strong>
+                    <span class="mt-1 block text-sm font-semibold text-campus-muted">Administrator portal</span>
+                </span>
+            </a>
+        </div>
         <partial name="_AdminNavigation" />
     </aside>
 
-    <header class="bg-campus-navy text-white lg:hidden">
+    <header class="border-b border-campus-line bg-white lg:hidden">
         <details class="group">
-            <summary class="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-campus-gold [&::-webkit-details-marker]:hidden">
+            <summary class="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-campus-focus [&::-webkit-details-marker]:hidden">
                 <span class="flex min-w-0 items-center gap-3">
                     <img src="~/images/qcu-logo.png" alt="" class="size-8 shrink-0" width="32" height="32" />
                     <strong class="text-sm">QCU Events</strong>
                 </span>
-                <span class="flex items-center gap-2 rounded-lg border border-white/35 px-3 py-2 text-sm font-semibold">
+                <span class="flex items-center gap-2 rounded-lg border border-campus-line px-3 py-2 text-sm font-semibold">
                     Menu<span aria-hidden="true" class="size-2 -translate-y-0.5 rotate-45 border-r-2 border-b-2 group-open:translate-y-0.5 group-open:rotate-225"></span>
                 </span>
             </summary>
-            <div class="border-t border-white/15">
+            <div class="border-t border-campus-line">
                 <partial name="_AdminNavigation" />
             </div>
         </details>

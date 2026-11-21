@@ -15,32 +15,32 @@
             ("Account Management", "M12 22s7-4 7-10V6l-7-3-7 3v6c0 6 7 10 7 10Z", null)
         ])
     ];
-    const string row = "flex min-h-11 items-center rounded-lg border-l-2 pr-3 pl-11";
+    const string row = "flex min-h-12.5 items-center rounded-lg border-l-3 pr-3 pl-13";
 }
 
 <nav aria-label="Administrator navigation" class="space-y-7 px-3.5 py-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
     @foreach (var group in groups)
     {
         <div>
-            <p class="px-3.5 text-xs font-bold tracking-wide text-slate-300 uppercase">@group.Title</p>
-            <ul class="mt-2 space-y-1 text-sm">
+            <p class="px-4 text-sm font-bold tracking-wide text-slate-500 uppercase">@group.Title</p>
+            <ul class="mt-2 space-y-1 text-base">
                 @foreach (var link in group.Links)
                 {
                     <li class="relative">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
-                             class="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 @(link.Route is not null && eventsIsCurrent ? "text-sky-200" : "text-slate-400")">
+                             class="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 @(link.Route is not null && eventsIsCurrent ? "text-blue-700" : "text-slate-500")">
                             <path d="@link.Icon" />
                         </svg>
                         @if (link.Route is not null)
                         {
                             <a asp-route="@link.Route" aria-current="@(eventsIsCurrent ? "page" : null)"
-                               class="@row font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-gold @(eventsIsCurrent ? "border-sky-300 bg-sky-300/15 text-sky-100" : "border-transparent text-white hover:bg-white/10")">
+                               class="@row font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus @(eventsIsCurrent ? "border-blue-600 bg-blue-50 text-blue-700" : "border-transparent text-campus-ink hover:bg-campus-input")">
                                 @link.Label
                             </a>
                         }
                         else
                         {
-                            <span role="link" aria-disabled="true" class="@row border-transparent text-slate-300">@link.Label</span>
+                            <span role="link" aria-disabled="true" class="@row border-transparent font-medium text-campus-muted">@link.Label</span>
                         }
                     </li>
                 }
@@ -49,17 +49,17 @@
     }
 </nav>
 
-<div class="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2.5 border-t border-white/15 bg-white/5 px-3.5 py-3">
-    <span aria-hidden="true" class="grid size-10 place-items-center rounded-full border border-sky-200/35 bg-sky-300/15 text-sm font-bold text-sky-100">
+<div class="grid shrink-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-t border-campus-line bg-white px-4 py-3.5">
+    <span aria-hidden="true" class="grid size-11 place-items-center rounded-full border border-blue-200 bg-blue-50 text-sm font-bold text-blue-700">
         @accountName[0].ToString().ToUpperInvariant()
     </span>
     <div class="min-w-0">
         <p class="wrap-break-word text-sm leading-tight font-semibold">@accountName</p>
-        <p class="mt-1 text-xs font-medium text-emerald-200">Administrator</p>
+        <p class="mt-1 text-xs font-medium text-emerald-700">Administrator</p>
     </div>
     <form asp-controller="Account" asp-action="Logout" method="post">
         <button type="submit" aria-label="Sign out" title="Sign out"
-                class="grid size-11 place-items-center rounded-lg text-slate-200 hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-campus-gold">
+                class="grid size-11 place-items-center rounded-lg text-slate-600 hover:bg-campus-input hover:text-campus-ink focus-visible:outline-2 focus-visible:outline-campus-focus">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-5">
                 <path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h5m5-12 4 4-4 4m4-4H9" />
             </svg>
