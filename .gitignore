@@ -1,0 +1,29 @@
+# IDE and local user state
+.vs/
+.vscode/
+.idea/
+*.csproj.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# .NET and frontend build/dependency output
+**/bin/
+**/obj/
+**/node_modules/
+**/TestResults/
+**/playwright-report/
+**/test-results/
+
+# Local secrets, databases, and private operational data
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+**/secrets.json
+*.bak
+*.mdf
+*.ldf
+*.bacpac
+PrivateData/
+*.log
