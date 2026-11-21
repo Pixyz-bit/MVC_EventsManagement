@@ -12,7 +12,7 @@ Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); prog
 | EF Core SQL Server and Design | 11.0.0; Design is private development tooling |
 | Project-local dotnet-ef | 11.0.0 in root dotnet-tools.json |
 | SQL Server | Default instance at `localhost`, engine 16.0.1000.6 |
-| Test stack | Microsoft.NET.Test.Sdk 17.14.1; xunit 2.9.3; xunit.runner.visualstudio 3.1.5 |
+| Test stack | Microsoft.NET.Test.Sdk 17.14.1, xunit 2.9.3, xunit.runner.visualstudio 3.1.5, Microsoft.AspNetCore.Mvc.Testing 11.0.0 |
 | Dependency reproducibility | packages.lock.json in application and test project; no prerelease packages requested |
 
 ## Database configuration
@@ -63,9 +63,20 @@ dotnet publish MVC_QCUEventsManagement/MVC_QCUEventsManagement.csproj -c Release
 
 Publish output is ignored build output. A published app requires explicit production connection configuration.
 
-## Login preview and Tailwind
+## Create the first administrator
 
-Start the app using the command above and open `/login`. The preview uses the shared account layout. Authentication is tracked under M4.
+After applying the EF migration, run this from the solution root in an interactive PowerShell. Substitute the email address you want to use for the administrator account.
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet run --project MVC_QCUEventsManagement --no-launch-profile -- --create-admin 'admin@example.com'
+```
+
+Enter and confirm a password of 15 to 128 characters at the prompts. Input is hidden and the command exits after creating the account. Only the first administrator can be created this way. The command checks both the administrator role and email uniqueness. Open `/login` and use the administrator email and password to sign in.
+
+## Login and Tailwind
+
+The app starts at `/login`. Administrators can use email. Students can use their email or student ID once their account and profile exist.
 
 Run these commands in `MVC_QCUEventsManagement` when changing Razor styles. Node.js 24.14.0 and npm 11.9.0 were used with Tailwind and its CLI pinned to 4.3.5.
 
@@ -80,4 +91,4 @@ Commit the regenerated CSS with style changes. The .NET publish includes the com
 
 ## Current limitations
 
-Feature services/authentication/screens are not implemented. The database intentionally has no administrator; first-admin provisioning must be an explicit later setup operation. Frontend tooling, functional workflow/browser tests, deployment target and real camera checks remain later milestones. Existing Bootstrap starter files remain until M3. See testing for actual verification results rather than assuming pending features work.
+Authentication and the protected portal entry pages are implemented. The initial database remains empty until first-admin setup is run. Student and administrator management screens, event workflows, deployment and camera checks are later milestones. See [testing](TESTING.md) for the checks completed so far.

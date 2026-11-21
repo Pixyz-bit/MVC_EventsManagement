@@ -38,9 +38,9 @@ Destination ownership is proposed until implementation establishes routes. Every
 
 ### AUTH-01: Login, roles and logout
 
-- [ ] Accept a trimmed student ID OR email plus password. Despite an email-only source comment, usp_User_GetUserByIdentifier matches either UserTable.Email or StudentTable.StudentId. Missing input, wrong/unknown credentials and inactive accounts fail without authentication.
-- [ ] Supported roles are Admin and Student. Return only to validated local URLs or the correct portal; unknown roles are denied. Replace Default.aspx's broad non-Admin-to-student fallback. Reject wrong-role requests before any operation, including exports/JSON.
-- [ ] Logout clears authentication. Account deactivation/role changes must affect existing access; source session checks alone do not refresh account state per request.
+- [x] Sign in with a trimmed student ID or email and a password. Missing input, wrong or unknown credentials, and inactive accounts fail authentication. If an identifier matches both, the email match takes precedence.
+- [x] Supported roles are Admin and Student. Sign-in accepts validated local return URLs and otherwise routes to the correct portal. Role checks protect both portal entry routes. Apply the same authorization to future export and JSON actions.
+- [x] Logout clears authentication. Account deactivation or a role change invalidates existing access on the next request.
 
 Acceptance: both identifier forms work, inactive/unknown accounts fail, direct wrong-role endpoints are denied, external return URLs are rejected, and protected requests require login after logout.
 
@@ -48,8 +48,8 @@ Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, Se
 
 ### AUTH-02: New-account credentials
 
-- [ ] The new database has no imported users/hashes or seed accounts. Select a secure new-account hash policy during M4; source PBKDF2 details remain historical evidence, not a required compatibility mode. Do not copy the plaintext PasswordHash fallback.
-- [ ] New/reset passwords use a fresh salt. Most source form paths enforce six characters, but trimming and reset validation differ. Establish a consistent policy for new accounts; never expose hashes/salts in forms or exports.
+- [x] The first administrator uses ASP.NET Core Identity password hashing and a password of 15 to 128 characters. The setup command prompts for confirmation and preserves password whitespace. The new database starts without imported or seeded accounts.
+- [ ] Apply the new-account hashing and password policy to account creation, password change and reset flows as those screens are implemented.
 
 Acceptance: verify new-account hashes, incorrect passwords, malformed hashes, salt regeneration and deliberate whitespace handling. No source-account upgrade or seed transition is required.
 

@@ -1,0 +1,12 @@
+@{
+    Layout = "_AccountLayout";
+    ViewData["Title"] = "Access denied";
+}
+
+<main class="mx-auto w-full max-w-xl px-6 py-12">
+    <h1 class="text-3xl font-bold tracking-tight">Access denied</h1>
+    <p class="mt-3 text-campus-muted">Your account doesn’t have permission to open this page.</p>
+    <a asp-controller="Account" asp-action="Login" class="mt-6 inline-block font-semibold text-campus-action underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">
+        @(User.Identity?.IsAuthenticated == true ? "Return to your portal" : "Sign in")
+    </a>
+</main>

@@ -1,3 +1,4 @@
+@model MVC_QCUEventsManagement.ViewModels.Account.LoginInput
 @{
     Layout = "_AccountLayout";
     ViewData["Title"] = "Sign in";
@@ -26,23 +27,29 @@
                     <p class="mt-2 text-sm leading-5 text-campus-muted">Use your QCU account to access the events portal.</p>
                 </div>
 
-                <form method="post" aria-describedby="login-status" class="login-form grid">
+                <form asp-controller="Account" asp-action="Login" method="post" class="login-form grid">
+                    <input asp-for="ReturnUrl" type="hidden" />
+                    @if (ViewData.ModelState.TryGetValue(string.Empty, out var errors) && errors.Errors.Count > 0)
+                    {
+                        <div asp-validation-summary="ModelOnly" role="alert" class="text-sm font-semibold text-red-800"></div>
+                    }
                     <div>
                         <label for="identifier" class="block text-sm font-semibold">Student ID or email</label>
-                        <input id="identifier" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" class="login-field" />
+                        <input asp-for="Identifier" id="identifier" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="150" required aria-describedby="identifier-error" class="login-field" />
+                        <span asp-validation-for="Identifier" id="identifier-error" class="mt-1 block text-sm text-red-800 empty:hidden"></span>
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-semibold">Password</label>
                         <div class="relative">
-                            <input id="password" type="password" autocomplete="current-password" class="login-field pr-20" />
+                            <input asp-for="Password" id="password" type="password" autocomplete="current-password" maxlength="128" required aria-describedby="password-error" class="login-field pr-20" />
                             <button id="password-visibility" type="button" hidden aria-controls="password"
                                     aria-label="Show password" class="absolute inset-y-0 right-1 min-w-15 rounded-lg px-2 text-sm font-bold text-campus-action focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-campus-focus">Show</button>
                         </div>
+                        <span asp-validation-for="Password" id="password-error" class="mt-1 block text-sm text-red-800 empty:hidden"></span>
                     </div>
-                    <button type="submit" disabled class="login-submit w-full rounded-full bg-campus-action px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed">
+                    <button type="submit" class="login-submit w-full rounded-full bg-campus-action px-4 py-2 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">
                         Sign in
                     </button>
-                    <p id="login-status" class="text-sm leading-5 text-campus-muted">Sign-in is unavailable in this preview.</p>
                 </form>
             </section>
         </div>

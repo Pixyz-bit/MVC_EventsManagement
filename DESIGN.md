@@ -24,14 +24,14 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-The login fills the viewport edge to edge. The seal and form sit on the left with their own padding, and the QCU campus photo fades into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Credential submission is deferred to M4.
+The login fills the viewport edge to edge. The seal and form sit on the left with their own padding, and the QCU campus photo fades into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Validation appears by the affected field or above the form for failed credentials.
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
 | Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png), adapted with a white background | Preview verified at 390px, 1024px, and 1366px |
-| Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Pending | Awaiting reference |
+| Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
 | Admin | Event list | AdminEvents.aspx | Pending | Awaiting reference |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
 | Admin | Event details/edit/sponsors/cancellation | EventDetails.aspx | Pending | Awaiting reference |

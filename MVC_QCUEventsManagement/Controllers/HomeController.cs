@@ -8,7 +8,7 @@ namespace MVC_QCUEventsManagement.Controllers
     {
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction(nameof(AccountController.Login), "Account");
         }
 
         public IActionResult Privacy()

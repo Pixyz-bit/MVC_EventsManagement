@@ -49,3 +49,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, outer margin removal: Edge verified that the published login reaches all four viewport edges at 390 × 800 and 1366 × 900, with no horizontal overflow.
 
 2026-11-21, viewport fit: Edge verified the published login fits without scrolling at 1366 × 900, 1024 × 480, 390 × 800, 320 × 568, 667 × 375, and 568 × 320. At 320 × 240, scrolling kept the bottom of the form reachable.
+
+2026-11-21, M4: all 26 tests passed, including nine authentication cases through the MVC pipeline and localhost SQL Server. Coverage includes login by student ID or email, local return URLs, redirects by role, wrong-role denial, antiforgery on login and logout, rejection of invalid credentials, and cookie revocation after role changes or deactivation. The published app returned generic feedback after an invalid sign-in. The first-admin command rejected missing arguments and redirected password input. SQL counts confirmed zero users and student profiles after rollback. First-admin provisioning awaits user-chosen credentials.

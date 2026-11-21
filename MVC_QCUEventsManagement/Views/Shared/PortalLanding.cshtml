@@ -1,0 +1,13 @@
+@model string
+@{
+    Layout = "_AccountLayout";
+    ViewData["Title"] = Model;
+}
+
+<main class="mx-auto w-full max-w-xl px-6 py-12">
+    <h1 class="text-3xl font-bold tracking-tight">@Model</h1>
+    <p class="mt-3 wrap-break-word text-campus-muted">Signed in as @User.Identity?.Name</p>
+    <form asp-controller="Account" asp-action="Logout" method="post" class="mt-6">
+        <button type="submit" class="min-h-11 rounded-lg bg-campus-action px-5 py-2 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">Sign out</button>
+    </form>
+</main>
