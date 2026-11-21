@@ -69,3 +69,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, Event Directory redesign: the Tailwind build and Release publish succeeded. MVC integration coverage renders a matching event and a filtered empty state using a rolled-back SQL Server fixture. Edge verified the active tab, preservation of the search query when switching status, keyboard activation of Clear filters, and no horizontal overflow at widths of 390px and 320px. The local preview was checked with an empty event catalog.
 
 2026-11-21, compact Event Directory: all 28 tests passed. Edge verified a 28px title and an 864px-wide panel at 1366px, with tabs and search side by side. At 320px the toolbar stacked with no horizontal overflow. Search and filter controls retained 44px targets.
+
+2026-11-21, full-width Event Directory: all 28 tests passed. With Soon selected, Edge verified that the panel used the available width beside the sidebar, the title stayed at 28px, and all four tabs, search, and Clear filters shared one row at 1280px, 1536px, and 1920px. The toolbar stacked without horizontal overflow on mobile.

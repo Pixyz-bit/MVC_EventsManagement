@@ -21,21 +21,21 @@
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 }
 
-<main class="max-w-[58rem] px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
+<main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <header>
         <h1 class="text-2xl leading-tight font-extrabold tracking-tight text-campus-navy sm:text-[1.75rem]">Event Directory</h1>
         <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Find upcoming campus events and check when registration opens or closes.</p>
     </header>
 
     <section aria-label="Event results" class="mt-5 rounded-xl border border-campus-line bg-white">
-        <div class="rounded-t-xl border-b border-campus-line xl:flex xl:items-stretch xl:justify-between">
-            <nav aria-label="Filter by registration status" class="grid grid-cols-2 border-b border-campus-line px-3 sm:flex sm:flex-wrap sm:gap-3 sm:px-4 xl:border-b-0">
+        <div class="rounded-t-xl border-b border-campus-line xl:grid xl:grid-cols-[max-content_minmax(0,1fr)]">
+            <nav aria-label="Filter by registration status" class="grid grid-cols-2 border-b border-campus-line px-3 sm:flex sm:flex-wrap sm:gap-3 sm:px-4 xl:flex-nowrap xl:border-b-0">
                 @foreach (var filter in filters)
                 {
                     var current = filter.Status == Model.Status;
                     <a asp-route="AdminEvents" asp-route-q="@(hasSearch ? Model.Search : null)" asp-route-status="@filter.Status"
                        aria-current="@(current ? "page" : null)"
-                       class="-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-1 text-sm font-semibold focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:border-campus-field hover:text-campus-ink")">
+                       class="-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-1 text-sm font-semibold whitespace-nowrap focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:border-campus-field hover:text-campus-ink")">
                         @if (filter.Status is null)
                         {
                             <span class="sm:hidden">Upcoming</span>
@@ -58,8 +58,8 @@
                     <input type="hidden" name="status" value="@selected" />
                 }
                 <label for="event-search" class="sr-only">Search events</label>
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="relative w-full max-w-xs sm:w-64">
+                <div class="flex flex-wrap items-center gap-2 xl:flex-nowrap xl:justify-end">
+                    <div class="relative w-full min-w-0 max-w-xs sm:w-64">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                              aria-hidden="true" class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 text-campus-muted">
                             <circle cx="10.5" cy="10.5" r="6.5" />
@@ -69,10 +69,10 @@
                                placeholder="Title, venue or department"
                                class="@focus block min-h-11 w-full rounded-lg border border-campus-field bg-white py-1.5 pr-2 pl-9 text-base placeholder:text-sm placeholder:text-campus-muted sm:text-sm" />
                     </div>
-                    <button type="submit" class="@focus min-h-11 rounded-lg bg-campus-action px-3 text-sm font-semibold text-white hover:bg-campus-navy">Search</button>
+                    <button type="submit" class="@focus min-h-11 shrink-0 rounded-lg bg-campus-action px-3 text-sm font-semibold text-white hover:bg-campus-navy">Search</button>
                     @if (hasFilters)
                     {
-                        <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-campus-action hover:underline">Clear filters</a>
+                        <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 shrink-0 items-center rounded-lg px-2 text-sm font-semibold whitespace-nowrap text-campus-action hover:underline">Clear filters</a>
                     }
                 </div>
             </form>
