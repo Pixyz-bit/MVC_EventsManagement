@@ -25,6 +25,8 @@ M2 and M3 can advance independently where dependencies allow. Authentication can
 
 Page organization now follows one controller, page model and view per application page; see [architecture](ARCHITECTURE.md) for the file map. Event creation exposes nine supported programs and rejects unsupported codes. The schema location guide is in [database and security](DATABASE_AND_SECURITY.md#schema-file-locations).
 
+Create Event now shares Event Directory's responsive page padding and heading/subheading treatment. Tailwind, layout scanning and the Release build passed; rendered verification of this spacing increment remains pending because Computer Use URL detection blocked browser access. See [testing](TESTING.md).
+
 ## Current handoff
 
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.

@@ -9,9 +9,10 @@
     const string directoryRoute = "AdminEvents";
 }
 
-<main class="event-workspace">
+<main class="event-workspace w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <header class="event-page-heading">
-        <h1 class="text-xl font-extrabold tracking-tight text-campus-navy sm:text-2xl">Publish New Campus Event</h1>
+        <h1 class="text-2xl leading-tight font-extrabold tracking-tight text-campus-navy sm:text-[1.75rem]">Publish New Campus Event</h1>
+        <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Set the event details, registration dates, and audience before publishing.</p>
     </header>
 
     <form asp-route="AdminCreateEvent" method="post" enctype="multipart/form-data" id="create-event-form" class="event-editor" novalidate>

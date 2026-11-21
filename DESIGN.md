@@ -1,6 +1,6 @@
 # UI design, Tailwind, and page references
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-22 (Asia/Manila).
 
 The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. Do not copy the old Web Forms UI or invent final page designs before their references arrive.
 
@@ -57,7 +57,9 @@ Admin filenames above are under source Frontend/Admin; Student filenames are und
 
 The Event Directory header includes an enabled blue plus-icon “Create new event” link beside the heading on desktop and below the introduction on mobile. The sidebar Create Event entry links to the same workflow and has its own active state.
 
-The Create Event workspace occupies the viewport beside the shared sidebar (below the compact mobile header). The form has a fixed step-navigation row, a scrolling content area and bottom Cancel/Back/Next/Publish actions. At narrow widths, numbered tabs and the current step label replace long tab labels, and Cancel uses shorter copy. Short viewports use reduced heading spacing. The mobile menu overlays the workspace. Step tabs support arrow keys and Home/End; forward navigation validates prior steps. Schedule, audience, sponsors and review retain the supplied white/blue visual direction. Drafts stay in the current browser page; leaving a changed draft prompts before discarding.
+The [Event Directory heading reference](MVC_QCUEventsManagement/DesignReferences/Admin/event-directory-heading-spacing.png) and [previous creation heading](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-heading-spacing-before.png), supplied 2026-11-22, establish matching page introductions. Create Event uses the directory's responsive horizontal gutters (16px, 24px from 640px, 32px from 1024px), top padding (24px, 28px from 640px), 32px bottom padding, heading typography and 6px subtitle gap. Its subtitle reads “Set the event details, registration dates, and audience before publishing.”
+
+The Create Event workspace occupies the viewport beside the shared sidebar (below the compact mobile header). The form has a fixed step-navigation row, a scrolling content area and bottom Cancel/Back/Next/Publish actions. At narrow widths, numbered tabs and the current step label replace long tab labels, and Cancel uses shorter copy. Short viewports retain the page padding while compacting step navigation, form content spacing and bottom actions. The mobile menu overlays the workspace. Step tabs support arrow keys and Home/End; forward navigation validates prior steps. Schedule, audience, sponsors and review retain the supplied white/blue visual direction. Drafts stay in the current browser page; leaving a changed draft prompts before discarding.
 
 The temporary preview variant has been removed. Administrator screens share their normal authenticated layouts and navigation, with publishing available on the final creation step. Mobile step tabs retain full accessible names.
 
