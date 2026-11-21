@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MVC_QCUEventsManagement.Data;
 using MVC_QCUEventsManagement.Models;
+using MVC_QCUEventsManagement.Services;
 
 namespace MVC_QCUEventsManagement.Tests;
 
@@ -96,7 +97,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, portal.StatusCode);
         using var eventList = await client.GetAsync("/admin/events?status=Closed&q=no-matching-event");
         Assert.Equal(HttpStatusCode.OK, eventList.StatusCode);
-        Assert.Contains("Search by title, venue or department", await eventList.Content.ReadAsStringAsync());
+        Assert.Contains("Event Directory", await eventList.Content.ReadAsStringAsync());
         using var wrongPortal = await client.GetAsync("/student");
         Assert.StartsWith("/access-denied?", RedirectPath(wrongPortal));
 
@@ -106,6 +107,37 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal("/login", RedirectPath(logout));
         using var signedOut = await client.GetAsync("/admin");
         Assert.StartsWith("/login?", RedirectPath(signedOut));
+    }
+
+    [Fact]
+    public async Task Event_directory_renders_filtered_results_and_a_recoverable_empty_state()
+    {
+        var title = $"Campus Research Forum {Guid.NewGuid():N}";
+        var now = new EventClock(TimeProvider.System).Now;
+        await using (var db = CreateContext())
+        {
+            db.Events.Add(new Event
+            {
+                Title = title, VenueLocation = "Main Campus Hall", MaxCapacity = 30,
+                CreatedByUserId = await db.Users.Where(user => user.Email == _adminEmail).Select(user => user.UserId).SingleAsync(),
+                EventStart = now.AddDays(3), EventEnd = now.AddDays(3).AddHours(2),
+                RegStart = now.AddDays(-1), RegEnd = now.AddDays(1)
+            });
+            await db.SaveChangesAsync();
+        }
+
+        using var client = NewClient();
+        using var login = await SignInAsync(client, _adminEmail, _password);
+        var query = Uri.EscapeDataString(title);
+        var results = await client.GetStringAsync($"/admin/events?q={query}&status=Open");
+        Assert.Contains(title, results);
+        Assert.Contains("Main Campus Hall", results);
+        Assert.Contains("0 of 30 registered", results);
+
+        var empty = await client.GetStringAsync($"/admin/events?q={query}&status=Closed");
+        Assert.Contains("No matching events", empty);
+        Assert.Contains("Clear filters", empty);
+        Assert.DoesNotContain("0 of 30 registered", empty);
     }
 
     [Fact]

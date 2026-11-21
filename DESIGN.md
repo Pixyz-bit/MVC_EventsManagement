@@ -35,7 +35,7 @@ The white admin sidebar is 16rem wide on desktop. It follows the supplied Web Fo
 | Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png) with the original MVC white fade | See [testing](docs/TESTING.md) |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
 | Admin | Shared sidebar | Admin.Master | [White sidebar reference](MVC_QCUEventsManagement/DesignReferences/Admin/sidebar-white.png) and [header detail](MVC_QCUEventsManagement/DesignReferences/Admin/sidebar-white-header.png), with the first MVC branding | See [testing](docs/TESTING.md) |
-| Admin | Event Directory | AdminEvents.aspx | Pending | Functional preview uses existing QCU styles |
+| Admin | Event Directory | AdminEvents.aspx | User-directed redesign using the shared white QCU admin styling | Search and registration tabs share the results panel. The active tab is underlined. Counts show on the unsearched directory, and the results show the matching count. Desktop results align in columns and stack on smaller screens. See [testing](docs/TESTING.md). |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
 | Admin | Event details/edit/sponsors/cancellation | EventDetails.aspx | Pending | Awaiting reference |
 | Admin | Student directory/import/export | StudentList.aspx | Pending | Awaiting reference |
