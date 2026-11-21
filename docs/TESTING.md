@@ -67,3 +67,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 2026-11-21, compact sidebar: the Tailwind build and Release publish succeeded. Edge measured the sidebar at 256px with a 36px seal and 44px Event Directory and sign-out targets at 1366 × 900. At 390 × 800, the mobile Menu opened with Space and the page had no horizontal overflow.
 
 2026-11-21, Event Directory redesign: the Tailwind build and Release publish succeeded. MVC integration coverage renders a matching event and a filtered empty state using a rolled-back SQL Server fixture. Edge verified the active tab, preservation of the search query when switching status, keyboard activation of Clear filters, and no horizontal overflow at widths of 390px and 320px. The local preview was checked with an empty event catalog.
+
+2026-11-21, compact Event Directory: all 28 tests passed. Edge verified a 28px title and an 864px-wide panel at 1366px, with tabs and search side by side. At 320px the toolbar stacked with no horizontal overflow. Search and filter controls retained 44px targets.

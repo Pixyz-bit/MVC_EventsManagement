@@ -21,84 +21,85 @@
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 }
 
-<main class="mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-8 sm:pt-11 xl:px-12">
+<main class="max-w-[58rem] px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <header>
-        <h1 class="text-3xl leading-tight font-extrabold tracking-tight text-campus-navy sm:text-4xl">Event Directory</h1>
-        <p class="mt-2 max-w-prose text-sm leading-relaxed text-campus-muted sm:text-base">Find upcoming campus events and check when registration opens or closes.</p>
+        <h1 class="text-2xl leading-tight font-extrabold tracking-tight text-campus-navy sm:text-[1.75rem]">Event Directory</h1>
+        <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Find upcoming campus events and check when registration opens or closes.</p>
     </header>
 
-    <section aria-label="Event results" class="mt-7 rounded-2xl border border-campus-line bg-white sm:mt-8">
-        <form asp-route="AdminEvents" method="get" role="search" class="rounded-t-2xl border-b border-campus-line bg-campus-input px-4 py-4 sm:px-6">
-            @if (Model.Status is { } selected)
-            {
-                <input type="hidden" name="status" value="@selected" />
-            }
-            <label for="event-search" class="block text-sm font-semibold">Search events</label>
-            <div class="mt-2 flex flex-wrap items-center gap-2.5">
-                <div class="relative w-full sm:max-w-md sm:flex-1">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                         aria-hidden="true" class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 text-campus-muted">
-                        <circle cx="10.5" cy="10.5" r="6.5" />
-                        <path d="m16 16 4 4" />
-                    </svg>
-                    <input id="event-search" name="q" value="@Model.Search" type="search" maxlength="150"
-                           placeholder="Title, venue or department"
-                           class="@focus block min-h-11 w-full rounded-lg border border-campus-field bg-white py-2 pr-3 pl-10 text-base placeholder:text-sm placeholder:text-campus-muted sm:placeholder:text-base" />
-                </div>
-                <button type="submit" class="@focus min-h-11 rounded-lg bg-campus-action px-5 text-sm font-semibold text-white hover:bg-campus-navy">Search</button>
-                @if (hasFilters)
+    <section aria-label="Event results" class="mt-5 rounded-xl border border-campus-line bg-white">
+        <div class="rounded-t-xl border-b border-campus-line xl:flex xl:items-stretch xl:justify-between">
+            <nav aria-label="Filter by registration status" class="grid grid-cols-2 border-b border-campus-line px-3 sm:flex sm:flex-wrap sm:gap-3 sm:px-4 xl:border-b-0">
+                @foreach (var filter in filters)
                 {
-                    <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-campus-action hover:underline">Clear filters</a>
+                    var current = filter.Status == Model.Status;
+                    <a asp-route="AdminEvents" asp-route-q="@(hasSearch ? Model.Search : null)" asp-route-status="@filter.Status"
+                       aria-current="@(current ? "page" : null)"
+                       class="-mb-px inline-flex min-h-11 items-center gap-1.5 border-b-2 px-1 text-sm font-semibold focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:border-campus-field hover:text-campus-ink")">
+                        @if (filter.Status is null)
+                        {
+                            <span class="sm:hidden">Upcoming</span>
+                            <span class="hidden sm:inline">@filter.Label</span>
+                        }
+                        else
+                        {
+                            @filter.Label
+                        }
+                        @if (!hasSearch)
+                        {
+                            <span class="rounded-full px-1.5 py-0.5 text-xs tabular-nums @(current ? "bg-blue-50" : "bg-campus-input")">@filter.Count</span>
+                        }
+                    </a>
                 }
-            </div>
-        </form>
-
-        <nav aria-label="Filter by registration status" class="grid grid-cols-2 border-b border-campus-line px-4 sm:flex sm:flex-wrap sm:gap-5 sm:px-6">
-            @foreach (var filter in filters)
-            {
-                var current = filter.Status == Model.Status;
-                <a asp-route="AdminEvents" asp-route-q="@(hasSearch ? Model.Search : null)" asp-route-status="@filter.Status"
-                   aria-current="@(current ? "page" : null)"
-                   class="-mb-px inline-flex min-h-12 items-center gap-2 border-b-2 px-1 text-sm font-semibold focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:border-campus-field hover:text-campus-ink")">
-                    @if (filter.Status is null)
+            </nav>
+            <form asp-route="AdminEvents" method="get" role="search" class="bg-campus-input px-3 py-2.5 sm:px-4 xl:rounded-tr-xl xl:bg-white">
+                @if (Model.Status is { } selected)
+                {
+                    <input type="hidden" name="status" value="@selected" />
+                }
+                <label for="event-search" class="sr-only">Search events</label>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="relative w-full max-w-xs sm:w-64">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                             aria-hidden="true" class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 text-campus-muted">
+                            <circle cx="10.5" cy="10.5" r="6.5" />
+                            <path d="m16 16 4 4" />
+                        </svg>
+                        <input id="event-search" name="q" value="@Model.Search" type="search" maxlength="150"
+                               placeholder="Title, venue or department"
+                               class="@focus block min-h-11 w-full rounded-lg border border-campus-field bg-white py-1.5 pr-2 pl-9 text-base placeholder:text-sm placeholder:text-campus-muted sm:text-sm" />
+                    </div>
+                    <button type="submit" class="@focus min-h-11 rounded-lg bg-campus-action px-3 text-sm font-semibold text-white hover:bg-campus-navy">Search</button>
+                    @if (hasFilters)
                     {
-                        <span class="sm:hidden">Upcoming</span>
-                        <span class="hidden sm:inline">@filter.Label</span>
+                        <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-campus-action hover:underline">Clear filters</a>
                     }
-                    else
-                    {
-                        @filter.Label
-                    }
-                    @if (!hasSearch)
-                    {
-                        <span class="rounded-full px-2 py-0.5 text-xs tabular-nums @(current ? "bg-blue-50" : "bg-campus-input")">@filter.Count</span>
-                    }
-                </a>
-            }
-        </nav>
+                </div>
+            </form>
+        </div>
 
         @if (Model.Events.Count == 0)
         {
-            <div class="px-4 py-12 text-center sm:px-6 sm:py-16">
-                <span class="mx-auto grid size-12 place-items-center rounded-xl bg-blue-50 text-campus-action">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-6">
+            <div class="px-4 py-8 text-center sm:py-9">
+                <span class="mx-auto grid size-9 place-items-center rounded-xl bg-blue-50 text-campus-action">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="size-5">
                         <rect x="4" y="6" width="16" height="14" rx="2" />
                         <path d="M8 4v4m8-4v4M4 10h16" />
                     </svg>
                 </span>
-                <h2 class="mt-4 text-lg font-bold text-campus-navy">@(Model.TotalUpcoming == 0 ? "No upcoming events yet" : "No matching events")</h2>
-                <p class="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-campus-muted">
+                <h2 class="mt-2.5 text-base font-bold text-campus-navy">@(Model.TotalUpcoming == 0 ? "No upcoming events yet" : "No matching events")</h2>
+                <p class="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-campus-muted">
                     @(Model.TotalUpcoming == 0 ? "Upcoming events will appear here when they’re added." : "Try a different search or clear your filters to see all upcoming events.")
                 </p>
             </div>
         }
         else
         {
-            <div class="flex flex-wrap justify-between gap-x-4 gap-y-1 px-4 py-3 text-sm sm:px-6">
+            <div class="flex flex-wrap justify-between gap-x-4 gap-y-1 px-3 py-2 text-sm sm:px-4">
                 <h2 class="font-semibold">@Model.MatchingCount @(Model.MatchingCount == 1 ? "event" : "events")</h2>
                 <p class="text-campus-muted">Philippine time</p>
             </div>
-            <div aria-hidden="true" class="@eventColumns hidden gap-5 border-y border-campus-line bg-campus-input px-6 py-2.5 text-xs font-bold tracking-wide text-campus-muted uppercase lg:grid">
+            <div aria-hidden="true" class="@eventColumns hidden gap-4 border-y border-campus-line bg-campus-input px-4 py-2 text-xs font-bold tracking-wide text-campus-muted uppercase lg:grid">
                 <span>Event</span>
                 <span>Starts</span>
                 <span>Registration</span>
@@ -113,9 +114,9 @@
                         _ => "bg-campus-input text-campus-muted"
                     };
 
-                    <li class="@eventColumns grid gap-x-5 gap-y-3 px-4 py-4 text-sm sm:px-6">
+                    <li class="@eventColumns grid gap-x-4 gap-y-2 px-3 py-3 text-sm sm:px-4">
                         <div class="min-w-0 wrap-break-word">
-                            <h3 class="text-base font-bold text-campus-navy">@item.Title</h3>
+                            <h3 class="font-bold text-campus-navy">@item.Title</h3>
                             <p class="mt-1 text-campus-muted">@item.Venue</p>
                             @if (!string.IsNullOrWhiteSpace(item.Department))
                             {
@@ -148,7 +149,7 @@
 
         @if (Model.TotalPages > 1)
         {
-            <nav aria-label="Event pages" class="flex flex-wrap items-center gap-3 border-t border-campus-line px-4 py-3 text-sm sm:px-6">
+            <nav aria-label="Event pages" class="flex flex-wrap items-center gap-3 border-t border-campus-line px-3 py-2 text-sm sm:px-4">
                 <span class="mr-auto text-campus-muted">Page @Model.Page of @Model.TotalPages</span>
                 @if (Model.Page > 1)
                 {
