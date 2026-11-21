@@ -2,8 +2,9 @@
 @using MVC_QCUEventsManagement.ViewModels.Admin
 @model EventListViewModel
 @{
-    Layout = "_AccountLayout";
+    Layout = "_AdminLayout";
     ViewData["Title"] = "Events";
+    ViewData["AdminSection"] = "Events";
     (string Label, RegistrationStatus? Status, int Count)[] filters =
     [
         ("All upcoming", null, Model.TotalUpcoming),
@@ -15,22 +16,6 @@
     string DisplayTime(DateTime time) => time.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture);
     string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 }
-
-<header class="border-b border-campus-line">
-    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
-        <div class="flex items-center gap-3">
-            <img src="~/images/qcu-logo.png" alt="" class="size-10 shrink-0" width="40" height="40" />
-            <div>
-                <p class="text-sm font-bold">QCU Events Management</p>
-                <p class="text-sm text-campus-muted">Administrator portal</p>
-            </div>
-        </div>
-        <form asp-controller="Account" asp-action="Logout" method="post" class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
-            <span class="wrap-break-word text-sm text-campus-muted">@User.Identity?.Name</span>
-            <button type="submit" class="@focus min-h-11 rounded-lg border border-campus-field px-4 text-sm font-semibold hover:bg-campus-input">Sign out</button>
-        </form>
-    </div>
-</header>
 
 <main class="mx-auto max-w-6xl px-5 py-9 sm:px-8 sm:py-12">
     <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Events</h1>

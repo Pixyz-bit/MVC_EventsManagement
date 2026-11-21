@@ -28,6 +28,8 @@ The login fills the viewport edge to edge. On desktop the seal stays at the top 
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
+The admin navigation uses a navy sidebar with the QCU seal and a gold marker for the current page. On smaller screens, the same navigation opens under a compact Menu control. Events, attendance, and administration are grouped by task. The event list and sign-out are available now, and the remaining destinations are indicated as unavailable until implemented.
+
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
 | Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png), adapted with a white background | Preview verified at 390px, 1024px, and 1366px |

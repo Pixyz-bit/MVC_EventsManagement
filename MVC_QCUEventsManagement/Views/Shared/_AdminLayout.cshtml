@@ -1,0 +1,47 @@
+@{
+    Layout = "_AccountLayout";
+}
+
+<a href="#admin-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-20 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-campus-navy focus:outline-2 focus:outline-campus-focus">
+    Skip to content
+</a>
+
+<div class="min-h-dvh lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
+    <aside class="sticky top-0 hidden h-dvh overflow-y-auto bg-campus-navy text-white lg:flex lg:flex-col" aria-label="Administrator sidebar">
+        <div class="border-b border-white/15 px-5 py-6">
+            <a asp-route="AdminPortal" class="flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-campus-gold">
+                <img src="~/images/qcu-logo.png" alt="" class="size-10 shrink-0" width="40" height="40" />
+                <span class="text-sm leading-tight">
+                    <strong class="block">QCU Events</strong>
+                    <span class="mt-1 block text-slate-300">Administrator portal</span>
+                </span>
+            </a>
+        </div>
+        <partial name="_AdminNavigation" />
+    </aside>
+
+    <header class="bg-campus-navy text-white lg:hidden">
+        <details class="group">
+            <summary class="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-campus-gold [&::-webkit-details-marker]:hidden">
+                <span class="flex min-w-0 items-center gap-3">
+                    <img src="~/images/qcu-logo.png" alt="" class="size-8 shrink-0" width="32" height="32" />
+                    <strong class="text-sm">QCU Events</strong>
+                </span>
+                <span class="flex items-center gap-2 rounded-lg border border-white/35 px-3 py-2 text-sm font-semibold">
+                    Menu<span aria-hidden="true" class="size-2 -translate-y-0.5 rotate-45 border-r-2 border-b-2 group-open:translate-y-0.5 group-open:rotate-225"></span>
+                </span>
+            </summary>
+            <div class="border-t border-white/15">
+                <partial name="_AdminNavigation" />
+            </div>
+        </details>
+    </header>
+
+    <div id="admin-content" tabindex="-1" class="min-w-0">
+        @RenderBody()
+    </div>
+</div>
+
+@section Scripts {
+    @await RenderSectionAsync("Scripts", required: false)
+}

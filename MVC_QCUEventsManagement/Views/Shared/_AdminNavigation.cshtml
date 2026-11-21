@@ -1,0 +1,48 @@
+@{
+    var eventsIsCurrent = string.Equals(ViewData["AdminSection"] as string, "Events", StringComparison.Ordinal);
+    (string Title, string[] Pages)[] upcomingSections =
+    [
+        ("Attendance", ["Preregistered students", "Attendance scanner", "Attendance records"]),
+        ("Administration", ["Student directory", "Account management"])
+    ];
+}
+
+<nav aria-label="Administrator navigation" class="space-y-5 px-4 py-5">
+    <div>
+        <p class="px-3 text-xs font-semibold tracking-wider text-slate-300 uppercase">Events</p>
+        <ul class="mt-2 space-y-1 text-sm">
+            <li>
+                <a asp-route="AdminEvents" aria-current="@(eventsIsCurrent ? "page" : null)"
+                   class="flex min-h-11 items-center gap-3 rounded-lg px-3 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-gold @(eventsIsCurrent ? "bg-white/15 text-white" : "text-slate-200 hover:bg-white/10")">
+                    @if (eventsIsCurrent)
+                    {
+                        <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-campus-gold"></span>
+                    }
+                    Event list
+                </a>
+            </li>
+            <li><span role="link" aria-disabled="true" class="block px-3 py-2 text-slate-400">Create event</span></li>
+            <li><span role="link" aria-disabled="true" class="block px-3 py-2 text-slate-400">Event history</span></li>
+        </ul>
+    </div>
+
+    @foreach (var group in upcomingSections)
+    {
+        <div>
+            <p class="px-3 text-xs font-semibold tracking-wider text-slate-300 uppercase">@group.Title</p>
+            <ul class="mt-2 space-y-1 text-sm">
+                @foreach (var destination in group.Pages)
+                {
+                    <li><span role="link" aria-disabled="true" class="block px-3 py-2 text-slate-400">@destination</span></li>
+                }
+            </ul>
+        </div>
+    }
+</nav>
+
+<div class="mt-auto border-t border-white/15 px-5 py-4">
+    <p class="wrap-break-word text-sm text-slate-200">@User.Identity?.Name</p>
+    <form asp-controller="Account" asp-action="Logout" method="post" class="mt-3">
+        <button type="submit" class="min-h-11 w-full rounded-lg border border-white/35 px-3 text-left text-sm font-semibold hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-gold">Sign out</button>
+    </form>
+</div>
