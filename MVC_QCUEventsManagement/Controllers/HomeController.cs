@@ -1,25 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using MVC_QCUEventsManagement.Models;
-using System.Diagnostics;
 
-namespace MVC_QCUEventsManagement.Controllers
+namespace MVC_QCUEventsManagement.Controllers;
+
+public sealed class HomeController : Controller
 {
-    public class HomeController : Controller
-    {
-        public IActionResult Index()
-        {
-            return RedirectToAction(nameof(AccountController.Login), "Account");
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-    }
+    public IActionResult Index() => RedirectToAction(nameof(LoginController.Login), "Login");
 }

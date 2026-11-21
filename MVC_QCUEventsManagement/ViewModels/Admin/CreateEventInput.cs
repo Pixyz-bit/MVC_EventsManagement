@@ -28,13 +28,11 @@ public sealed class CreateEventInput : IValidatableObject
         ("BSCS", "Computer Science", "College of Computer Studies"),
         ("BSIS", "Information Systems", "College of Computer Studies"),
         ("BSIE", "Industrial Engineering", "College of Engineering"),
-        ("BSCpE", "Computer Engineering", "College of Engineering"),
         ("BSECE", "Electronics Engineering", "College of Engineering"),
         ("BSA", "Accountancy", "College of Business Administration and Accountancy"),
         ("BSBA", "Business Administration", "College of Business Administration and Accountancy"),
         ("BSEntrep", "Entrepreneurship", "College of Business Administration and Accountancy"),
-        ("BECEd", "Early Childhood Education", "College of Education"),
-        ("BSEd", "Secondary Education", "College of Education")
+        ("BECEd", "Early Childhood Education", "College of Education")
     ];
     public static readonly string[] SponsorPresets = ["QCU Alumni Association", "DOST-NCR", "AWS Educate", "Google Developer Student Clubs", "Microsoft Learn"];
 

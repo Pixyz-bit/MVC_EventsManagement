@@ -27,7 +27,7 @@ public sealed class DevelopmentPreviewController(IWebHostEnvironment environment
     {
         if (!Available) return NotFound();
         Prepare();
-        return View("~/Views/Admin/Events.cshtml", await events.GetUpcomingAsync(q, status, page, cancellationToken));
+        return View("~/Views/EventDirectory/Index.cshtml", await events.GetUpcomingAsync(q, status, page, cancellationToken));
     }
 
     [HttpGet("preview/admin/events/create", Name = "PreviewCreateEvent")]
@@ -35,6 +35,6 @@ public sealed class DevelopmentPreviewController(IWebHostEnvironment environment
     {
         if (!Available) return NotFound();
         Prepare();
-        return View("~/Views/Admin/Create.cshtml", new CreateEventInput());
+        return View("~/Views/CreateEvent/Create.cshtml", new CreateEventInput());
     }
 }

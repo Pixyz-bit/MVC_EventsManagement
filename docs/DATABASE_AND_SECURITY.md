@@ -25,6 +25,12 @@ Optional banners allow PNG/JPEG/WEBP up to 5 MiB. SkiaSharp 4.153.1 decodes the 
 - Keep secrets outside committed settings; use development secrets/environment variables. Do not log passwords, connection credentials, or private import data. Do not trim or transform passwords without reviewing compatibility implications.
 - Preserve event/registration date semantics; document storage and Asia/Manila display conversions after inspecting current behavior.
 
+## Schema file locations
+
+The MVC schema is defined by [ApplicationDbContext](../MVC_QCUEventsManagement/Data/ApplicationDbContext.cs) and the five files in [Data/Configurations](../MVC_QCUEventsManagement/Data/Configurations). Versioned schema changes live in [Data/Migrations](../MVC_QCUEventsManagement/Data/Migrations), starting with [InitialCreate](../MVC_QCUEventsManagement/Data/Migrations/20261121070748_InitialCreate.cs); [ApplicationDbContextModelSnapshot.cs](../MVC_QCUEventsManagement/Data/Migrations/ApplicationDbContextModelSnapshot.cs) records the latest model. There is no separately maintained SQL schema file. Generate review SQL using the command in [setup](SETUP.md). The historical source SQL path below is reference material, not the MVC installer.
+
+Program choices are application validation data in CreateEventInput, not seeded database rows. Removing unsupported options requires no schema migration and does not delete existing records. The supported catalog is owned by [the functional specification](FUNCTIONAL_SPEC.md#eligible-01-eligibility).
+
 ## Historical source schema inventory (M1)
 
 Evidence: source Backend/Database/Migration/07_FinalDatabaseSchema.sql. This is a fresh-install script, not proof that the existing database is identical. Map explicit table names and SQL types; do not let convention-generated plural names replace them accidentally. All listed foreign keys use NO ACTION on delete/update. Fields are required unless marked nullable in the table below.

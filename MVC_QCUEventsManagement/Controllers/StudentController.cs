@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MVC_QCUEventsManagement.ViewModels.Student;
 
 namespace MVC_QCUEventsManagement.Controllers;
 
@@ -8,5 +9,5 @@ namespace MVC_QCUEventsManagement.Controllers;
 public sealed class StudentController : Controller
 {
     [HttpGet("student")]
-    public IActionResult Index() => View("PortalLanding", "Student portal");
+    public IActionResult Index() => View(new StudentLandingViewModel(User.Identity?.Name ?? ""));
 }

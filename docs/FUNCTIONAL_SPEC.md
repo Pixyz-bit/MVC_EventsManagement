@@ -141,7 +141,7 @@ Evidence: StudentList.aspx/.cs; StudentRepository.cs/.sql; account and student e
 
 - [ ] Every restricted dimension must match: trimmed campus/department, whole comma-delimited program token with spaces removed and known alias equivalences, and selected year. Blank/null target means unrestricted.
 - [ ] Browse with omitted year; final commit must supply/recheck year 1-5. One matching dimension cannot bypass another restriction.
-- [ ] Preserve program aliases: BSIT/BS Information Technology; BSCS/BS Computer Science; BSIS/BS Information Systems; BSIE/BS Industrial Engineering; BSCpE/BS Computer Engineering; BSECE/BS Electronics Engineering; BSA/BS Accountancy; BSBA/BS Business Administration; BSEntrep/BS Entrepreneurship; BECEd/Bachelor of Early Childhood Education; BSEd/BS Secondary Education or Bachelor of Secondary Education. Check actual SQL collation before choosing case semantics.
+- [ ] Preserve supported program aliases: BSIT/BS Information Technology; BSCS/BS Computer Science; BSIS/BS Information Systems; BSIE/BS Industrial Engineering; BSECE/BS Electronics Engineering; BSA/BS Accountancy; BSBA/BS Business Administration; BSEntrep/BS Entrepreneurship; BECEd/Bachelor of Early Childhood Education. Only these nine programs are supported; event creation rejects other program codes. Check actual SQL collation before choosing case semantics.
 
 Acceptance: independent dimension mismatches reject, unrestricted values allow, aliases match, substrings do not, and browse/preflight/commit use consistent predicates.
 

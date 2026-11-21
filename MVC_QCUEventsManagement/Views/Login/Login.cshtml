@@ -27,7 +27,7 @@
                     <p class="mt-2 text-sm leading-5 text-campus-muted">Use your QCU account to access the events portal.</p>
                 </div>
 
-                <form asp-controller="Account" asp-action="Login" method="post" class="login-form grid">
+                <form asp-controller="Login" asp-action="Login" method="post" class="login-form grid">
                     <input asp-for="ReturnUrl" type="hidden" />
                     @if (ViewData.ModelState.TryGetValue(string.Empty, out var errors) && errors.Errors.Count > 0)
                     {

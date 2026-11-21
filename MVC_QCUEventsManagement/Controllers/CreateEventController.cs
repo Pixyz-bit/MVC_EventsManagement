@@ -10,7 +10,7 @@ namespace MVC_QCUEventsManagement.Controllers;
 
 [Authorize(Roles = "Admin")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public sealed class AdminController(EventService events, EventBannerStore banners, ILogger<AdminController> logger) : Controller
+public sealed class CreateEventController(EventService events, EventBannerStore banners, ILogger<CreateEventController> logger) : Controller
 {
     [HttpGet("admin/events/create", Name = "AdminCreateEvent")]
     public IActionResult Create() => View(new CreateEventInput());
@@ -63,10 +63,4 @@ public sealed class AdminController(EventService events, EventBannerStore banner
         return PhysicalFile(path, "image/png");
     }
 
-    [HttpGet("admin", Name = "AdminPortal")]
-    [HttpGet("admin/events", Name = "AdminEvents")]
-    public async Task<IActionResult> Index(string? q, string? status, int page = 1, CancellationToken cancellationToken = default)
-    {
-        return View("Events", await events.GetUpcomingAsync(q, status, page, cancellationToken));
-    }
 }
