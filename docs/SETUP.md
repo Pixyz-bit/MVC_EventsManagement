@@ -91,4 +91,4 @@ Commit the regenerated CSS with style changes. The .NET publish includes the com
 
 ## Current limitations
 
-Authentication and the protected portal entry pages are implemented. The initial database remains empty until first-admin setup is run. Student and administrator management screens, event workflows, deployment and camera checks are later milestones. See [testing](TESTING.md) for the checks completed so far.
+Authentication and the protected portal entry pages are implemented. Fresh databases require first-admin setup. The current development database has an active local administrator. Student and administrator management screens, event workflows, deployment and camera checks are later milestones. See [testing](TESTING.md) for the checks completed so far.

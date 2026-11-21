@@ -27,4 +27,4 @@ M2 and M3 can advance independently where dependencies allow. Authentication can
 
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.
 
-M4 authentication is complete. First-admin provisioning is ready with a user-chosen email and password. M5 begins administrator event management, starting with the event list. Other screens follow their selected references. Continue updating the related documentation with each checkpoint.
+M4 authentication is complete, and the first local administrator has been provisioned and verified. M5 begins administrator event management, starting with the event list. Other screens follow their selected references. Continue updating the related documentation with each checkpoint.
