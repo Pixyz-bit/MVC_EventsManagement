@@ -4,7 +4,7 @@ Last updated: 2026-11-21 (Asia/Manila).
 
 Use MVC controllers and Razor views, not Areas, React, Next.js, or a separate SPA. Flow: controller -> service -> ApplicationDbContext -> SQL Server. Controllers handle HTTP requests; services own business operations, queries, and transactions. Views receive view models rather than binding writable EF entities directly. Do not introduce a generic repository layer. Supporting classes may be added to the appropriate existing responsibility when needed.
 
-M2 implemented the five EF entities, context/configurations, InitialCreate migration, EventClock, and SQL-backed tests. M3 established `Views/Account/Login.cshtml`, `Views/Shared/_AccountLayout.cshtml`, and the Tailwind files below. M4 connects the form to `AccountController` and `AccountService`. `AccountCookieEvents` revalidates the current account using EF Core, and `FirstAdminCommand` is the interactive setup entry point. `/admin` and `/student` currently use a shared role-protected landing view, ready for the portal features.
+M2 implemented the five EF entities, context/configurations, InitialCreate migration, EventClock, and SQL-backed tests. M3 established the Razor login, shared account layout, and Tailwind files. M4 connects the form to `AccountController` and `AccountService`, with `AccountCookieEvents` revalidating the account and `FirstAdminCommand` providing setup. M5 replaces the administrator landing with `Views/Admin/Events.cshtml`. `AdminController` calls `EventService` to filter and paginate through EF Core, then passes an event list view model to Razor. `/student` still uses the shared protected landing view.
 
 ```text
 MVC_QCUEventsManagement/                  # Solution/repository root

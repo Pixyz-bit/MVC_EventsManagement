@@ -77,7 +77,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var html = await portal.Content.ReadAsStringAsync();
         Assert.Contains(_studentEmail, html);
 
-        using var denied = await client.GetAsync("/admin");
+        using var denied = await client.GetAsync("/admin/events");
         Assert.StartsWith("/access-denied?", RedirectPath(denied));
         using var denialPage = await client.GetAsync(denied.Headers.Location);
         Assert.Equal(HttpStatusCode.Forbidden, denialPage.StatusCode);
@@ -94,6 +94,9 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal(target, RedirectPath(login));
         using var portal = await client.GetAsync("/admin");
         Assert.Equal(HttpStatusCode.OK, portal.StatusCode);
+        using var eventList = await client.GetAsync("/admin/events?status=Closed&q=no-matching-event");
+        Assert.Equal(HttpStatusCode.OK, eventList.StatusCode);
+        Assert.Contains("Search by title, venue or department", await eventList.Content.ReadAsStringAsync());
         using var wrongPortal = await client.GetAsync("/student");
         Assert.StartsWith("/access-denied?", RedirectPath(wrongPortal));
 

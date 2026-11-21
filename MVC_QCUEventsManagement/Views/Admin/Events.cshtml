@@ -1,0 +1,127 @@
+@using System.Globalization
+@using MVC_QCUEventsManagement.ViewModels.Admin
+@model EventListViewModel
+@{
+    Layout = "_AccountLayout";
+    ViewData["Title"] = "Events";
+    (string Label, RegistrationStatus? Status, int Count)[] filters =
+    [
+        ("All upcoming", null, Model.TotalUpcoming),
+        ("Open", RegistrationStatus.Open, Model.Counts.GetValueOrDefault(RegistrationStatus.Open)),
+        ("Soon", RegistrationStatus.Soon, Model.Counts.GetValueOrDefault(RegistrationStatus.Soon)),
+        ("Closed", RegistrationStatus.Closed, Model.Counts.GetValueOrDefault(RegistrationStatus.Closed))
+    ];
+    var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
+    string DisplayTime(DateTime time) => time.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture);
+    string TimeValue(DateTime time) => time.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
+}
+
+<header class="border-b border-campus-line">
+    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4 sm:px-8">
+        <div class="flex items-center gap-3">
+            <img src="~/images/qcu-logo.png" alt="" class="size-10 shrink-0" width="40" height="40" />
+            <div>
+                <p class="text-sm font-bold">QCU Events Management</p>
+                <p class="text-sm text-campus-muted">Administrator portal</p>
+            </div>
+        </div>
+        <form asp-controller="Account" asp-action="Logout" method="post" class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
+            <span class="wrap-break-word text-sm text-campus-muted">@User.Identity?.Name</span>
+            <button type="submit" class="@focus min-h-11 rounded-lg border border-campus-field px-4 text-sm font-semibold hover:bg-campus-input">Sign out</button>
+        </form>
+    </div>
+</header>
+
+<main class="mx-auto max-w-6xl px-5 py-9 sm:px-8 sm:py-12">
+    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Events</h1>
+
+    <nav aria-label="Filter by registration status" class="mt-6 flex flex-wrap gap-2">
+        @foreach (var filter in filters)
+        {
+            var current = filter.Status == Model.Status;
+            <a asp-route="AdminEvents" asp-route-q="@(Model.Search.Length == 0 ? null : Model.Search)" asp-route-status="@filter.Status"
+               aria-current="@(current ? "page" : null)"
+               class="@focus inline-flex min-h-11 items-center gap-2 rounded-lg border px-3 text-sm font-semibold @(current ? "border-campus-navy bg-campus-navy text-white" : "border-campus-line text-campus-ink hover:bg-campus-input")">
+                @filter.Label <span class="tabular-nums">@filter.Count</span>
+            </a>
+        }
+    </nav>
+
+    <form asp-route="AdminEvents" method="get" role="search" class="mt-5 flex flex-wrap items-end gap-3">
+        @if (Model.Status is { } selected)
+        {
+            <input type="hidden" name="status" value="@selected" />
+        }
+        <div class="w-full sm:max-w-sm">
+            <label for="event-search" class="block text-sm font-semibold">Search by title, venue or department</label>
+            <input id="event-search" name="q" value="@Model.Search" type="search" maxlength="150"
+                   class="@focus mt-2 block min-h-11 w-full rounded-lg border border-campus-field bg-white px-3 text-base" />
+        </div>
+        <button type="submit" class="@focus min-h-11 rounded-lg bg-campus-action px-4 text-sm font-semibold text-white">Search</button>
+        @if (Model.Status is not null || Model.Search.Length > 0)
+        {
+            <a asp-route="AdminEvents" class="@focus inline-flex min-h-11 items-center px-2 text-sm font-semibold text-campus-action underline">Clear filters</a>
+        }
+    </form>
+
+    <section aria-label="Event results" class="mt-8">
+        @if (Model.Events.Count == 0)
+        {
+            <p class="rounded-xl border border-campus-line bg-campus-input px-5 py-6 text-sm text-campus-muted">
+                @(Model.TotalUpcoming == 0 ? "There are no upcoming events." : "No upcoming events match these filters.")
+            </p>
+        }
+        else
+        {
+            <p class="mb-3 text-sm text-campus-muted">@Model.MatchingCount @(Model.MatchingCount == 1 ? "event" : "events") · Philippine time</p>
+            <ul class="divide-y divide-campus-line rounded-xl border border-campus-line">
+                @foreach (var item in Model.Events)
+                {
+                    <li class="grid gap-4 px-5 py-5 sm:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
+                        <div class="min-w-0 wrap-break-word">
+                            <h2 class="font-bold">@item.Title</h2>
+                            <p class="mt-1 text-sm text-campus-muted">@item.Venue</p>
+                            @if (!string.IsNullOrWhiteSpace(item.Department))
+                            {
+                                <p class="mt-1 text-sm text-campus-muted">@item.Department</p>
+                            }
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-semibold">Event starts</p>
+                            <time class="mt-1 block text-campus-muted" datetime="@TimeValue(item.StartsAt)">@DisplayTime(item.StartsAt)</time>
+                        </div>
+                        <div class="text-sm">
+                            <p class="font-semibold">Registration <span class="ml-1 rounded-md bg-campus-input px-2 py-1">@item.Status</span></p>
+                            <p class="mt-2 text-campus-muted">@item.Registered of @item.Capacity registered</p>
+                            @if (item.Status == RegistrationStatus.Soon)
+                            {
+                                <p class="mt-1 text-campus-muted">Opens <time datetime="@TimeValue(item.RegistrationOpensAt)">@DisplayTime(item.RegistrationOpensAt)</time></p>
+                            }
+                            else if (item.Status == RegistrationStatus.Open)
+                            {
+                                <p class="mt-1 text-campus-muted">Closes <time datetime="@TimeValue(item.RegistrationClosesAt)">@DisplayTime(item.RegistrationClosesAt)</time></p>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Event pages" class="mt-5 flex flex-wrap items-center gap-4 text-sm">
+            @if (Model.Page > 1)
+            {
+                <a asp-route="AdminEvents" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)"
+                   class="@focus inline-flex min-h-11 items-center font-semibold text-campus-action underline">Previous</a>
+            }
+            <span class="text-campus-muted">Page @Model.Page of @Model.TotalPages</span>
+            @if (Model.Page < Model.TotalPages)
+            {
+                <a asp-route="AdminEvents" asp-route-q="@Model.Search" asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)"
+                   class="@focus inline-flex min-h-11 items-center font-semibold text-campus-action underline">Next</a>
+            }
+        </nav>
+    }
+</main>

@@ -64,6 +64,6 @@ public sealed class AccountController(AccountService accounts) : Controller
     }
 
     private IActionResult Portal(string role) => role == "Admin"
-        ? RedirectToAction(nameof(AdminController.Index), "Admin")
+        ? RedirectToRoute("AdminPortal")
         : RedirectToAction(nameof(StudentController.Index), "Student");
 }

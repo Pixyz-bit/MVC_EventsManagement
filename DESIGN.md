@@ -32,7 +32,7 @@ The source page/action inventory is recorded in [the functional specification](d
 | --- | --- | --- | --- | --- |
 | Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png), adapted with a white background | Preview verified at 390px, 1024px, and 1366px |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
-| Admin | Event list | AdminEvents.aspx | Pending | Awaiting reference |
+| Admin | Event list | AdminEvents.aspx | Pending | Functional preview uses existing QCU styles |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
 | Admin | Event details/edit/sponsors/cancellation | EventDetails.aspx | Pending | Awaiting reference |
 | Admin | Student directory/import/export | StudentList.aspx | Pending | Awaiting reference |

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using MVC_QCUEventsManagement.Data;
 using MVC_QCUEventsManagement.Models;
 using MVC_QCUEventsManagement.Services;
+using MVC_QCUEventsManagement.ViewModels.Admin;
 
 namespace MVC_QCUEventsManagement.Tests;
 
@@ -187,6 +188,56 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         var clock = new EventClock(new FixedTimeProvider(new DateTimeOffset(2030, 6, 30, 18, 0, 0, TimeSpan.Zero)));
         Assert.Equal(new DateTime(2030, 7, 1, 2, 0, 0, DateTimeKind.Unspecified), clock.Now);
         Assert.Equal(DateTimeKind.Unspecified, clock.Now.Kind);
+    }
+
+    [Fact]
+    public async Task Upcoming_events_apply_registration_boundaries_search_and_pagination_in_sql_server()
+    {
+        var utcNow = new DateTimeOffset(2037, 4, 1, 0, 0, 0, TimeSpan.Zero);
+        var clock = new EventClock(new FixedTimeProvider(utcNow));
+        var now = clock.Now;
+        var marker = Guid.NewGuid().ToString("N");
+        var owner = NewUser($"events-{marker}@example.test");
+        var service = new EventService(_db, clock);
+
+        Event MakeEvent(string title, DateTime regStart, DateTime regEnd, DateTime? start = null) => new()
+        {
+            Title = title, VenueLocation = $"Venue {marker}", TargetDepartment = $"Department {marker}",
+            CreatedByUser = owner, MaxCapacity = 5,
+            EventStart = start ?? now.AddDays(3), EventEnd = (start ?? now.AddDays(3)).AddHours(1),
+            RegStart = regStart, RegEnd = regEnd
+        };
+
+        var full = MakeEvent($"Full {marker}", now.AddDays(-1), now.AddDays(1));
+        full.CurrentRegistrations = full.MaxCapacity;
+        var cancelled = MakeEvent($"Cancelled {marker}", now.AddDays(-1), now.AddDays(1));
+        cancelled.Status = "Cancelled";
+        cancelled.CancellationReason = "Unavailable venue";
+        var completed = MakeEvent($"Completed {marker}", now.AddDays(-1), now.AddDays(1));
+        completed.Status = "Completed";
+        _db.Events.AddRange(
+            MakeEvent($"Opening boundary {marker}", now, now.AddDays(1), now.AddDays(4)),
+            MakeEvent($"Deadline boundary {marker}", now.AddDays(-1), now),
+            MakeEvent($"Opening soon {marker}", now.AddHours(1), now.AddDays(1)),
+            MakeEvent($"Past deadline {marker}", now.AddDays(-1), now.AddSeconds(-1), now.AddDays(2)),
+            MakeEvent($"Ended {marker}", now.AddDays(-2), now.AddDays(-1), now.AddHours(-1)),
+            full, cancelled, completed);
+        for (var i = 0; i < 26; i++)
+        {
+            _db.Events.Add(MakeEvent($"Page {i:D2} {marker}", now.AddHours(1), now.AddDays(1), now.AddDays(5 + i)));
+        }
+        await _db.SaveChangesAsync();
+
+        var open = await service.GetUpcomingAsync($"venue {marker.ToUpperInvariant()}", "open", 1, default);
+        Assert.Equal(new[] { $"Deadline boundary {marker}", $"Opening boundary {marker}" }, open.Events.Select(ev => ev.Title));
+        var closed = await service.GetUpcomingAsync($"department {marker}", "closed", 1, default);
+        Assert.Equal(new[] { $"Past deadline {marker}", $"Full {marker}" }, closed.Events.Select(ev => ev.Title));
+        var soon = await service.GetUpcomingAsync($"venue {marker}", "soon", int.MaxValue, default);
+        Assert.Equal(27, soon.MatchingCount);
+        Assert.Equal(2, soon.Page);
+        Assert.Equal(new[] { $"Page 24 {marker}", $"Page 25 {marker}" }, soon.Events.Select(ev => ev.Title));
+        var all = await service.GetUpcomingAsync($"venue {marker}", null, 1, default);
+        Assert.Equal(31, all.MatchingCount);
     }
 
     private async Task<(Event Event, Student Student)> CreateGraphAsync()

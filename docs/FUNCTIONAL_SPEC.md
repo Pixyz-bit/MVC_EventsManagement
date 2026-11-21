@@ -74,9 +74,10 @@ Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAd
 
 ### EVENT-01: Matrix and lifecycle
 
-- [ ] All/Open/Soon/Close tabs, metadata search/reset, event navigation and chronological ordering remain available. Cancelled events retain their distinct state.
-- [ ] Stored outcomes are Upcoming, Cancelled, Completed. Source repository access synchronizes expired Upcoming events to Completed. Effective completion occurs at now >= EventEnd. Select an explicit equivalent EF service strategy.
-- [ ] Matrix state is Cancelled for cancelled events; Close for completed/ended events, now > RegEnd, or full capacity; Soon for now < RegStart; otherwise Open. Opening and deadline are inclusive.
+- [x] `/admin` and `/admin/events` list unfinished Upcoming events with All upcoming, Open, Soon, and Closed filters, search/reset, and chronological ordering. Search matches title, venue, or department. Filter counts cover all upcoming events, and results paginate at 25 per page.
+- [ ] Add event details navigation. Completed and cancelled events belong in the later history workflow.
+- [ ] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows at read time. Persistent completion and history behavior remain later work.
+- [x] Within the upcoming matrix, registration is Closed if now > RegEnd or capacity has been reached, Soon if now < RegStart, and Open otherwise. Opening and deadline are inclusive.
 
 Acceptance: exactly RegStart/RegEnd, just after deadline, exactly EventEnd, full, cancelled and completed fixtures produce correct states. Open/Soon/Close are display states, not stored outcomes.
 
