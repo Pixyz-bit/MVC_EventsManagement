@@ -18,7 +18,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         var connectionString = Environment.GetEnvironmentVariable("MVC_EVENTS_TEST_CONNECTION")
-            ?? "Server=(localdb)\\MSSQLLocalDB;Database=MVC_EventsManagement;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;";
+            ?? "Server=localhost;Database=MVC_EventsManagement;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;";
         var connection = new SqlConnectionStringBuilder(connectionString);
         if (connection.InitialCatalog != "MVC_EventsManagement")
         {

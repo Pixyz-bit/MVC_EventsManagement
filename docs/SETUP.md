@@ -11,24 +11,23 @@ Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); prog
 | .NET SDK/runtime | 11.0.100 / 11.0.0; target net11.0; global.json allows stable patch roll-forward |
 | EF Core SQL Server and Design | 11.0.0; Design is private development tooling |
 | Project-local dotnet-ef | 11.0.0 in root dotnet-tools.json |
-| SQL Server LocalDB | MSSQLLocalDB, SQL Server 2019 Express engine 15.0.4382.1 |
+| SQL Server | Default instance at `localhost`, engine 16.0.1000.6 |
 | Test stack | Microsoft.NET.Test.Sdk 17.14.1; xunit 2.9.3; xunit.runner.visualstudio 3.1.5 |
 | Dependency reproducibility | packages.lock.json in application and test project; no prerelease packages requested |
 
 ## Database configuration
 
-Development server: `(localdb)\MSSQLLocalDB`. Database: `MVC_EventsManagement`. It is a NEW database created by EF migration, with zero users/students/events/sponsors/registrations. The EF history row is infrastructure metadata, not seed data. No stored procedures, source data or administrator account are copied/seeded.
+Connect to `localhost` with Windows Authentication and select `MVC_EventsManagement`. EF Core created the five application tables and its migration history. The application tables start empty.
 
-appsettings.Development.json defines the non-secret Windows-authenticated connection named EventsDatabase. Local development uses Encrypt=True/TrustServerCertificate=True for the LocalDB certificate. Other deployments must provide their own validated encryption/authentication configuration. No connection password is committed.
+appsettings.Development.json defines the Windows-authenticated connection named EventsDatabase. The localhost connection uses `Encrypt=True` and `TrustServerCertificate=True` for development. Other deployments must provide their own validated encryption and authentication configuration.
 
 Program requires EventsDatabase to target exactly MVC_EventsManagement, rejecting the old catalog before any connection. Production has no default connection: supply `ConnectionStrings__EventsDatabase` through the deployment environment or a secret provider. Development secrets may override the same key if credentials are ever needed. Do not change the database name to the source catalog.
 
-Full SQL Server services were stopped and Windows denied starting MSSQLSERVER with the current account. User-owned LocalDB started successfully, so no administrative service changes are required for this setup. Its default data files are managed by LocalDB outside Git.
+The default Windows service `MSSQLSERVER` must be running. Check it with `Get-Service MSSQLSERVER` and start it from an administrator PowerShell with `Start-Service MSSQLSERVER` if needed.
 
 ## Restore and create the empty schema
 
 ```powershell
-sqllocaldb start MSSQLLocalDB
 dotnet tool restore
 dotnet restore MVC_QCUEventsManagement.slnx --locked-mode
 dotnet ef database update --project MVC_QCUEventsManagement -- --environment Development
@@ -56,7 +55,7 @@ dotnet run --project MVC_QCUEventsManagement --no-build --no-launch-profile --ur
 
 The last command is the verified HTTP-only startup smoke configuration; `/` and `/Home/Privacy` respond successfully. It is not a camera/HTTPS acceptance test. Stop with Ctrl+C. The existing HTTPS launch profile remains available for later browser/camera verification. The HTTP-only smoke can log that no HTTPS redirect port is configured.
 
-Integration tests require the migrated database, execute inside rolled-back transactions and leave no test records. They default to the same LocalDB catalog; `MVC_EVENTS_TEST_CONNECTION` may override the server/authentication for tests but must retain the exact MVC_EventsManagement catalog. Tests never drop/create/reset the database. Rolled-back identity inserts can consume identity numbers; no records are retained and IDs must not be assumed contiguous.
+Integration tests require the migrated database and default to the same localhost catalog. They roll back test records. `MVC_EVENTS_TEST_CONNECTION` may override the server and authentication for tests while retaining the exact `MVC_EventsManagement` catalog. Rolled-back inserts can consume identity numbers.
 
 ```powershell
 dotnet publish MVC_QCUEventsManagement/MVC_QCUEventsManagement.csproj -c Release --no-restore --output MVC_QCUEventsManagement/obj/publish-smoke

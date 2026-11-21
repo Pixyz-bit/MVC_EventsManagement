@@ -41,3 +41,5 @@ Detailed expected business outcomes have one owner: [functional specification](F
 - Every test uses a rollback transaction. Post-test SQL counts were zero in all five application tables. SQL metadata confirmed ten enabled/trusted CHECKs, five NO ACTION FKs and three unique indexes.
 - HTTP startup smoke: existing root and Privacy routes responded successfully. Production/missing-connection startup fails clearly; deliberately configured old-catalog startup was rejected before any connection.
 - No data was imported or seeded. No camera, redesigned UI, full booking/cancellation/check-in services, or authentication workflows are implemented/verified yet. RowVersion and uniqueness checks do not replace the future transaction/concurrency workflow tests.
+
+2026-11-21, SQL Server switch: InitialCreate applied on `localhost` to the new `MVC_EventsManagement` catalog. All 17 integration suite cases passed with the localhost default. A post-test query confirmed the migration history and zero rows in all five application tables. The development app returned HTTP 200 on `/`.

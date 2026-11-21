@@ -70,4 +70,4 @@ MVC_EventsManagement was created on the development server documented in [setup]
 
 The migration creates schema and EF history only. All five application tables have zero rows after tests. First-admin provisioning is a later explicit setup task, not a seed in M2. Migration reapplication reported up-to-date; pending-model check found no changes. SQL inspection confirmed five enabled/trusted FKs, ten enabled/trusted CHECKs and the three unique indexes. Current test results are owned by [testing](TESTING.md).
 
-Full SQL Server services remain stopped because Windows denied service-start permissions. The user-owned LocalDB instance runs without that administrative requirement. Do not run source installers or connect the new application to the old catalog.
+The active development catalog is on the default SQL Server instance at `localhost`. The earlier LocalDB catalog is separate. Connection settings and service commands are in [setup](SETUP.md).
