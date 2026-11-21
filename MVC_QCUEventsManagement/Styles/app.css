@@ -26,6 +26,17 @@
 }
 
 @layer components {
+  .login-photo-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgb(29 78 216 / 88%),
+      rgb(37 99 235 / 75%) 22%,
+      rgb(37 99 235 / 42%) 40%,
+      rgb(37 99 235 / 10%) 58%,
+      rgb(37 99 235 / 0%) 72%
+    );
+  }
+
   .login-content {
     padding-block: clamp(0.75rem, 4dvh, 2.25rem);
   }

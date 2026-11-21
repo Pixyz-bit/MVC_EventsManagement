@@ -24,17 +24,18 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-The login fills the viewport edge to edge. On desktop the seal stays at the top left and the form is vertically centered against the viewport. The QCU campus photo fades into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Validation appears by the affected field or above the form for failed credentials.
+The login fills the viewport edge to edge. On desktop the seal stays at the top left and the form is vertically centered on the white panel. The QCU campus photo fills the right half, with the royal-blue overlay from the Web Forms login fading toward the bottom. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. The photo gives way to the form below the large breakpoint and on short landscape screens. Spacing responds to viewport height, and the page can scroll when the available height is too small to show every control. Plus Jakarta Sans is served locally. Validation appears by the affected field or above the form for failed credentials.
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
-The admin navigation uses a navy sidebar with the QCU seal and a gold marker for the current page. On smaller screens, the same navigation opens under a compact Menu control. Events, attendance, and administration are grouped by task. The event list and sign-out are available now, and the remaining destinations are indicated as unavailable until implemented.
+The navy admin sidebar follows the supplied sidebar screenshot for the Core Management and Attendance & Users groups, line icons, and account footer with initial, role, and icon-only sign-out. The active row uses a light-blue fill and left edge. On smaller screens, the navigation opens under a compact Menu control. Event Directory and sign-out are available now. The other visible destinations are indicated as unavailable until implemented. Attendance-specific workflows remain in the functional specification.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
-| Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png), adapted with a white background | Preview verified at 390px, 1024px, and 1366px |
+| Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png) with a white form panel and the Web Forms blue photo fade | See [testing](docs/TESTING.md) |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Shared account styling for initial access feedback | Functional page and entry routing verified |
-| Admin | Event list | AdminEvents.aspx | Pending | Functional preview uses existing QCU styles |
+| Admin | Shared sidebar | Admin.Master | User-supplied sidebar screenshot (`codex-clipboard-1c811e19-01aa-4de9-977f-0866ffe69da3.png`), adapted to QCU navy | See [testing](docs/TESTING.md) |
+| Admin | Event Directory | AdminEvents.aspx | Pending | Functional preview uses existing QCU styles |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |
 | Admin | Event details/edit/sponsors/cancellation | EventDetails.aspx | Pending | Awaiting reference |
 | Admin | Student directory/import/export | StudentList.aspx | Pending | Awaiting reference |

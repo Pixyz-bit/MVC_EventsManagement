@@ -3,7 +3,7 @@
 @model EventListViewModel
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Events";
+    ViewData["Title"] = "Event Directory";
     ViewData["AdminSection"] = "Events";
     (string Label, RegistrationStatus? Status, int Count)[] filters =
     [
@@ -18,7 +18,7 @@
 }
 
 <main class="mx-auto max-w-6xl px-5 py-9 sm:px-8 sm:py-12">
-    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Events</h1>
+    <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Event Directory</h1>
 
     <nav aria-label="Filter by registration status" class="mt-6 flex flex-wrap gap-2">
         @foreach (var filter in filters)
