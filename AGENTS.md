@@ -29,6 +29,7 @@ Documentation is divided into files by topic. Each topic has one authoritative f
 - Commit every meaningful, reviewable increment, including documentation-only work. Implement, run relevant checks, update affected documents, review the diff/staged files, then commit. Do not wait for a large module to finish before checkpointing progress.
 - Preserve user work and stage only intended files. Exclude IDE state, build output, database backups, credentials, private imports/exports, and personal data.
 - Follow the established architecture and design. Use the document index above to find the applicable rules. Avoid unnecessary layers, dependencies, and competing component systems.
+- Follow the skill-use rules in [Skills](docs/SKILLS.md) for every task.
 - Run tests appropriate to consequential behavior; avoid tests that only mirror trivial implementation details. Do not mark milestones complete merely because files exist.
 - Report changes, verification, limitations, and commit ID. Distinguish implemented from verified work.
 - Local commits are authorized. Remote pushes, publication, and production database changes are separate actions.

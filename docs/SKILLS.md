@@ -2,7 +2,9 @@
 
 Last updated: 2026-11-21 (Asia/Manila).
 
-ASP.NET Core and EF Core skills are now installed under C:/Users/arlan/.codex/skills and their relevant guidance has been read for M2; they become discoverable in the next turn. Browser testing remains deferred until needed. Existing design skills: Frontend God Mode, Impeccable, UI/UX Pro Max. Use focused relevant guidance rather than loading every overlapping skill. User architecture, Tailwind, references, and documentation ownership in AGENTS.md override generic defaults, including React/Next.js or duplicate documents.
+For every task, identify and apply all available skills necessary to implement and verify the work. Read each applicable skill and the references needed for the task. Use complementary guidance when several skills apply. The project's architecture, Tailwind setup, supplied design references, and documentation ownership in AGENTS.md take precedence over generic skill defaults.
+
+ASP.NET Core and EF Core are installed. Frontend God Mode, Impeccable, and UI/UX Pro Max are available for design and frontend work.
 
 | Candidate | Source | Intended use | State |
 | --- | --- | --- | --- |
