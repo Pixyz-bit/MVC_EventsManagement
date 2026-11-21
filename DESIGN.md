@@ -24,13 +24,13 @@ Tailwind implementation conventions:
 
 ### Page reference and verification register
 
-The login uses a split layout with the existing QCU campus photo in an inset frame on the left and the QCU seal and form on the right. Below the large breakpoint, the photo is hidden so the form stays prominent. Plus Jakarta Sans is served locally. Login fields use visible labels and a keyboard focus outline. Credential submission is deferred to M4.
+The login adapts the supplied reference into a white QCU layout. The seal and form sit on the left of a rounded desktop panel, with the QCU campus photo fading into white on the right. The form uses softly filled fields, a blue sign-in button, and a keyboard-accessible Show/Hide password control. Below the large breakpoint, the photo is hidden and the form stays prominent. Plus Jakarta Sans is served locally. Credential submission is deferred to M4.
 
 The source page/action inventory is recorded in [the functional specification](docs/FUNCTIONAL_SPEC.md). This register tracks design references and visual verification.
 
 | Portal | Page/workflow | Source reference | Design reference | Status |
 | --- | --- | --- | --- | --- |
-| Account | Login | Frontend/Login/Login.aspx | [Wensity split-screen reference](https://ui.wensity.com/blocks/login-pages/login-page-with-split-screen-image) | Preview verified at 390px and 1366px |
+| Account | Login | Frontend/Login/Login.aspx | [Supplied layout reference](MVC_QCUEventsManagement/DesignReferences/Account/login-layout.png), adapted with a white background | Preview verified at 390px, 1024px, and 1366px |
 | Shared | Access denied / entry routing | Frontend/AccessDenied.aspx; Default.aspx | Pending | Awaiting reference |
 | Admin | Event list | AdminEvents.aspx | Pending | Awaiting reference |
 | Admin | Create event | CreateEvent.aspx | Pending | Awaiting reference |

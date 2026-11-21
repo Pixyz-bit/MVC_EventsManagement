@@ -7,7 +7,8 @@
     <link rel="icon" href="~/images/qcu-logo.png" type="image/png" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
 </head>
-<body class="bg-campus-surface font-sans text-campus-ink antialiased">
+<body class="bg-white font-sans text-campus-ink antialiased">
     @RenderBody()
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

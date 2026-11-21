@@ -21,10 +21,12 @@
   --color-campus-field: #8695a5;
   --color-campus-gold: #e3b752;
   --color-campus-focus: #28649a;
+  --color-campus-action: #155bb1;
+  --color-campus-input: #f4f7fb;
 }
 
 @layer components {
   .login-field {
-    @apply mt-2 block min-h-12 w-full rounded-lg border border-campus-field bg-campus-surface px-3 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
+    @apply mt-2 block min-h-13 w-full rounded-xl border border-campus-field bg-campus-input px-4 py-2 text-base text-campus-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus;
   }
 }

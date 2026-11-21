@@ -44,4 +44,4 @@ Detailed expected business outcomes have one owner: [functional specification](F
 
 2026-11-21, SQL Server switch: InitialCreate applied on `localhost` to the new `MVC_EventsManagement` catalog. All 17 integration suite cases passed with the localhost default. A post-test query confirmed the migration history and zero rows in all five application tables. The development app returned HTTP 200 on `/`.
 
-2026-11-21, split-screen login preview: Tailwind compiled and the Release publish served `/login` and the QCU campus image with HTTP 200. Edge checks verified the image panel at 1366px, the form-only layout at 390px, no horizontal overflow, and visible keyboard focus on both fields. Sign-in is disabled for the design preview.
+2026-11-21, white login preview: Tailwind compiled and the Release publish served `/login`. Edge checks at 390px, 1024px, and 1366px verified the white background, image visibility at desktop widths, no horizontal overflow, visible keyboard focus, and password reveal and masking using Space. Sign-in is disabled for the design preview.
