@@ -7,18 +7,7 @@
     <link rel="icon" href="~/images/qcu-logo.png" type="image/png" />
     <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
 </head>
-<body class="flex min-h-dvh flex-col bg-campus-paper font-sans text-campus-ink antialiased">
-    <header class="border-b-4 border-campus-gold bg-campus-navy text-campus-surface">
-        <div class="mx-auto flex max-w-6xl items-center gap-4 px-5 py-5 sm:gap-5 sm:px-10 sm:py-6">
-            <img src="~/images/qcu-logo.png" alt="" width="52" height="52" class="size-11 shrink-0 object-contain sm:size-13" />
-            <div class="min-w-0">
-                <p class="text-sm font-semibold sm:text-base">Quezon City University</p>
-                <p class="mt-1 text-xs text-slate-200 sm:text-sm">Events Management</p>
-            </div>
-        </div>
-    </header>
-    <main class="flex flex-1 items-start justify-center px-4 py-12 sm:px-6 sm:pt-20">
-        @RenderBody()
-    </main>
+<body class="bg-campus-surface font-sans text-campus-ink antialiased">
+    @RenderBody()
 </body>
 </html>
