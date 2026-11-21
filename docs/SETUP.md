@@ -1,6 +1,6 @@
 # Setup and deployment
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-22 (Asia/Manila).
 
 Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); progress belongs in [milestones](MILESTONES.md). Original starter baseline commit: 8e785e5. Source application/database are unchanged. Commands below run in PowerShell from the solution root.
 
@@ -14,6 +14,10 @@ Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); prog
 | SQL Server | Default instance at `localhost`, engine 16.0.1000.6 |
 | Test stack | Microsoft.NET.Test.Sdk 17.14.1, xunit 2.9.3, xunit.runner.visualstudio 3.1.5, Microsoft.AspNetCore.Mvc.Testing 11.0.0 |
 | Dependency reproducibility | packages.lock.json in application and test project; no prerelease packages requested |
+
+## GitHub repository
+
+The configured `origin` fetch/push URL is `https://github.com/Pixyz-bit/MVC_EventsManagement.git`. On 2026-11-22, `git ls-remote --symref origin HEAD` succeeded and returned no refs (empty repository). The local branch is `master`; no upstream branch is set and no commits have been pushed. Remote publication remains a separate action.
 
 ## Database configuration
 
