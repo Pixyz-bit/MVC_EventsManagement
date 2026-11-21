@@ -55,6 +55,8 @@ Admin filenames above are under source Frontend/Admin; Student filenames are und
 
 ### Established design decisions
 
+The Event Directory header includes a plus-icon “Create new event” button beside the heading on desktop and below the introduction on mobile. It is disabled with a visible “Coming soon” description until the creation workflow is implemented. Browser verification of this addition remains pending.
+
 - Framework: Tailwind CSS with server-rendered Razor MVC.
 - Visual direction: page-specific references. The account layout and color tokens are established for login. The admin and student portal design decisions follow their own references.
 - Accessibility and responsive behavior are required for all implemented pages.

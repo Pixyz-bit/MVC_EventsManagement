@@ -27,4 +27,4 @@ M2 and M3 can advance independently where dependencies allow. Authentication can
 
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.
 
-M4 authentication is complete, and the login uses the restored white fade. The M5 sidebar follows the supplied white Web Forms reference with the first MVC branding. The Event Directory redesign establishes the search, filters, and results patterns. Create Event is the next workflow.
+M4 authentication is complete, and the login uses the restored white fade. The M5 sidebar follows the supplied white Web Forms reference with the first MVC branding. The Event Directory redesign establishes the search, filters, and results patterns. Its header now includes a disabled Create new event button with a Coming soon note. Create Event is the next workflow.

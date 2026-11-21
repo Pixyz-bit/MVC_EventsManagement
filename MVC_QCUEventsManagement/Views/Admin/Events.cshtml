@@ -22,9 +22,21 @@
 }
 
 <main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
-    <header>
+    <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
         <h1 class="text-2xl leading-tight font-extrabold tracking-tight text-campus-navy sm:text-[1.75rem]">Event Directory</h1>
         <p class="mt-1.5 max-w-prose text-sm text-campus-muted">Find upcoming campus events and check when registration opens or closes.</p>
+        </div>
+        <div class="shrink-0 sm:text-right">
+            <button type="button" disabled aria-describedby="create-event-availability"
+                    class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-campus-input px-4 text-sm font-semibold text-campus-muted disabled:cursor-not-allowed">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" class="size-4.5">
+                    <path d="M12 5v14M5 12h14" />
+                </svg>
+                Create new event
+            </button>
+            <p id="create-event-availability" class="mt-1 text-xs text-campus-muted">Coming soon</p>
+        </div>
     </header>
 
     <section aria-label="Event results" class="mt-5 rounded-xl border border-campus-line bg-white">
