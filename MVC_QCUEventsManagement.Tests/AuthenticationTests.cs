@@ -322,6 +322,89 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.StartsWith("/login?", RedirectPath(protectedPage));
     }
 
+    [Fact]
+    public async Task Event_details_edit_and_cancellation_are_authorized_atomic_and_concurrency_checked()
+    {
+        var day = DateOnly.FromDateTime(new EventClock(TimeProvider.System).Now.AddDays(10));
+        int id; string version;
+        await using (var db = CreateContext())
+        {
+            var ev = new Event { Title = "Details workflow fixture", VenueLocation = "Research Hall", MaxCapacity = 20,
+                CurrentRegistrations = 2, CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = day.ToDateTime(new TimeOnly(9, 0)), EventEnd = day.ToDateTime(new TimeOnly(12, 0)),
+                RegStart = day.AddDays(-5), RegEnd = day.AddDays(-1), Sponsors = [new Sponsor { SponsorName = "Original partner", CreatedAt = new EventClock(TimeProvider.System).Now }] };
+            db.Events.Add(ev); await db.SaveChangesAsync(); id = ev.EventId; version = Convert.ToBase64String(ev.RowVersion);
+        }
+        using var client = NewClient();
+        using var anonymous = await client.GetAsync($"/admin/events/{id}");
+        Assert.StartsWith("/login?", RedirectPath(anonymous));
+        using var login = await SignInAsync(client, _adminEmail, _password);
+        using var missing = await client.GetAsync("/admin/events/2147483647");
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var page = await client.GetAsync($"/admin/events/{id}?edit=true");
+        var csrf = await TokenAsync(page);
+        FormUrlEncodedContent EditForm(int capacity, string title = "Updated research forum") => Form(
+            ("__RequestVerificationToken", csrf), ("version", version), ("Input.Title", title), ("Input.VenueLocation", "Main Auditorium"),
+            ("Input.MaxCapacity", capacity.ToString()), ("Input.EventDate", day.ToString("yyyy-MM-dd")),
+            ("Input.StartTime", "10:00"), ("Input.EndTime", "13:00"), ("Input.RegStart", day.AddDays(-4).ToString("yyyy-MM-dd")),
+            ("Input.RegEnd", day.AddDays(-1).ToString("yyyy-MM-dd")), ("Input.Confirm", "true"), ("Input.Sponsors[0]", "New partner"));
+        using var noToken = await client.PostAsync($"/admin/events/{id}/edit", Form());
+        Assert.Equal(HttpStatusCode.BadRequest, noToken.StatusCode);
+        using var tooSmall = await client.PostAsync($"/admin/events/{id}/edit", EditForm(1));
+        Assert.Contains("Capacity cannot be lower", await tooSmall.Content.ReadAsStringAsync());
+        await using (var db = CreateContext()) Assert.Equal("Original partner", await db.Sponsors.Where(s => s.EventId == id).Select(s => s.SponsorName).SingleAsync());
+        using var saved = await client.PostAsync($"/admin/events/{id}/edit", EditForm(30));
+        Assert.Equal($"/admin/events/{id}", RedirectPath(saved));
+        using var stale = await client.PostAsync($"/admin/events/{id}/edit", EditForm(40, "Stale overwrite"));
+        Assert.Contains("changed while you were editing", await stale.Content.ReadAsStringAsync());
+        await using (var db = CreateContext())
+        {
+            var ev = await db.Events.AsNoTracking().SingleAsync(e => e.EventId == id);
+            Assert.Equal("Updated research forum", ev.Title); Assert.Equal(30, ev.MaxCapacity); Assert.Equal(2, ev.CurrentRegistrations);
+            Assert.Equal("New partner", await db.Sponsors.Where(s => s.EventId == id).Select(s => s.SponsorName).SingleAsync());
+            version = Convert.ToBase64String(ev.RowVersion);
+        }
+        using var confirmationMissing = await client.PostAsync($"/admin/events/{id}/cancel", Form(("__RequestVerificationToken", csrf), ("version", version), ("reason", "Venue unavailable")));
+        Assert.Contains("Confirm that you want to cancel", await confirmationMissing.Content.ReadAsStringAsync());
+        using var cancelled = await client.PostAsync($"/admin/events/{id}/cancel", Form(("__RequestVerificationToken", csrf), ("version", version), ("reason", " Venue unavailable "), ("confirmed", "true")));
+        Assert.Equal($"/admin/events/{id}", RedirectPath(cancelled));
+        using var repeat = await client.PostAsync($"/admin/events/{id}/cancel", Form(("__RequestVerificationToken", csrf), ("version", version), ("reason", "Overwrite"), ("confirmed", "true")));
+        Assert.Contains("can no longer be cancelled", await repeat.Content.ReadAsStringAsync());
+        await using (var db = CreateContext())
+        {
+            var ev = await db.Events.AsNoTracking().SingleAsync(e => e.EventId == id);
+            Assert.Equal("Cancelled", ev.Status); Assert.Equal("Venue unavailable", ev.CancellationReason); Assert.Equal(2, ev.CurrentRegistrations);
+        }
+        var details = await client.GetStringAsync($"/admin/events/{id}?edit=true");
+        Assert.Contains("Venue unavailable", details); Assert.DoesNotContain("id=\"event-edit-form\"", details);
+        using var forbiddenEdit = await client.PostAsync($"/admin/events/{id}/edit", EditForm(30));
+        Assert.Contains("can no longer be edited", await forbiddenEdit.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Ended_events_are_read_only_and_students_cannot_open_details()
+    {
+        int id;
+        var now = new EventClock(TimeProvider.System).Now;
+        await using (var db = CreateContext())
+        {
+            var ev = new Event { Title = "Ended event fixture", VenueLocation = "Hall A", MaxCapacity = 10,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = now.AddDays(-2), EventEnd = now.AddDays(-2).AddHours(1),
+                RegStart = DateOnly.FromDateTime(now.AddDays(-5)), RegEnd = DateOnly.FromDateTime(now.AddDays(-3)) };
+            db.Events.Add(ev); await db.SaveChangesAsync(); id = ev.EventId;
+        }
+        using var student = NewClient();
+        using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync($"/admin/events/{id}");
+        Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        await using var context = CreateContext();
+        var service = new EventService(context, new EventClock(TimeProvider.System));
+        var model = await service.GetDetailsAsync(id, true, default);
+        Assert.NotNull(model); Assert.False(model.CanManage); Assert.False(model.Editing);
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CancelAsync(id, "Ended event", model.Event.Version, default));
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

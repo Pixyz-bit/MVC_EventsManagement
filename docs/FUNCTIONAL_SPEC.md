@@ -76,10 +76,10 @@ Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAd
 
 ### EVENT-01: Matrix and lifecycle
 
-Directory rows show only status, title, venue/event date, date-only registration opening/deadline, registered/capacity occupancy and a View action. Opening and deadline are shown for every status. Department remains searchable without a visible row field. View is disabled pending the Event Details design, as explicitly requested on 2026-11-23.
+Directory rows show only status, title, venue/event date, date-only registration opening/deadline, registered/capacity occupancy and a View action. Opening and deadline are shown for every status. Department remains searchable without a visible row field. View links to the approved details page at `/admin/events/{id}`.
 
 - [x] `/admin` and `/admin/events` list unfinished Upcoming events with All upcoming, Open, Soon, and Closed filters, search/reset, and chronological ordering. Search matches title, venue, or department. Filter counts cover all upcoming events, and results paginate at 25 per page.
-- [ ] Add event details navigation. Completed and cancelled events belong in the later history workflow.
+- [x] Add event details navigation. Completed and cancelled events belong in the later history workflow.
 - [ ] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows at read time. Persistent completion and history behavior remain later work.
 - [x] Registration opening/deadline are calendar dates. Using today's date in Asia/Manila, registration is Closed if today > RegEnd or capacity has been reached, Soon if today < RegStart, and Open otherwise. The opening and deadline days are inclusive; a one-day window is supported. Event completion still uses the event end timestamp.
 
@@ -87,26 +87,27 @@ Acceptance: Philippine midnight at opening, the last moment of the deadline day,
 
 ### EVENT-02: Creation and editing
 
-- [x] Creation inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero. `/admin/events/create` provides five steps and a final confirmation; successful publishing redirects to the directory with feedback. Editing remains pending.
-- [x] Creation validation: same-day event start precedes end; registration opening is on or before the deadline, and BOTH registration dates are strictly before the event date. Inputs use date-only registration controls and DateOnly values. Supported form years are 1753-9998, and events that have already ended are rejected. Apply these rules to editing when implemented.
-- [ ] Edit only unfinished Upcoming events and recheck at save. Capacity cannot fall below current reservations, including concurrent bookings. Preserve creator, lifecycle and counts during edits.
-- [ ] Missing/invalid event IDs return unavailable/not-found; database errors never fabricate example records.
+- [x] Creation inputs: title, optional description, venue, positive integer capacity, one event date/start/end, registration opening/deadline, optional audience, sponsors and image. Title/venue are required; creator comes from authentication; initial registration count is zero. `/admin/events/create` provides five steps and a final confirmation; successful publishing redirects to the directory with feedback. Editing uses the same validated input rules on the details page.
+- [x] Creation validation: same-day event start precedes end; registration opening is on or before the deadline, and BOTH registration dates are strictly before the event date. Inputs use date-only registration controls and DateOnly values. Supported form years are 1753-9998, and events that have already ended are rejected. These rules also apply to editing.
+- [x] Edit only unfinished Upcoming events and recheck at save. Capacity cannot fall below current reservations, including concurrent bookings. Preserve creator, lifecycle and counts during edits.
+- [x] Missing/invalid event IDs return unavailable/not-found; database errors never fabricate example records.
 
 Acceptance: invalid fields/dates/capacity write nothing; cancelled/completed events reject edits; create/edit survives reload with correct identity, associations and image.
 
 ### EVENT-03: Event cancellation
 
-- [ ] Explicit admin confirmation plus trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
-- [ ] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history. Block further registration/admission, show reason on passes, and include the event in history. Source sends no automatic emails on cancellation.
+- [x] Explicit admin confirmation plus trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
+- [x] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history.
+- [ ] Future registration/admission, passes and history workflows must honor cancelled events and show the reason. Source sends no automatic emails on cancellation.
 
 Acceptance: historical evidence/counts survive, admission/booking stop immediately, repeated/finished-event cancellation fails safely.
 
 ### EVENT-04: Audience, sponsors and images
 
 - [x] Creation supports unrestricted audience dimensions, multiple known program codes, and optional year 1-5. College selection filters programs; the server rejects mismatched combinations. Eligibility enforcement for student booking remains in ELIGIBLE-01.
-- [x] Creation stages sponsor add/preset/remove, caps input at 20 names of 150 characters, and removes case-insensitive duplicates at save. Sponsor rows have CreatedAt and identity insertion order; there is no global sponsor catalog. Editing remains pending.
-- [ ] Creation upload/preview/remove is implemented with one EventPhotoPath. Banner replacement and retention during editing remain pending. Creation accepts PNG/JPEG/WEBP up to 5 MiB and validates/re-encodes pixels; see [database and security](DATABASE_AND_SECURITY.md).
-- [ ] Creation saves event/sponsors in one EF transaction and removes uploaded files after failed saves. Sponsor replacement during editing remains pending.
+- [x] Creation stages sponsor add/preset/remove, caps input at 20 names of 150 characters, and removes case-insensitive duplicates at save. Sponsor rows have CreatedAt and identity insertion order; there is no global sponsor catalog. Editing uses the same validated input rules on the details page.
+- [x] Creation and editing support upload/preview/remove with one EventPhotoPath. Editing retains the banner unless replaced or explicitly removed; replacement takes precedence over removal. Creation accepts PNG/JPEG/WEBP up to 5 MiB and validates/re-encodes pixels; see [database and security](DATABASE_AND_SECURITY.md).
+- [x] Creation and editing save event/sponsors in one EF transaction. Sponsor replacement is atomic. Failed saves clean new uploads; obsolete banners are removed only after successful saves.
 
 Acceptance: failure cannot leave partial sponsor replacement; valid associations persist; unsafe images fail; existing paths still resolve after migration.
 

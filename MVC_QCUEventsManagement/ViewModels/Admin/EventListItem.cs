@@ -9,4 +9,5 @@ public sealed record EventListItem(
     DateOnly RegistrationClosesAt,
     int Registered,
     int Capacity,
-    RegistrationStatus Status);
+    RegistrationStatus Status,
+    int EventId = 0);

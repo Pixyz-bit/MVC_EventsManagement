@@ -24,6 +24,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- AccessDeniedController.cs
 |   |   |-- EventDirectoryController.cs
 |   |   |-- CreateEventController.cs
+|   |   |-- EventDetailsController.cs
 |   |   |-- PrivacyController.cs
 |   |   |-- ErrorController.cs
 |   |   |-- StudentController.cs
@@ -62,6 +63,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- AccessDenied/
 |   |   |-- EventDirectory/
 |   |   |-- CreateEvent/
+|   |   |-- EventDetails/
 |   |   |-- Student/
 |   |   |-- Privacy/
 |   |   |-- Error/
@@ -100,6 +102,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Access denied | AccessDeniedController | ViewModels/Account/AccessDeniedViewModel.cs | Views/AccessDenied/Index.cshtml |
 | Event Directory | EventDirectoryController | ViewModels/Admin/EventListViewModel.cs | Views/EventDirectory/Index.cshtml |
 | Create Event | CreateEventController | ViewModels/Admin/CreateEventInput.cs | Views/CreateEvent/Create.cshtml |
+| Event Details/edit/cancel | EventDetailsController | ViewModels/Admin/EventDetailsViewModel.cs and EventDetailsData.cs; shared CreateEventInput | Views/EventDetails/Index.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
@@ -107,3 +110,5 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 Existing route paths and named routes are retained. EventListItem and RegistrationStatus each have a separate file under ViewModels/Admin. The unused starter Home/Index view is removed. Future pages follow this page-level convention.
 
 M2 configuration: Program registers a request-scoped ApplicationDbContext, singleton TimeProvider.System and singleton EventClock. The EventsDatabase connection must explicitly target MVC_EventsManagement; startup rejects any other catalog, including the old database. Development uses local Windows authentication; deployment must supply its connection through configuration. Migrations are explicit CLI operations, not application-startup side effects. No user/event seeding exists. The five feature services in the target tree will be implemented with their workflows; no empty placeholder service implementations were added.
+
+Event Details uses GET `/admin/events/{id}` (AdminEventDetails), optional `?edit=true`, and antiforgery-protected POST edit/cancel endpoints under the same route. EventService owns the no-tracking projection and tracked concurrency-checked mutations. `wwwroot/js/admin/event-details.js` handles sponsors, audience filtering, banner preview and the cancellation disclosure.

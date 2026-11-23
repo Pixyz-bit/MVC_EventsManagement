@@ -160,8 +160,8 @@
                         </div>
                         <div class="xl:text-right">
                             <span class="mb-1.5 block text-xs font-semibold text-campus-muted xl:sr-only">Actions</span>
-                            <button type="button" disabled title="Event details coming soon" aria-label="View @item.Title (details coming soon)"
-                                    class="inline-flex min-h-11 min-w-16 cursor-not-allowed items-center justify-center rounded-lg border border-campus-line bg-campus-input px-3 text-sm font-semibold text-campus-muted">View</button>
+                            <a asp-route="AdminEventDetails" asp-route-id="@item.EventId" aria-label="View @item.Title"
+                               class="@focus inline-flex min-h-11 min-w-16 items-center justify-center rounded-lg border border-campus-line px-3 text-sm font-semibold text-campus-action hover:bg-campus-input">View</a>
                         </div>
                     </li>
                 }
