@@ -16,7 +16,7 @@
     var hasSearch = Model.Search.Length > 0;
     var hasFilters = Model.Status is not null || hasSearch;
     var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
-    const string eventColumns = "xl:grid-cols-[5rem_minmax(12rem,1.4fr)_minmax(10rem,1fr)_11.5rem_6rem_4rem]";
+    const string eventColumns = "xl:grid-cols-[5rem_repeat(3,minmax(0,1fr))_6rem_4rem]";
     const string directoryRoute = "AdminEvents";
     const string createRoute = "AdminCreateEvent";
     string DisplayDate(DateOnly date) => date.ToString("MMM d, yyyy", CultureInfo.InvariantCulture);
@@ -113,10 +113,6 @@
         }
         else
         {
-            <div class="flex flex-wrap justify-between gap-x-4 gap-y-1 px-3 py-2 text-sm sm:px-4">
-                <h2 class="font-semibold">@Model.MatchingCount @(Model.MatchingCount == 1 ? "event" : "events")</h2>
-                <p class="text-campus-muted">Philippine time</p>
-            </div>
             <div aria-hidden="true" class="@eventColumns hidden items-center gap-x-5 border-y border-campus-line bg-campus-input px-4 py-3 text-[11px] font-semibold tracking-[0.06em] text-campus-muted uppercase xl:grid">
                 <span>Status</span>
                 <span>Event title</span>

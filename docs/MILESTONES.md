@@ -38,3 +38,5 @@ M4 authentication is complete, and the login uses the restored white fade. The M
 The redundant creation footer step counter was removed on 2026-11-23. Event details, editing and cancellation remain the next M5 workflows.
 
 Directory row spacing and typography were refined on 2026-11-23 and verified on five desktop/mobile widths. Suggested additional row data remains unimplemented pending user selection.
+
+The standalone directory count/time strip was removed and the three main data columns were equalized on 2026-11-23. Event Details remains next, followed by editing and cancellation; the design reference is still pending.
