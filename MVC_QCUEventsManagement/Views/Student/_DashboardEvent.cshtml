@@ -1,0 +1,38 @@
+@using System.Globalization
+@model MVC_QCUEventsManagement.ViewModels.Student.StudentDashboardEvent
+@{
+    var format = CultureInfo.InvariantCulture;
+    var registrationText = Model.Status switch
+    {
+        "Open" => $"Closes {Model.RegEnd.ToString("MMM d, yyyy", format)} · {Model.SeatsAvailable} seats left",
+        "Opens soon" => $"Opens {Model.RegStart.ToString("MMM d, yyyy", format)}",
+        "Closed" when Model.SeatsAvailable == 0 => "Venue at capacity",
+        "Closed" => "Registration closed",
+        _ => Model.Status
+    };
+}
+<article class="student-card" id="student-event-@Model.Id" data-event-category="@Model.Category" tabindex="-1">
+    <div class="student-card-banner">
+        @if (Model.HasBanner) { <img data-event-banner loading="lazy" src="@Url.RouteUrl("StudentEventBanner", new { id = Model.Id })" alt="" /> }
+        <div><span class="student-category">@Model.Category</span><span class="student-status" data-status="@Model.Status">@Model.Status</span></div>
+    </div>
+    <div class="student-card-body">
+        <h3>@Model.Title</h3>
+        <dl>
+            <div><dt>Date and time (PHT)</dt><dd>@Model.Start.ToString("MMM d, yyyy · h:mm tt", format)–@Model.End.ToString(Model.Start.Date == Model.End.Date ? "h:mm tt" : "MMM d, h:mm tt", format)</dd></div>
+            <div><dt>Venue</dt><dd>@Model.Venue</dd></div>
+            <div><dt>@(Model.PassReference is null ? "Registration" : "Ticket reference")</dt><dd>@(Model.PassReference ?? registrationText)</dd></div>
+        </dl>
+        <details class="student-card-details">
+            <summary class="student-button">@(Model.PassReference is null ? "View event" : "View registration")</summary>
+            <div class="student-card-description">
+                @if (!string.IsNullOrWhiteSpace(Model.Description)) { <p>@Model.Description</p> }
+                @if (Model.Sponsors.Count > 0) { <p><strong>Hosted with</strong> @string.Join(", ", Model.Sponsors)</p> }
+                @if (!string.IsNullOrWhiteSpace(Model.CancellationReason)) { <p><strong>Cancellation reason</strong> @Model.CancellationReason</p> }
+                @if (Model.CheckedIn) { <p>Attendance confirmed</p> }
+                @if (Model.PassReference is null && string.IsNullOrWhiteSpace(Model.Description) && Model.Sponsors.Count == 0) { <p>@registrationText</p> }
+                @if (Model.PassReference is not null && !Model.CheckedIn && string.IsNullOrWhiteSpace(Model.Description) && string.IsNullOrWhiteSpace(Model.CancellationReason) && Model.Sponsors.Count == 0) { <p>@Model.Status · @Model.PassReference</p> }
+            </div>
+        </details>
+    </div>
+</article>

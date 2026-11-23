@@ -748,6 +748,65 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.DoesNotContain("Password", csv);
     }
 
+    [Fact]
+    public async Task Student_dashboard_shows_eligible_events_and_only_owned_registration_references()
+    {
+        var marker = Guid.NewGuid().ToString("N")[..8];
+        await using var db = CreateContext();
+        var admin = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync();
+        var student = await db.Students.SingleAsync(s => s.StudentId == _studentId);
+        var today = new EventClock(TimeProvider.System).Now.Date;
+        Event MakeEvent(string label, int offset = 6) => new()
+        {
+            Title = label + " " + marker, VenueLocation = "Campus Hall", MaxCapacity = 30, CreatedByUserId = admin,
+            EventStart = today.AddDays(offset).AddHours(9), EventEnd = today.AddDays(offset).AddHours(11),
+            RegStart = DateOnly.FromDateTime(today.AddDays(Math.Min(-4, offset - 3))), RegEnd = DateOnly.FromDateTime(today.AddDays(offset - 1))
+        };
+        var eligible = MakeEvent("Eligible workshop"); eligible.TargetDepartment = student.Department; eligible.TargetProgram = " BSCS, BSIT "; eligible.TargetYearLevel = 3;
+        var wrongCampus = MakeEvent("Restricted campus"); wrongCampus.TargetBranch = "Batasan";
+        var wrongProgram = MakeEvent("Restricted program"); wrongProgram.TargetProgram = "XBSIT";
+        var wrongCollege = MakeEvent("Restricted college"); wrongCollege.TargetDepartment = "Other college";
+        var owned = MakeEvent("Owned completed seminar", -2); owned.Status = "Completed"; owned.TargetBranch = "Batasan";
+        var voided = MakeEvent("Returned to catalog");
+        var bannerName = Guid.NewGuid().ToString("N") + ".png";
+        Directory.CreateDirectory(_bannerRoot);
+        await File.WriteAllBytesAsync(Path.Combine(_bannerRoot, bannerName), Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGNgAAAAAgAB9HFkpgAAAABJRU5ErkJggg=="));
+        eligible.EventPhotoPath = wrongCampus.EventPhotoPath = owned.EventPhotoPath = bannerName;
+        var otherStudent = NewAccount($"another-{marker}@example.test", "Student");
+        otherStudent.Student = new Student
+        {
+            StudentId = "ANOTHER-" + marker, FirstName = "Other", LastName = "Student", Gender = "Not Specified",
+            CampusBranch = "Batasan", Department = "Computing", Program = "BSIT"
+        };
+        db.Users.Add(otherStudent);
+        db.Events.AddRange(eligible, wrongCampus, wrongProgram, wrongCollege, owned, voided);
+        var pass = new EventRegistration { Event = owned, StudentId = _studentId, CurrentYearLvl = 3, CurrentSection = "BSIT-3A", Status = "Present", CheckInTimestamp = owned.EventStart };
+        var foreignPass = new EventRegistration { Event = owned, Student = otherStudent.Student, StudentId = otherStudent.Student.StudentId, CurrentYearLvl = 3, CurrentSection = "BSIT-3B" };
+        db.EventRegistrations.AddRange(pass, foreignPass,
+            new EventRegistration { Event = voided, StudentId = _studentId, CurrentYearLvl = 3, CurrentSection = "BSIT-3A", Status = "Cancelled" });
+        await db.SaveChangesAsync();
+        using var client = NewClient();
+        using var login = await SignInAsync(client, _studentEmail, _password);
+        var html = await client.GetStringAsync("/student");
+        Assert.Contains("data-theme=\"dark\"", html);
+        Assert.Contains("Eligible workshop " + marker, html);
+        Assert.Contains("Returned to catalog " + marker, html);
+        Assert.DoesNotContain("Restricted campus " + marker, html);
+        Assert.DoesNotContain("Restricted program " + marker, html);
+        Assert.DoesNotContain("Restricted college " + marker, html);
+        Assert.Contains($"TCK-{owned.EventId:D4}-{pass.EventRegistrationId:D5}", html);
+        Assert.DoesNotContain($"TCK-{owned.EventId:D4}-{foreignPass.EventRegistrationId:D5}", html);
+        Assert.DoesNotContain("ANOTHER-" + marker, html);
+        Assert.Contains("Attendance confirmed", html);
+        using var missing = await client.GetAsync($"/student/events/{wrongCampus.EventId}/banner");
+        Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var visibleBanner = await client.GetAsync($"/student/events/{eligible.EventId}/banner");
+        Assert.Equal("image/png", visibleBanner.Content.Headers.ContentType?.MediaType);
+        using var ownedBanner = await client.GetAsync($"/student/events/{owned.EventId}/banner");
+        Assert.Equal(HttpStatusCode.OK, ownedBanner.StatusCode);
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

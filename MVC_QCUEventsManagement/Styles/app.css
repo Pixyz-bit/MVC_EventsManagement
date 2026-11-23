@@ -26,6 +26,89 @@
 }
 
 @layer components {
+  #student-dashboard {
+    --student-bg: #f5f7fb; --student-surface: #fff; --student-ink: #192b40;
+    --student-muted: #485b70; --student-line: #ced9e7; --student-hover: #edf4ff;
+    --student-accent: #155bb1; --student-on-accent: #fff; --student-focus: #236ac1;
+    min-height: 100dvh; background: var(--student-bg); color: var(--student-ink); color-scheme: light;
+  }
+  #student-dashboard[data-theme="dark"] {
+    --student-bg: #0d1829; --student-surface: #14243a; --student-ink: #eaf1fc;
+    --student-muted: #b3c3d9; --student-line: #3d526e; --student-hover: #233954;
+    --student-accent: #8bbafa; --student-on-accent: #0b2443; --student-focus: #a4cafa;
+    color-scheme: dark;
+  }
+  #student-dashboard [hidden] { display: none !important; }
+  .student-navbar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem; padding: .875rem clamp(1rem, 4vw, 3rem); background: #1458a8; color: #fff;
+  }
+  #student-dashboard[data-theme="dark"] .student-navbar { background: #174e97; }
+  .student-brand, .student-nav-tools, .student-identity { display: flex; align-items: center; gap: .625rem; min-width: 0; }
+  .student-brand img { flex-shrink: 0; object-fit: contain; }
+  .student-nav-tools { flex-wrap: wrap; }
+  .student-identity strong { overflow-wrap: anywhere; }
+  .student-navbar small { display: block; font-size: .75rem; color: #e9f2ff; }
+  .student-avatar { display: grid; place-items: center; flex: 0 0 2.375rem; height: 2.375rem; border-radius: 50%; background: #eaf1fc; color: #174e97; font-size: .75rem; font-weight: 700; }
+  #student-dashboard :is(a, button, select, summary):focus-visible { outline: 2px solid var(--student-focus); outline-offset: 3px; }
+  #student-dashboard .student-navbar :is(a, button):focus-visible, #student-dashboard .student-showcase :is(a, button):focus-visible { outline-color: white; }
+  .student-button {
+    min-height: 2.75rem; display: inline-flex; align-items: center; justify-content: center;
+    padding: .5rem .875rem; border: 1px solid var(--student-line); border-radius: .5rem;
+    background: var(--student-surface); color: var(--student-ink); font-size: .875rem; font-weight: 650; cursor: pointer;
+  }
+  .student-button:hover, .student-event-tabs .student-button[aria-pressed="true"] { background: var(--student-hover); }
+  .student-event-tabs .student-button[aria-pressed="true"] { border-color: var(--student-accent); color: var(--student-accent); }
+  .student-button.student-primary { background: var(--student-accent); color: var(--student-on-accent); border-color: var(--student-accent); }
+  .student-primary:hover { filter: brightness(.94); }
+  .student-button.student-nav-button { background: transparent; color: white; border-color: #a6c9f1; }
+  .student-nav-button:hover, .student-nav-button[aria-pressed="true"] { background: #e8f2ff; color: #143b68; }
+  .student-showcase { position: relative; background: #11263f; color: white; }
+  .student-feature { position: relative; display: grid; align-content: center; min-height: 21rem; isolation: isolate; background: center 45% / cover url("../images/qcu-campus.png"); }
+  .student-feature-photo, .student-card-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .student-feature::after, .student-card-banner::after { content: ""; position: absolute; inset: 0; pointer-events: none; }
+  .student-feature::after { background: linear-gradient(90deg, #0b1d34f5, #0b1d34e3 42%, #0b1d3466); }
+  .student-feature-content { position: relative; z-index: 1; display: grid; justify-items: start; gap: .75rem; max-width: 48rem; padding: clamp(1.375rem, 5vw, 3.5rem) clamp(1rem, 5vw, 3.5rem) 4rem; }
+  .student-feature-content h1 { font-size: clamp(1.875rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; letter-spacing: -.025em; overflow-wrap: anywhere; }
+  .student-feature-content p { color: #e4ecf7; overflow-wrap: anywhere; }
+  .student-feature-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .student-feature-controls { position: absolute; z-index: 2; display: flex; align-items: center; gap: .5rem; bottom: .75rem; right: clamp(1rem, 5vw, 3.5rem); font-size: .75rem; }
+  .student-feature-controls .student-button { min-width: 2.75rem; }
+  .student-workspace { max-width: 76rem; margin-inline: auto; padding: 1.75rem clamp(1rem, 4vw, 3rem) 3rem; }
+  .student-section-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .875rem; margin-bottom: 1rem; }
+  .student-workspace h2 { font-size: 1.5rem; font-weight: 750; letter-spacing: -.02em; }
+  .student-event-tabs { display: flex; flex-wrap: wrap; gap: .375rem; }
+  .student-event-filter { display: flex; justify-content: end; margin-bottom: 1rem; }
+  .student-event-filter label, .student-card dt { display: block; font-size: .75rem; color: var(--student-muted); }
+  .student-event-filter label { margin-bottom: .25rem; font-weight: 700; }
+  .student-event-filter select { min-height: 2.75rem; border: 1px solid var(--student-line); border-radius: .5rem; background: var(--student-surface); padding: .5rem; }
+  .student-events { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  .student-card { overflow: hidden; border: 1px solid var(--student-line); border-radius: .75rem; background: var(--student-surface); scroll-margin-top: 1rem; }
+  .student-card:focus-visible { outline: 2px solid var(--student-focus); outline-offset: 2px; }
+  .student-card-banner { position: relative; min-height: 7.5rem; isolation: isolate; background: #203650 center 35% / cover url("../images/qcu-campus.png"); }
+  .student-card-banner::after { background: linear-gradient(180deg, #0d2138b3, #0d21381a); }
+  .student-card-banner > div { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .75rem 1rem; }
+  .student-category, .student-status { width: fit-content; border-radius: 1rem; padding: .2rem .6rem; font-size: .75rem; font-weight: 700; }
+  .student-category { background: #11263f; color: white; }
+  .student-status { background: #eaf1fa; color: #254a76; }
+  .student-status[data-status="Open"], .student-status[data-status="Checked in"] { background: #e2f8ee; color: #065f46; }
+  .student-status[data-status="Opens soon"] { background: #fff0ce; color: #704701; }
+  .student-status[data-status="Cancelled"] { background: #ffe4ea; color: #8d203a; }
+  .student-card-body { display: grid; gap: .875rem; padding: 1rem; overflow-wrap: anywhere; }
+  .student-card h3 { font-size: 1.1rem; font-weight: 750; }
+  .student-card dl, .student-card-description { display: grid; gap: .5rem; }
+  .student-card dd { font-size: .875rem; font-weight: 600; }
+  .student-card-details { padding-top: .75rem; border-top: 1px solid var(--student-line); }
+  .student-card-details summary { list-style: none; }
+  .student-card-details summary::-webkit-details-marker { display: none; }
+  .student-card-description { margin-top: .75rem; color: var(--student-muted); font-size: .875rem; white-space: pre-line; }
+  .student-empty { padding: 1.5rem; border: 1px dashed var(--student-line); border-radius: .75rem; color: var(--student-muted); }
+  .student-registered > h2 { margin-block: 1.5rem .75rem; }
+  @media (max-width: 40rem) {
+    .student-events { grid-template-columns: minmax(0, 1fr); }
+    .student-feature::after { background: #0b1d34c7; }
+    .student-event-filter { justify-content: start; }
+  }
   .directory-filter-menu { @apply sm:relative; }
   .directory-filter-panel { @apply absolute inset-x-4 top-full z-10 mt-2 space-y-3 rounded-xl border border-campus-line bg-white p-4 shadow-md sm:right-0 sm:left-auto sm:w-60; }
   .student-directory-dialog { width: min(44rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; overflow-y: auto; border: 1px solid var(--color-campus-line); border-radius: .875rem; padding: clamp(1rem, 4vw, 1.5rem); background: white; color: var(--color-campus-ink); }

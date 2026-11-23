@@ -151,9 +151,10 @@ Acceptance: independent dimension mismatches reject, unrestricted values allow, 
 
 ### DISCOVER-01: Dashboard
 
-- [ ] Discover eligible Upcoming events with image/sponsors/venue/schedule/availability and category filter. Order Open, Soon, closed, preserving schedule order within groups.
-- [ ] Non-cancelled owned registrations appear in My Registered Events rather than available catalog. Cancelled bookings allow rediscovery if otherwise eligible.
-- [ ] Owned passes remain reachable when booking closes/full; represent ended/cancelled/checked-in states honestly. Missing profile/data does not produce sample events or bookings.
+- [x] Discover eligible Upcoming events with image/sponsors/venue/schedule/availability and category filter. Order Open, Soon, closed, preserving schedule order within groups.
+- [x] Non-cancelled owned registrations appear in My Registered Events rather than available catalog. Cancelled bookings allow rediscovery if otherwise eligible.
+- [x] Owned registration details and ticket references remain visible when registration closes or fills. Show end, cancellation and check-in states and handle missing profiles with an empty state.
+- [ ] Full pass presentation, booking and student cancellation are tracked in their separate workflow requirements.
 
 Acceptance: no duplicate current-pass/catalog item, cancelled bookings release visibility, filters work, and owned tickets remain accessible after deadline.
 

@@ -122,7 +122,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Attendance list | EventAttendanceController | EventAttendanceViewModel, EventAttendanceQuery, AttendanceItem | Views/EventAttendance/Index.cshtml |
 | Analytics | EventAnalyticsController | EventAnalyticsViewModel, EventAnalyticsQuery and separate report result records | Views/EventAnalytics/Index.cshtml |
 | Student Directory | StudentDirectoryController | StudentDirectoryViewModel, StudentDirectoryQuery, StudentProfileData/Input, StudentImportReport/Error (one type per file) | Views/StudentDirectory/Index.cshtml and _QueryFields.cshtml |
-| Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
+| Student Dashboard | StudentController | StudentDashboardViewModel, StudentDashboardEvent | Views/Student/Index.cshtml and _DashboardEvent.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
 
@@ -145,3 +145,5 @@ AnalyticsService projects the selected event’s registrations without email, co
 StudentDirectoryController serves AdminStudentDirectory at GET /admin/students with GET template/export and antiforgery-protected POST create/edit/access/password/import. StudentService owns bounded filters, stable 25-row paging, profile/account transactions and protected snapshots. StudentCsvService parses bounded UTF-8 current/legacy CSV and processes each valid row independently through StudentService. student-directory.js handles native profile/editor/account/import dialogs, focus return, dependent programs and password clearing; it does not persist directly. Existing entities/keys are retained; no Student year/section or schema migration was added.
 
 AccountManagementController serves /admin/accounts. AccountManagementService reads filtered pages and exports, and saves account and linked student changes through one database transaction. The Account Management Razor view is enhanced by account-management.js for keyboard-accessible profile tabs. Student creation and roster import open the existing Student Directory dialogs.
+
+StudentDashboardService builds the read-only discovery and registration views at /student. The dedicated student image route uses the existing banner store and the same visibility rules as the dashboard. student-dashboard.js enhances the server-rendered cards with theme selection, featured navigation and filtering.

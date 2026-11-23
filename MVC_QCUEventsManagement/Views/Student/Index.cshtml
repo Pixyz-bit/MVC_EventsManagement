@@ -1,13 +1,100 @@
-@model MVC_QCUEventsManagement.ViewModels.Student.StudentLandingViewModel
+@using System.Globalization
+@model MVC_QCUEventsManagement.ViewModels.Student.StudentDashboardViewModel
 @{
     Layout = "_AccountLayout";
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = "Student portal";
+    var featured = Model.Available.Where(e => e.Status is "Open" or "Opens soon").Take(4).ToList();
+    var categories = Model.Available.Select(e => e.Category).Distinct().Order().ToList();
+    var initials = string.Concat(Model.DisplayName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => char.ToUpperInvariant(part[0])));
 }
+<div id="student-dashboard" data-theme="dark">
+    <header class="student-navbar">
+        <a asp-route="StudentDashboard" class="student-brand">
+            <img src="~/images/qcu-logo.png" width="40" height="40" alt="" />
+            <span><strong>University Event Portal</strong><small>Quezon City University</small></span>
+        </a>
+        <div class="student-nav-tools">
+            <div class="student-identity" title="@Model.Email">
+                <span class="student-avatar" aria-hidden="true">@initials</span>
+                <span><strong>@Model.DisplayName</strong>@if (Model.StudentId is not null) { <small>@Model.StudentId</small> }</span>
+            </div>
+            <button class="student-button student-nav-button" type="button" data-theme-toggle aria-pressed="true" hidden>Dark mode</button>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                <button class="student-button student-nav-button" type="submit">Sign out</button>
+            </form>
+        </div>
+    </header>
 
-<main class="mx-auto w-full max-w-xl px-6 py-12">
-    <h1 class="text-3xl font-bold tracking-tight">@Model.Title</h1>
-    <p class="mt-3 wrap-break-word text-campus-muted">Signed in as @Model.DisplayName</p>
-    <form asp-controller="Account" asp-action="Logout" method="post" class="mt-6">
-        <button type="submit" class="min-h-11 rounded-lg bg-campus-action px-5 py-2 text-sm font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus">Sign out</button>
-    </form>
-</main>
+    @if (featured.Count > 0)
+    {
+        <section class="student-showcase" aria-label="Featured campus events">
+            <div aria-live="polite">
+                @for (var index = 0; index < featured.Count; index++)
+                {
+                    var item = featured[index];
+                    <div class="student-feature" data-feature hidden="@(index != 0)">
+                        @if (item.HasBanner)
+                        {
+                            <img class="student-feature-photo" data-event-banner src="@Url.RouteUrl("StudentEventBanner", new { id = item.Id })" alt="" />
+                        }
+                        <div class="student-feature-content">
+                            <h1>@item.Title</h1>
+                            <span class="student-status" data-status="@item.Status">@(item.Status == "Open" ? "Registration open" : item.Status)</span>
+                            @if (!string.IsNullOrWhiteSpace(item.Description)) { <p class="student-feature-description">@item.Description</p> }
+                            <p>@item.Start.ToString("MMM d, yyyy · h:mm tt", CultureInfo.InvariantCulture) PHT · @item.Venue</p>
+                            <a class="student-button student-primary" href="#student-event-@item.Id" data-feature-link>View event</a>
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (featured.Count > 1)
+            {
+                <div class="student-feature-controls" data-feature-controls hidden>
+                    <span data-feature-position>1 of @featured.Count</span>
+                    <button type="button" class="student-button student-nav-button" data-feature-prev aria-label="Previous featured event">←</button>
+                    <button type="button" class="student-button student-nav-button" data-feature-next aria-label="Next featured event">→</button>
+                </div>
+            }
+        </section>
+    }
+
+    <main class="student-workspace">
+        <div class="student-section-heading">
+            <h2 data-workspace-title>Campus events</h2>
+            <nav class="student-event-tabs" aria-label="Student event views" data-event-tabs hidden>
+                <button type="button" class="student-button" data-event-tab="available" aria-controls="student-available" aria-pressed="true">Available events</button>
+                <button type="button" class="student-button" data-event-tab="registered" aria-controls="student-registered" aria-pressed="false">My registered events</button>
+            </nav>
+        </div>
+        @if (Model.StudentId is null)
+        {
+            <p class="student-empty">Your student profile is missing. Contact an administrator to complete it.</p>
+        }
+        else
+        {
+            <section id="student-available" aria-label="Available events">
+                @if (categories.Count > 1)
+                {
+                    <div class="student-event-filter" data-event-filter hidden>
+                        <div><label for="student-event-category">Category</label><select id="student-event-category"><option value="">All categories</option>@foreach (var category in categories) { <option>@category</option> }</select></div>
+                    </div>
+                }
+                @if (Model.Available.Count == 0) { <p class="student-empty">No eligible campus events are available right now.</p> }
+                else { <p class="student-empty" data-no-category-results hidden>No events match this category.</p> }
+                <div class="student-events">
+                    @foreach (var item in Model.Available) { <partial name="_DashboardEvent" model="item" /> }
+                </div>
+            </section>
+            <section id="student-registered" aria-label="My registered events" class="student-registered">
+                <h2 data-registered-heading>My registered events</h2>
+                @if (Model.Registered.Count == 0) { <p class="student-empty">You have no registered events yet.</p> }
+                <div class="student-events">
+                    @foreach (var item in Model.Registered) { <partial name="_DashboardEvent" model="item" /> }
+                </div>
+            </section>
+        }
+    </main>
+</div>
+@section Scripts {
+    <script src="~/js/student-dashboard.js" asp-append-version="true" defer></script>
+}

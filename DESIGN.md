@@ -46,7 +46,7 @@ The white admin sidebar is 16rem wide on desktop. It follows the supplied Web Fo
 | Admin | Analytics | EventAnalytics.aspx | Pending | Awaiting reference |
 | Admin | History | EventHistory.aspx and code-behind, inspected live on 2026-11-23 | [History layout sample](work/event-history-layout.html), using the established QCU design | Approved and implemented at `/admin/events/history`. Source fields preserved: outcome, title/college, venue/date and report action. Outcome counts are global filter tabs, with academic-year/search/reset and 25-row pagination. Titles open read-only details; report View stays disabled until analytics. Live desktop/mobile empty/filter states and populated HTTP rendering passed. |
 | Admin | Connection diagnostics (development scope) | TestConnection.aspx | Pending | Awaiting reference |
-| Student | Dashboard/discovery | Dashboard.aspx | work/student-dashboard-layout.html | Sample ready for review |
+| Student | Dashboard/discovery | Dashboard.aspx | work/student-dashboard-layout.html | Implemented in MVC |
 | Student | Registration/cancellation | EventRegistration.aspx | Pending | Awaiting reference |
 | Student | Pass/QR/download | EventPass.aspx | Pending | Awaiting reference |
 | Student | Profile/password | StudentProfile.aspx | Pending | Awaiting reference |
@@ -114,3 +114,5 @@ Student dashboard revision: use the Web Forms dashboard’s featured-event carou
 The Student Dashboard preview starts in dark mode with a blue navbar. The Dark mode toggle compares dark and light versions in the same preview. Both use the blue navbar and preserve the selected events when switching themes.
 
 Student Directory toolbar spacing uses a common control height and consistent gaps. The search field fills the available width above three equal-width actions on small screens. The filter panel aligns its Reset and Apply filters buttons in two equal columns.
+
+The MVC Student Dashboard uses the blue navbar, a dark default with a locally remembered theme choice, and a manual featured-event carousel. Campus imagery backs event banners, and actual event banners take precedence. The two views show eligible events and owned registration details. The category filter and detail disclosures work with real event data.
