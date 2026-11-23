@@ -1,0 +1,19 @@
+@model MVC_QCUEventsManagement.ViewModels.Admin.EventWorkflowViewModel
+@{
+    (string Label, string? Route)[] workflows = [ ("Details", "AdminEventDetails"), ("Pre-registered", "AdminEventPreRegistered"), ("Attendance scanner", null), ("Attendance", null), ("Analytics", null) ];
+}
+<nav aria-label="Event workflows" class="mt-6 flex flex-wrap gap-x-6 border-b border-campus-line text-sm">
+    @foreach (var workflow in workflows)
+    {
+        var current = workflow.Label == Model.Current;
+        @if (workflow.Route is not null)
+        {
+            <a asp-route="@workflow.Route" asp-route-id="@Model.EventId" asp-route-from="@(Model.FromHistory ? "history" : null)" aria-current="@(current ? "page" : null)"
+               class="inline-flex min-h-11 items-center border-b-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus @(current ? "border-campus-action font-semibold text-campus-action" : "border-transparent text-campus-muted hover:text-campus-action")">@workflow.Label</a>
+        }
+        else
+        {
+            <span role="link" aria-disabled="true" title="This workflow is not implemented yet" class="inline-flex min-h-11 items-center text-campus-muted">@workflow.Label</span>
+        }
+    }
+</nav>

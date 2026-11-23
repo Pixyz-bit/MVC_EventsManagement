@@ -444,6 +444,56 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Contains("Clear filters", empty);
     }
 
+    [Fact]
+    public async Task Preregistered_roster_hides_email_orders_columns_and_protects_pass_cancellation()
+    {
+        int id, registrationId; string version, eventVersion;
+        await using (var db = CreateContext())
+        {
+            var day = new EventClock(TimeProvider.System).Now.AddDays(5);
+            var ev = new Event { Title = "Roster verification event", VenueLocation = "Campus Hall", MaxCapacity = 30, CurrentRegistrations = 1,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = day, EventEnd = day.AddHours(2), RegStart = DateOnly.FromDateTime(day.AddDays(-3)), RegEnd = DateOnly.FromDateTime(day.AddDays(-1)) };
+            var pass = new EventRegistration { Event = ev, StudentId = _studentId, CurrentYearLvl = 3, CurrentSection = "SBIT-3A" };
+            db.EventRegistrations.Add(pass); await db.SaveChangesAsync();
+            id = ev.EventId; registrationId = pass.EventRegistrationId; version = Convert.ToBase64String(pass.RowVersion); eventVersion = Convert.ToBase64String(ev.RowVersion);
+        }
+        var path = $"/admin/events/{id}/preregistered";
+        var post = $"{path}/{registrationId}/void";
+        using var anonymous = NewClient(); using var anonymousPage = await anonymous.GetAsync(path);
+        Assert.StartsWith("/login?", RedirectPath(anonymousPage));
+        using var student = NewClient(); using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync(path); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        using var missing = await client.GetAsync("/admin/events/2147483647/preregistered"); Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var page = await client.GetAsync(path); var html = await page.Content.ReadAsStringAsync();
+        Assert.DoesNotContain(_studentEmail, html); Assert.DoesNotContain("Institutional email", html);
+        Assert.Contains("Test Student", html); Assert.Contains(_studentId, html);
+        var headings = Regex.Match(html, "aria-hidden=\"true\"[^>]*>\\s*<span>Ticket ref</span>[\\s\\S]*?</div>").Value;
+        Assert.NotEmpty(headings);
+        headings = WebUtility.HtmlDecode(headings);
+        Assert.True(headings.IndexOf("Ticket ref", StringComparison.Ordinal) < headings.IndexOf("Student", StringComparison.Ordinal));
+        Assert.True(headings.IndexOf("Student", StringComparison.Ordinal) < headings.IndexOf("College & program", StringComparison.Ordinal));
+        Assert.True(headings.IndexOf("College & program", StringComparison.Ordinal) < headings.IndexOf("Year & section", StringComparison.Ordinal));
+        Assert.True(headings.IndexOf("Year & section", StringComparison.Ordinal) < headings.IndexOf("Status", StringComparison.Ordinal));
+        if (Environment.GetEnvironmentVariable("MVC_EVENTS_ROSTER_CAPTURE") is { Length: > 0 } capture) await File.WriteAllTextAsync(capture, html);
+        using var noCsrf = await client.PostAsync(post, Form(("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true")));
+        Assert.Equal(HttpStatusCode.BadRequest, noCsrf.StatusCode);
+        var csrf = await TokenAsync(page);
+        using var wrongEvent = await client.PostAsync($"/admin/events/2147483647/preregistered/{registrationId}/void", Form(("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true"), ("__RequestVerificationToken", csrf)));
+        Assert.Equal(HttpStatusCode.NotFound, wrongEvent.StatusCode);
+        using var unconfirmed = await client.PostAsync(post, Form(("Version", version), ("EventVersion", eventVersion), ("__RequestVerificationToken", csrf)));
+        Assert.StartsWith(path, RedirectPath(unconfirmed));
+        var error = await client.GetStringAsync(path); Assert.Contains("Confirm that you want to cancel", error);
+        using var success = await client.PostAsync(post, Form(("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true"), ("__RequestVerificationToken", csrf)));
+        Assert.StartsWith(path, RedirectPath(success));
+        var cancelled = await client.GetStringAsync($"{path}?cohort=Cancelled");
+        Assert.Contains(_studentId, cancelled); Assert.DoesNotContain("data-prepare-void", cancelled);
+        await using var verification = CreateContext();
+        Assert.Equal(0, await verification.Events.Where(e => e.EventId == id).Select(e => e.CurrentRegistrations).SingleAsync());
+        Assert.Equal("Cancelled", await verification.EventRegistrations.Where(r => r.EventRegistrationId == registrationId).Select(r => r.Status).SingleAsync());
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

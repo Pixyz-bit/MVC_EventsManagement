@@ -35,13 +35,7 @@
             </div>
         }
     </header>
-    <nav aria-label="Event workflows" class="mt-6 flex flex-wrap gap-x-6 border-b border-campus-line text-sm">
-        <a asp-route="AdminEventDetails" asp-route-id="@ev.Id" asp-route-from="@(fromHistory ? "history" : null)" aria-current="page" class="@focus inline-flex min-h-11 items-center border-b-2 border-campus-action font-semibold text-campus-action">Details</a>
-        @foreach (var workflow in new[] { "Pre-registered", "Attendance scanner", "Attendance", "Analytics" })
-        {
-            <span role="link" aria-disabled="true" title="This workflow is not implemented yet" class="inline-flex min-h-11 items-center text-campus-muted">@workflow</span>
-        }
-    </nav>
+    <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Details", fromHistory))" />
     @if (TempData["EventMessage"] is string message)
     {
         <p role="status" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">@message</p>

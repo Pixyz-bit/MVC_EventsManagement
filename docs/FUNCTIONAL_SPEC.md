@@ -176,8 +176,8 @@ Acceptance: deadline boundary honored, repeat requests release at most one seat,
 
 ### CANCEL-02: Administrator void
 
-- [ ] Source permits voiding any non-cancelled registration, including Present, regardless of deadline/event state, retaining any CheckInTimestamp and decrementing the counter once. This is broader than student cancellation and changes historical cohort counts.
-- [ ] Retain this documented capability unless the user changes policy. MVC must verify registration belongs to the selected event instead of trusting a hidden registration ID alone.
+- [x] Administrator voiding permits any non-Cancelled registration, including Present, regardless of deadline/event state. It retains CheckInTimestamp/history and decrements the event count once (never below zero). This is broader than student cancellation and changes historical cohort counts.
+- [x] The service binds the registration to the selected event, requires explicit confirmation, and uses event/pass rowversions in one transaction. Missing/wrong-event, repeated, unconfirmed and stale submissions cannot partially update the pass/count.
 
 Acceptance: correct attendee/event is confirmed, one transition/decrement occurs, cancelled rows stay stable and reports reflect the new status.
 
@@ -202,7 +202,7 @@ Evidence: Dashboard/EventRegistration/EventPass/StudentProfile.aspx/.cs; EventRe
 
 ### ROSTER-01: Lists
 
-- [ ] Preregistered includes all non-Cancelled, including Present; revoked rows are separate. Preserve student ID/name search, department/program/year filters/reset and attendee details/void action. Source row fields are ticket reference, student ID, full name/email, department/program, registered year/section and status. The profile additionally shows campus. The proposed layout groups student identity fields without omitting data; its approval/implementation status is tracked in DESIGN.md.
+- [x] `/admin/events/{id}/preregistered` includes all non-Cancelled registrations, including Present, with Cancelled in a separate cohort. Student ID/name search, college/program/registered-year filters, reset and 25-row paging combine on the server. Cohort counts/options cover the whole selected event. Rows show Ticket ref, Student name/ID, College & program, Year & section, Status, then View. NoShow displays as Reserved. The attendee modal adds campus and pass cancellation confirmation. Email is intentionally omitted from rows and modal per user direction. Registration year/section comes from the booking, not a current student year.
 - [ ] Attendance includes Present ordered by timestamp descending, search/department/program filters, latest check-in and turnout. Available booking seats use CurrentRegistrations; physical occupancy uses Present counts.
 
 Acceptance: check-in stays in preregistered and appears in attendance; void moves to revoked; counts and filter scope are correct, including empty lists.
