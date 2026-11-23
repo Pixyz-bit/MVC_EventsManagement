@@ -90,3 +90,5 @@ The final published preview on port 5314 was then checked directly without an au
 
 2026-11-22, preview removal: removed the temporary no-login controller/configuration and all preview-specific UI branches. All 51 tests passed, including old preview URLs returning 404 and normal creation requiring sign-in. Tailwind compilation and Release publish passed. No account passwords or credential configuration were changed.
 Live sign-in with the supplied existing administrator account succeeded. Event Directory opened at /admin, and Create Event opened at /admin/events/create with normal navigation, no preview label, and publishing enabled. No credentials were saved to source or documentation.
+
+2026-11-23, creation footer counter removal: removed the Step N of 5 footer label and its JavaScript update together. JavaScript syntax and Release build/publish passed. The initial publish encountered the running apphost lock; after stopping the identified local app, publish succeeded and the app was restarted. Top step navigation and the mobile current-step label are retained.

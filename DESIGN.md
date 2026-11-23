@@ -63,6 +63,8 @@ The Create Event workspace occupies the viewport beside the shared sidebar (belo
 
 The temporary preview variant has been removed. Administrator screens share their normal authenticated layouts and navigation, with publishing available on the final creation step. Mobile step tabs retain full accessible names.
 
+The footer no longer displays the redundant “Step N of 5” counter, per the 2026-11-23 request. Progress remains visible in the top step navigation and compact mobile current-step label.
+
 Creation refinements supplied 2026-11-21 remove the [breadcrumbs](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-breadcrumb.png), [venue/capacity helper text](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-venue-hints.png), [upload helper text](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-upload-hint.png) and [standalone upload subtitle](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-remove-upload-subtitle.png). Inline optional labels use “(Optional)”. The [registration-window image](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-registration-cleanup.png) prompted date-only storage/controls, not removal of the section. The [step-label reference](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-step-labels.png) adds STEP 01–05 above titles, chevron separators, a blue current step and green completed steps. The fifth tab is Summary & Confirm. Compact mobile tabs preserve their full accessible names and 44px targets.
 
 - Framework: Tailwind CSS with server-rendered Razor MVC.

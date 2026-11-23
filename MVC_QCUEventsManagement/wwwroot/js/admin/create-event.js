@@ -28,7 +28,6 @@
         publish.classList.toggle("hidden", index !== 4);
         next.querySelector("span").textContent = window.matchMedia("(max-width: 639px)").matches ? "Next" : labels[Math.min(index + 1, 4)];
         document.getElementById("event-current-step").textContent = `${index + 1} of 5 · ${labels[index]}`;
-        document.getElementById("event-progress").textContent = `Step ${index + 1} of 5`;
         if (index === 4) updateSummary();
         body.scrollTop = 0;
         if (focus) tabs[index].focus();

@@ -32,3 +32,5 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.
 
 M4 authentication is complete, and the login uses the restored white fade. The M5 sidebar follows the supplied white Web Forms reference with the first MVC branding. The directory and sidebar link to Create Event. The temporary preview routes have been removed; access uses normal administrator sign-in. Creation and banner validation have passing integration coverage, and viewport/step interactions were checked with a rendered fixture. Continue with event details/editing/cancellation using their supplied references.
+
+The redundant creation footer step counter was removed on 2026-11-23. Event details, editing and cancellation remain the next M5 workflows.
