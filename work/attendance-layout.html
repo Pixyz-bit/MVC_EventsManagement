@@ -27,8 +27,8 @@
 #attendance-preview h2{font-size:14px;color:#142c48;font-weight:700;margin:0}
 #attendance-preview .a-count{display:inline-block;margin-left:6px;padding:1px 6px;background:var(--a-fill);border-radius:5px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
 #attendance-preview .a-order{font-size:12px;color:var(--a-muted)}
-#attendance-preview .a-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;padding:16px;align-items:end}
-#attendance-preview .a-search{grid-column:1/-1}
+#attendance-preview .a-tools{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,.8fr) auto;gap:12px;padding:16px;align-items:end}
+#attendance-preview .a-search{min-width:0}
 #attendance-preview label{display:block;font-size:12px;font-weight:600;color:var(--a-ink);margin-bottom:6px}
 #attendance-preview button,#attendance-preview input,#attendance-preview select{font:inherit}
 #attendance-preview input,#attendance-preview select{display:block;width:100%;min-width:0;min-height:44px;border:1px solid var(--a-line);border-radius:8px;background:var(--a-fill);color:var(--a-ink);padding:10px 12px;font-size:13px}
@@ -57,7 +57,7 @@
   <aside class="a-sidebar" aria-label="Administrator sidebar preview"><div class="a-brand">QCU Events<small>Administrator portal</small></div><div><p class="a-group">CORE MANAGEMENT</p><div class="a-nav-item current">Event Directory</div><div class="a-nav-item">Create Event</div><div class="a-nav-item">Events History</div></div><div><p class="a-group">ATTENDANCE &amp; USERS</p><div class="a-nav-item">Student Directory</div><div class="a-nav-item">Account Management</div></div><div class="a-account">Administrator</div></aside>
   <div><div class="a-mobile-brand">QCU Events · Administrator portal</div><main class="a-main">
    <div class="a-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to events</div>
-   <header><div class="a-title"><h1>Campus Research Forum</h1><span class="a-badge">Upcoming</span></div><dl class="a-meta"><div><dt>Event date</dt><dd>Monday, Nov 30, 2026</dd></div><div><dt>Venue</dt><dd>Central Auditorium</dd></div><div><dt>Registered seats</dt><dd>3 / 150</dd></div></dl></header>
+   <header><div class="a-title"><h1>Campus Research Forum</h1><span class="a-badge">Upcoming</span></div><dl class="a-meta"><div><dt>Event date</dt><dd>Monday, Nov 30, 2026<span class="a-secondary">9:00 AM – 5:00 PM</span></dd></div><div><dt>Venue</dt><dd>Central Auditorium</dd></div><div><dt>Registered seats</dt><dd>3 / 150</dd></div></dl></header>
    <nav class="a-tabs" aria-label="Event workflows preview"><span>Details</span><span>Pre-registered</span><span>Attendance scanner</span><span class="active" aria-current="page">Attendance</span><span>Analytics</span></nav>
    <section class="a-results" aria-labelledby="a-roster-title"><div class="a-results-title"><h2 id="a-roster-title">Checked-in students <span class="a-count">2</span></h2><span class="a-order">Newest check-in first</span></div>
     <div class="a-tools"><div class="a-search"><label for="a-search">Search attendance</label><input id="a-search" type="search" placeholder="Student ID, name or ticket reference" /></div><div><label for="a-college">College</label><select id="a-college"><option value="">All colleges</option><option>College of Computer Studies</option><option>College of Engineering</option></select></div><div><label for="a-program">Program</label><select id="a-program"><option value="">All programs</option><option>BSIT</option><option>BSIE</option></select></div><button id="a-reset" type="button" class="a-button">Reset filters</button></div>
