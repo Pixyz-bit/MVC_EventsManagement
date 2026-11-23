@@ -601,9 +601,12 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var html = await page.Content.ReadAsStringAsync();
         Assert.Contains("Analytics &lt;verification&gt;", html); Assert.DoesNotContain(_studentEmail, html);
         Assert.Contains("Test Student", html); Assert.Contains("SBIT-4B", html); Assert.Contains("Back to history", html);
-        Assert.Contains("Confirmed arrivals per 5 minutes", html); Assert.Contains("Attendance by college", html);
+        Assert.Contains("Confirmed arrivals per 5 minutes", html); Assert.DoesNotContain("Attendance by college", html);
         Assert.Contains("<polyline data-arrival-line", html); Assert.Contains("data-arrival-point", html);
-        Assert.Contains("data-demographic-slice", html); Assert.Contains("data-demographic-legend", html);
+        Assert.Contains("data-demographic-slice", html); Assert.DoesNotContain("data-demographic-legend", html);
+        Assert.DoesNotContain("data-demographic-readout", html);
+        Assert.Contains("data-chart-label=\"Booking fill:", html);
+        Assert.Contains("data-chart-label=\"Attendance / capacity:", html);
         Assert.Contains("Attendance turnout", html); Assert.Contains("Did not attend", html);
         Assert.Contains("event-analytics.js", html); Assert.DoesNotContain("persistent.oaistatic.com", html);
         Assert.DoesNotContain(".ToString(&quot;", html);

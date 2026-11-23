@@ -16,7 +16,7 @@
     {
         var groups = Model.Distributions[dimension]; var offset = 0d;
         <div data-demographic-panel="@dimension" hidden="@(q.Dimension != dimension)" class="mt-5">
-            <div class="grid items-center gap-6 sm:grid-cols-[minmax(12rem,1fr)_minmax(0,1.3fr)]">
+            <div>
                 <div class="analytics-donut">
                     <svg viewBox="0 0 200 200" role="img" aria-label="@dimension distribution of @Model.Reserved active reservations" class="block w-full"><circle cx="100" cy="100" r="74" fill="none" stroke="var(--color-campus-line)" stroke-width="30" />
                         @for (var i = 0; i < groups.Count; i++)
@@ -29,13 +29,12 @@
                     </svg>
                     <div class="analytics-donut-center"><strong class="text-3xl font-extrabold tabular-nums">@Model.Reserved</strong><span class="mt-1 text-xs text-campus-muted">Registered</span></div>
                 </div>
-                @if (groups.Count == 0) { <p class="text-center text-sm text-campus-muted sm:text-left">No demographic cohorts registered yet.</p> }
+                @if (groups.Count == 0) { <p class="mt-4 text-center text-sm text-campus-muted">No demographic cohorts registered yet.</p> }
                 else
                 {
-                    <ul class="space-y-1" aria-label="@dimension counts">@for (var i = 0; i < groups.Count; i++) { var group = groups[i]; var share = Model.Reserved == 0 ? 0 : 100d * group.Reserved / Model.Reserved; <li><button type="button" data-demographic-legend="@i" data-chart-label="@($"{group.Label}: {group.Reserved} students ({share.ToString("0.0", culture)}%)")" class="flex min-h-11 w-full items-center justify-between gap-4 rounded-lg px-2 py-2 text-left text-sm hover:bg-campus-input focus-visible:outline-2 focus-visible:outline-campus-focus"><span class="flex min-w-0 items-center gap-2"><span aria-hidden="true" class="size-2.5 shrink-0 rounded-sm" style="background:@palette[i % palette.Length]"></span><span class="wrap-break-word">@group.Label</span></span><span class="shrink-0 text-xs tabular-nums"><strong>@group.Reserved</strong> · @share.ToString("0.0", culture)%</span></button></li> }</ul>
+                    <ul class="sr-only" aria-label="@dimension counts">@foreach (var group in groups) { <li>@group.Label: @group.Reserved students (@((100d * group.Reserved / Model.Reserved).ToString("0.0", culture))%)</li> }</ul>
                 }
             </div>
-            <p data-demographic-readout role="status" class="mt-4 min-h-6 text-center text-xs text-campus-muted">@(groups.Count == 0 ? "Counts will appear after students register." : "Hover, focus or tap a slice or label to inspect its count and share.")</p>
         </div>
     }
 </section>

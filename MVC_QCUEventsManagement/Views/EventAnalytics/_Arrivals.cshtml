@@ -28,7 +28,6 @@
                 }
             </svg><div class="mt-2 flex justify-between gap-3 text-xs tabular-nums text-campus-muted"><span>@buckets[0].Start.ToString("MMM d, h:mm tt", culture)</span><span class="text-right">@buckets[^1].Start.AddMinutes(q.Interval).ToString("MMM d, h:mm tt", culture)</span></div></div>
         </div>
-        <p data-arrival-readout aria-live="polite" class="mt-3 min-h-5 text-xs text-campus-muted">Hover or focus a point to inspect its window.</p>
         <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-campus-line pt-4 text-xs"><strong>Peak: @Model.Arrivals.PeakCount · @peak.ToString("MMM d, h:mm tt", culture)–@peak.AddMinutes(q.Interval).ToString("h:mm tt", culture)</strong>@if (Model.LatestCheckIn is { } latest) { <span class="text-campus-muted">Latest: @latest.ToString("MMM d, h:mm:ss tt", culture)</span> }</div>
         @if (Model.Arrivals.TiedPeaks > 1) { <p class="mt-1 text-xs text-campus-muted">First of @Model.Arrivals.TiedPeaks tied windows</p> }
         <details class="mt-3"><summary class="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-campus-action">View exact arrival counts</summary><dl class="grid gap-x-8 gap-y-2 text-xs sm:grid-cols-2">@foreach (var bucket in buckets) { <div class="flex justify-between gap-3 border-b border-campus-line py-2"><dt>@bucket.Start.ToString("MMM d, h:mm tt", culture)–@bucket.Start.AddMinutes(q.Interval).ToString("h:mm tt", culture)</dt><dd class="font-semibold tabular-nums">@bucket.Count</dd></div> }</dl></details>

@@ -3,10 +3,52 @@
     const root = document.getElementById('event-analytics');
     if (!root) return;
 
+    const tooltip = document.createElement('div');
+    tooltip.id = 'analytics-chart-tooltip';
+    tooltip.className = 'analytics-chart-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.hidden = true;
+    root.append(tooltip);
+    let activeTarget = null;
+    const hideTooltip = () => {
+        tooltip.hidden = true;
+        if (activeTarget) activeTarget.removeAttribute('aria-describedby');
+        activeTarget = null;
+    };
+    const positionTooltip = (target, event) => {
+        const bounds = target.getBoundingClientRect();
+        const x = Number.isFinite(event?.clientX) ? event.clientX : bounds.left + bounds.width / 2;
+        const y = Number.isFinite(event?.clientY) ? event.clientY : bounds.bottom;
+        const size = tooltip.getBoundingClientRect();
+        tooltip.style.left = `${Math.max(8, Math.min(x + 12, window.innerWidth - size.width - 8))}px`;
+        tooltip.style.top = `${Math.max(8, Math.min(y + 12, window.innerHeight - size.height - 8))}px`;
+    };
+    root.querySelectorAll('[data-chart-label]').forEach(target => {
+        const show = event => {
+            if (activeTarget !== target) hideTooltip();
+            activeTarget = target;
+            tooltip.textContent = target.dataset.chartLabel;
+            tooltip.hidden = false;
+            target.setAttribute('aria-describedby', tooltip.id);
+            positionTooltip(target, event);
+        };
+        // The custom tooltip replaces the browser's delayed SVG title bubble.
+        target.querySelector('title')?.remove();
+        target.addEventListener('pointerenter', show);
+        target.addEventListener('pointermove', event => { if (activeTarget === target) positionTooltip(target, event); });
+        target.addEventListener('focus', show);
+        target.addEventListener('click', show);
+        target.addEventListener('pointerleave', hideTooltip);
+        target.addEventListener('blur', hideTooltip);
+    });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') hideTooltip(); });
+    document.addEventListener('pointerdown', event => { if (!event.target.closest('[data-chart-label]')) hideTooltip(); });
+    window.addEventListener('scroll', hideTooltip, true);
+    window.addEventListener('resize', hideTooltip);
+
     const svg = root.querySelector('[data-arrival-chart]');
     if (svg) {
         const points = [...svg.querySelectorAll('[data-arrival-point]')];
-        const readout = root.querySelector('[data-arrival-readout]');
         const resize = () => {
             const width = Math.max(40, svg.getBoundingClientRect().width);
             const max = Math.max(1, Number(svg.dataset.max));
@@ -21,12 +63,6 @@
             svg.querySelector('[data-arrival-line]').setAttribute('points', coordinates.join(' '));
             svg.querySelectorAll('line').forEach(line => line.setAttribute('x2', width - 12));
         };
-        points.forEach(point => {
-            const show = () => { readout.textContent = point.dataset.chartLabel; };
-            point.addEventListener('pointerenter', show);
-            point.addEventListener('focus', show);
-            point.addEventListener('click', show);
-        });
         resize();
         if (globalThis.ResizeObserver) new ResizeObserver(resize).observe(svg);
     }
@@ -35,6 +71,7 @@
     const panels = [...root.querySelectorAll('[data-demographic-panel]')];
     if (!selector) return;
     const synchronize = () => {
+        hideTooltip();
         const selected = selector.value;
         panels.forEach(panel => { panel.hidden = panel.dataset.demographicPanel !== selected; });
         root.querySelectorAll('input[name="dimension"]').forEach(input => { input.value = selected; });
@@ -53,11 +90,9 @@
     root.querySelector('[data-demographic-form]').addEventListener('submit', event => { event.preventDefault(); synchronize(); });
     panels.forEach(panel => {
         const slices = [...panel.querySelectorAll('[data-demographic-slice]')];
-        const readout = panel.querySelector('[data-demographic-readout]');
         panel.querySelectorAll('[data-chart-label]').forEach(target => {
             const show = () => {
-                readout.textContent = target.dataset.chartLabel;
-                const selected = target.dataset.demographicSlice ?? target.dataset.demographicLegend;
+                const selected = target.dataset.demographicSlice;
                 slices.forEach(slice => { slice.classList.toggle('is-muted', slice.dataset.demographicSlice !== selected); });
             };
             const clear = () => { slices.forEach(slice => slice.classList.remove('is-muted')); };

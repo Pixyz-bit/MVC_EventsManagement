@@ -32,6 +32,8 @@
   .analytics-donut-center { pointer-events: none; position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .analytics-donut-slice { pointer-events: visibleStroke; transition: opacity .15s ease-out; }
   .analytics-donut-slice.is-muted { opacity: .25; }
+  .analytics-chart-tooltip { position: fixed; z-index: 60; pointer-events: none; max-width: min(20rem, calc(100vw - 2rem)); border-radius: .5rem; padding: .625rem .75rem; background: var(--color-campus-navy); color: white; font-size: .75rem; line-height: 1.6; box-shadow: 0 4px 12px rgb(20 44 72 / 15%); }
+  [data-chart-label]:focus-visible { outline: 2px solid var(--color-campus-focus); outline-offset: 3px; }
   .analytics-donut-slice:focus-visible { outline: 2px solid var(--color-campus-focus); outline-offset: 2px; }
   @media (prefers-reduced-motion: reduce) { .analytics-donut-slice { transition: none; } }
   .scanner-notice { @apply rounded-lg border border-campus-line bg-campus-input px-4 py-3 text-sm leading-6 text-campus-muted; }
