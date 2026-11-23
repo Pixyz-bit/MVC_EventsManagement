@@ -10,6 +10,43 @@ public sealed class EventService(ApplicationDbContext db, EventClock clock)
 {
     private const int PageSize = 25;
 
+    public async Task<EventHistoryViewModel> GetHistoryAsync(string? query, int? year, string? outcome, int page, CancellationToken ct)
+    {
+        var now = clock.Now;
+        var search = query?.Trim() ?? "";
+        if (search.Length > 150) search = search[..150];
+        var academicYear = year is >= 1752 and <= 9999 ? year : null;
+        var selectedOutcome = outcome?.Trim().ToUpperInvariant() switch
+        {
+            "COMPLETED" => "Completed", "CANCELLED" => "Cancelled", _ => null
+        };
+        // History includes events at their end instant without mutating stored outcomes on a GET.
+        var historical = db.Events.AsNoTracking()
+            .Where(ev => ev.Status == "Completed" || ev.Status == "Cancelled" || ev.EventEnd <= now)
+            .Select(ev => new { Event = ev, Outcome = ev.Status == "Cancelled" ? "Cancelled" : "Completed" });
+        var counts = await historical.GroupBy(row => row.Outcome)
+            .Select(group => new { Outcome = group.Key, Count = group.Count() })
+            .ToDictionaryAsync(row => row.Outcome, row => row.Count, ct);
+        var years = await historical.Select(row => row.Event.EventStart.Year - (row.Event.EventStart.Month < 8 ? 1 : 0))
+            .Distinct().OrderByDescending(value => value).ToListAsync(ct);
+        var matching = historical;
+        if (academicYear is { } selectedYear)
+            matching = matching.Where(row => row.Event.EventStart.Year - (row.Event.EventStart.Month < 8 ? 1 : 0) == selectedYear);
+        if (selectedOutcome is not null) matching = matching.Where(row => row.Outcome == selectedOutcome);
+        if (search.Length > 0)
+            matching = matching.Where(row => EF.Functions.Collate(row.Event.Title, "Latin1_General_100_CI_AS").Contains(search)
+                || EF.Functions.Collate(row.Event.VenueLocation, "Latin1_General_100_CI_AS").Contains(search)
+                || row.Event.TargetDepartment != null && EF.Functions.Collate(row.Event.TargetDepartment, "Latin1_General_100_CI_AS").Contains(search));
+        var total = await matching.CountAsync(ct);
+        var pages = Math.Max(1, (int)Math.Ceiling((double)total / PageSize));
+        page = Math.Clamp(page, 1, pages);
+        var items = await matching.OrderByDescending(row => row.Event.EventStart).ThenByDescending(row => row.Event.EventId)
+            .Skip((page - 1) * PageSize).Take(PageSize)
+            .Select(row => new EventHistoryItem(row.Event.EventId, row.Event.Title, row.Event.TargetDepartment,
+                row.Event.VenueLocation, row.Event.EventStart, row.Outcome)).ToListAsync(ct);
+        return new EventHistoryViewModel(search, academicYear, selectedOutcome, counts, years, items, page, pages, total);
+    }
+
     public async Task<EventDetailsViewModel?> GetDetailsAsync(int id, bool editing, CancellationToken ct)
     {
         var ev = await db.Events.AsNoTracking().Where(e => e.EventId == id)

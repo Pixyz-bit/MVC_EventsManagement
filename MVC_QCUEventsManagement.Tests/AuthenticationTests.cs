@@ -405,6 +405,45 @@ public sealed class AuthenticationTests : IAsyncLifetime
         await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CancelAsync(id, "Ended event", model.Event.Version, default));
     }
 
+    [Fact]
+    public async Task Event_history_is_admin_only_and_opens_read_only_details_with_safe_filter_navigation()
+    {
+        var title = $"History <script>fixture</script> {Guid.NewGuid():N}";
+        var now = new EventClock(TimeProvider.System).Now;
+        int id;
+        await using (var db = CreateContext())
+        {
+            var ev = new Event { Title = title, VenueLocation = "History Hall", MaxCapacity = 20,
+                EventStart = now.AddDays(-3), EventEnd = now.AddDays(-3).AddHours(2),
+                RegStart = DateOnly.FromDateTime(now.AddDays(-6)), RegEnd = DateOnly.FromDateTime(now.AddDays(-4)),
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync() };
+            db.Events.Add(ev); await db.SaveChangesAsync(); id = ev.EventId;
+        }
+        using var anonymous = NewClient();
+        using var redirect = await anonymous.GetAsync("/admin/events/history");
+        Assert.StartsWith("/login?", RedirectPath(redirect));
+        using var student = NewClient();
+        using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync("/admin/events/history");
+        Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var admin = NewClient();
+        using var adminLogin = await SignInAsync(admin, _adminEmail, _password);
+        var html = await admin.GetStringAsync($"/admin/events/history?q={Uri.EscapeDataString(title)}&outcome=Completed");
+        Assert.Contains(WebUtility.HtmlEncode(title), html);
+        Assert.DoesNotContain(title, html);
+        Assert.Contains("Open to all colleges", html);
+        Assert.Contains("History Hall", html);
+        Assert.Contains($"/admin/events/{id}?from=history", html);
+        Assert.Contains("Analytics is not implemented yet", html);
+        var details = await admin.GetStringAsync($"/admin/events/{id}?from=history&edit=true");
+        Assert.Contains("Back to history", details);
+        Assert.DoesNotContain("id=\"event-edit-form\"", details);
+        Assert.DoesNotContain("id=\"open-cancel-event\"", details);
+        var empty = await admin.GetStringAsync($"/admin/events/history?q={Uri.EscapeDataString(title)}&outcome=Cancelled");
+        Assert.Contains("No matching events", empty);
+        Assert.Contains("Clear filters", empty);
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

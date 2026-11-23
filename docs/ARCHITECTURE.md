@@ -1,6 +1,6 @@
 # Architecture and folder structure
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-23 (Asia/Manila).
 
 Event creation uses `CreateEventController.Create` (GET/POST `/admin/events/create`), `CreateEventInput`, `Views/CreateEvent/Create.cshtml`, and `wwwroot/js/admin/create-event.js`. `EventService.CreateAsync` validates and saves the event/sponsor graph in one EF SaveChanges transaction. `EventBannerStore` decodes and re-encodes uploaded images outside the public web root; the protected `/admin/events/{id}/banner` action serves them. Existing shared admin layouts/navigation support the active creation entry and an overlay mobile menu for the viewport form. Registration opening/deadline are DateOnly values mapped to SQL date by RegistrationDatesOnly; event start/end remain timestamps. See [database and security](DATABASE_AND_SECURITY.md) for date semantics.
 
@@ -25,6 +25,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDirectoryController.cs
 |   |   |-- CreateEventController.cs
 |   |   |-- EventDetailsController.cs
+|   |   |-- EventHistoryController.cs
 |   |   |-- PrivacyController.cs
 |   |   |-- ErrorController.cs
 |   |   |-- StudentController.cs
@@ -64,6 +65,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDirectory/
 |   |   |-- CreateEvent/
 |   |   |-- EventDetails/
+|   |   |-- EventHistory/
 |   |   |-- Student/
 |   |   |-- Privacy/
 |   |   |-- Error/
@@ -103,6 +105,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Event Directory | EventDirectoryController | ViewModels/Admin/EventListViewModel.cs | Views/EventDirectory/Index.cshtml |
 | Create Event | CreateEventController | ViewModels/Admin/CreateEventInput.cs | Views/CreateEvent/Create.cshtml |
 | Event Details/edit/cancel | EventDetailsController | ViewModels/Admin/EventDetailsViewModel.cs and EventDetailsData.cs; shared CreateEventInput | Views/EventDetails/Index.cshtml |
+| Events History | EventHistoryController | ViewModels/Admin/EventHistoryViewModel.cs and EventHistoryItem.cs | Views/EventHistory/Index.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
@@ -114,3 +117,5 @@ M2 configuration: Program registers a request-scoped ApplicationDbContext, singl
 Event Details uses GET `/admin/events/{id}` (AdminEventDetails), optional `?edit=true`, and antiforgery-protected POST edit/cancel endpoints under the same route. EventService owns the no-tracking projection and tracked concurrency-checked mutations. `wwwroot/js/admin/event-details.js` handles sponsors, audience filtering, banner preview and the cancellation disclosure.
 
 The details cancellation UI now uses a native dialog controlled by the existing event-details.js. Native modal behavior provides focus containment/Escape dismissal; Close/Keep event return focus to the trigger. The controller retains invalid cancellation input and the submitted concurrency token when rendering an error. Edit fields remain on the same page and use shared event-edit-section/event-edit-heading styles.
+
+EventHistoryController serves the Admin-only named route AdminEventHistory at GET `/admin/events/history`. EventService.GetHistoryAsync projects effective outcomes, global counts, academic-year options, combined filters and pagination through SQL using no tracking. Razor renders normal GET forms/links without a client data service. History title links open details with `from=history`, retaining the History navigation state and Back to history destination; historical events stay read-only.

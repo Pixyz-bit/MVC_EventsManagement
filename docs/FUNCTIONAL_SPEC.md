@@ -1,6 +1,6 @@
 # Functional specification and parity checklist
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-23 (Asia/Manila).
 
 ## Evidence and status
 
@@ -79,8 +79,8 @@ Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAd
 Directory rows show only status, title, venue/event date, date-only registration opening/deadline, registered/capacity occupancy and a View action. Opening and deadline are shown for every status. Department remains searchable without a visible row field. View links to the approved details page at `/admin/events/{id}`.
 
 - [x] `/admin` and `/admin/events` list unfinished Upcoming events with All upcoming, Open, Soon, and Closed filters, search/reset, and chronological ordering. Search matches title, venue, or department. Filter counts cover all upcoming events, and results paginate at 25 per page.
-- [x] Add event details navigation. Completed and cancelled events belong in the later history workflow.
-- [ ] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows at read time. Persistent completion and history behavior remain later work.
+- [x] Add event details navigation. Completed and cancelled events appear in `/admin/events/history`; titles open their read-only details.
+- [x] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows, and history includes them as Completed at the same instant. Cancellation takes precedence. Reads derive completion without writing stored outcomes or requiring a background completion job.
 - [x] Registration opening/deadline are calendar dates. Using today's date in Asia/Manila, registration is Closed if today > RegEnd or capacity has been reached, Soon if today < RegStart, and Open otherwise. The opening and deadline days are inclusive; a one-day window is supported. Event completion still uses the event end timestamp.
 
 Acceptance: Philippine midnight at opening, the last moment of the deadline day, midnight the following day, a one-day window, exactly EventEnd, full, cancelled and completed fixtures produce correct states. Open/Soon/Close are display states, not stored outcomes.
@@ -98,7 +98,8 @@ Acceptance: invalid fields/dates/capacity write nothing; cancelled/completed eve
 
 - [x] Cancellation opens a modal with a reason and explicit confirmation, Close/Keep event and Escape dismissal. Failed submissions retain the reason and submitted concurrency token. Require a trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
 - [x] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history.
-- [ ] Future registration/admission, passes and history workflows must honor cancelled events and show the reason. Source sends no automatic emails on cancellation.
+- [x] History includes cancelled events and opens their read-only details with the retained cancellation reason.
+- [ ] Future registration/admission and passes must honor cancelled events and show the reason. Source sends no automatic emails on cancellation.
 
 Acceptance: historical evidence/counts survive, admission/booking stop immediately, repeated/finished-event cancellation fails safely.
 
@@ -234,8 +235,9 @@ Acceptance: deterministic mixed-status/zero/multi-department/cross-midnight fixt
 
 ### HISTORY-01: History
 
-- [ ] Completed/Cancelled only, newest EventStart first, total/completed/cancelled event counts and analytics navigation. The live source history rows show outcome, title/target college, venue/event date and View (analytics). Search matches title, venue or college; academic year and outcome/reset are visible filters. Semester filtering exists in the repository but is not an existing visible filter. A design sample is available for user review; this workflow is not implemented in MVC.
-- [ ] Academic year starts August; Aug-Dec first semester, Jan-May second, Jun-Jul summer. Retain cancellation reasons and history.
+- [x] `/admin/events/history` shows stored/effective Completed and Cancelled events, newest EventStart then EventId first. Rows show outcome, title/target college and venue/event date. Global total/completed/cancelled counts remain independent of filters. Search matches title, venue or college without case sensitivity; academic year and outcome filters combine, with reset and 25-row pagination. Titles open read-only details. Semester filtering remains outside the visible UI, matching the source.
+- [ ] The report View action stays disabled until analytics is implemented; it must eventually navigate to the event report with history return context.
+- [x] Academic year starts August: August–December use the event year; January–July use the preceding year. Tests cover July/August, January and June. History retains cancellation reasons and counts. Semester categories remain defined for future reporting (Aug–Dec first, Jan–May second, Jun–Jul summer).
 
 Acceptance: August/January/June fixtures and filters agree with reports and outcome totals.
 

@@ -7,7 +7,7 @@
         [
             ("Event Directory", "M4 10h16M8 3v4m8-4v4M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z", "AdminEvents"),
             ("Create Event", "M12 8v8m-4-4h8m5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "AdminCreateEvent"),
-            ("Events History", "M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", null)
+            ("Events History", "M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z", "AdminEventHistory")
         ]),
         ("Attendance & Users",
         [
@@ -27,7 +27,8 @@
                 @foreach (var link in group.Links)
                 {
                     var isCurrent = link.Route == "AdminEvents" && currentSection == "Events"
-                        || link.Route == "AdminCreateEvent" && currentSection == "Create";
+                        || link.Route == "AdminCreateEvent" && currentSection == "Create"
+                        || link.Route == "AdminEventHistory" && currentSection == "History";
                     <li class="relative">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                              class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 @(isCurrent ? "text-blue-700" : "text-slate-500")">

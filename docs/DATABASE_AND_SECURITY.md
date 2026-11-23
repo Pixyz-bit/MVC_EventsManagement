@@ -1,6 +1,6 @@
 # Database and security rules
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-23 (Asia/Manila).
 
 The temporary no-login preview routes have been removed. Administrator pages require the normal authenticated session; no preview identity, preview configuration, or publish-disabled variant remains.
 
@@ -92,3 +92,7 @@ The active development catalog is on the default SQL Server instance at `localho
 ## Event Details mutations
 
 Details/edit/cancel require Admin authorization. Reads use no tracking; POSTs require antiforgery and the submitted eight-byte EventsTable RowVersion. Editing/cancellation recheck unfinished Upcoming state. Concurrent count/capacity/lifecycle changes reject the whole event/sponsor transaction. Edits preserve creator, lifecycle and registration count; capacity cannot fall below that count. Cancellation requires confirmation and a trimmed 1-500 character reason, changes only lifecycle/reason and preserves registration history. Repeated cancellation cannot overwrite the reason. SQL date registration columns are unchanged; no migration was needed. Uploads reuse the protected pixel-validation store. Failed saves clean new files; obsolete files are removed after database success. Cleanup failures are logged without reversing committed updates.
+
+## History reads
+
+History is Admin-only and uses no-tracking SQL queries. It includes stored Completed/Cancelled events and events whose EventEnd is at or before the captured Philippine wall-clock instant. Cancelled takes precedence; otherwise an ended event displays Completed. Reading history does not persist status changes, alter rowversions, modify counts or delete history. This requires no migration or completion job. Existing event mutations already reject ended/cancelled events. Academic years are derived from EventStart (August starts the next year label); SQL applies search, outcome/year filters, ordering and paging. No source records are imported.

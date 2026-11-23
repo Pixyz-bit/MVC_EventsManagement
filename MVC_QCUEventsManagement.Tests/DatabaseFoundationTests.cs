@@ -263,6 +263,88 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal(new DateOnly(2037, 4, 1), result.Events[0].RegistrationClosesAt);
     }
 
+    [Fact]
+    public async Task History_uses_effective_outcomes_and_August_academic_years_without_mutating_events()
+    {
+        var utc = new DateTimeOffset(2031, 7, 1, 0, 0, 0, TimeSpan.Zero);
+        var clock = new EventClock(new FixedTimeProvider(utc));
+        var service = new EventService(_db, clock);
+        var baseline = await service.GetHistoryAsync(null, null, null, 1, default);
+        var marker = Guid.NewGuid().ToString("N");
+        var owner = NewUser($"history-{marker}@example.test");
+        Event Make(string title, DateTime start, string status = "Upcoming") => new()
+        {
+            Title = $"{title} {marker}", VenueLocation = $"Venue {marker}", TargetDepartment = $"College {marker}",
+            CreatedByUser = owner, MaxCapacity = 20, CurrentRegistrations = 3,
+            EventStart = start, EventEnd = start.AddHours(2), RegStart = DateOnly.FromDateTime(start.AddDays(-3)),
+            RegEnd = DateOnly.FromDateTime(start.AddDays(-1)), Status = status,
+            CancellationReason = status == "Cancelled" ? "Original cancellation reason" : null
+        };
+        var boundary = Make("Boundary", clock.Now.AddHours(-2));
+        var cancelled = Make("Future cancelled", new DateTime(2031, 8, 2, 9, 0, 0), "Cancelled");
+        _db.Events.AddRange(
+            Make("July", new DateTime(2030, 7, 31, 9, 0, 0)),
+            Make("August", new DateTime(2030, 8, 1, 9, 0, 0)),
+            Make("January", new DateTime(2031, 1, 15, 9, 0, 0)),
+            Make("June", new DateTime(2031, 6, 1, 9, 0, 0)), boundary, cancelled,
+            Make("Stored completed", new DateTime(2032, 8, 2, 9, 0, 0), "Completed"),
+            Make("Still upcoming", clock.Now.AddHours(1)));
+        await _db.SaveChangesAsync();
+        var originalVersion = boundary.RowVersion.ToArray();
+        var all = await service.GetHistoryAsync($"VENUE {marker.ToUpperInvariant()}", null, null, 1, default);
+        Assert.Equal(7, all.Total);
+        Assert.Equal(baseline.Counts.GetValueOrDefault("Completed") + 6, all.Counts["Completed"]);
+        Assert.Equal(baseline.Counts.GetValueOrDefault("Cancelled") + 1, all.Counts["Cancelled"]);
+        Assert.Equal(all.Events.OrderByDescending(e => e.StartsAt).ThenByDescending(e => e.EventId), all.Events);
+        var academic = await service.GetHistoryAsync($"college {marker}", 2030, " completed ", 1, default);
+        Assert.Equal(4, academic.Total);
+        Assert.Equal(all.Counts, academic.Counts);
+        var july = await service.GetHistoryAsync(marker, 2029, null, 1, default);
+        Assert.StartsWith("July", Assert.Single(july.Events).Title);
+        var jan = await service.GetHistoryAsync($"January {marker}", 2030, null, 1, default);
+        Assert.Single(jan.Events);
+        var cancelledYear = await service.GetHistoryAsync(marker, 2031, "cancelled", 1, default);
+        Assert.Equal(cancelled.EventId, Assert.Single(cancelledYear.Events).EventId);
+        Assert.Contains(2032, all.AcademicYears);
+        Assert.Contains(2029, all.AcademicYears);
+        var before = new EventService(_db, new EventClock(new FixedTimeProvider(utc.AddSeconds(-1))));
+        Assert.Empty((await before.GetHistoryAsync(boundary.Title, null, null, 1, default)).Events);
+        Assert.Single((await before.GetUpcomingAsync(boundary.Title, null, 1, default)).Events);
+        Assert.Empty((await service.GetUpcomingAsync(boundary.Title, null, 1, default)).Events);
+        _db.ChangeTracker.Clear();
+        var retained = await _db.Events.SingleAsync(e => e.EventId == boundary.EventId);
+        Assert.Equal("Upcoming", retained.Status);
+        Assert.Equal(3, retained.CurrentRegistrations);
+        Assert.Equal(originalVersion, retained.RowVersion);
+        Assert.Equal("Original cancellation reason", (await _db.Events.SingleAsync(e => e.EventId == cancelled.EventId)).CancellationReason);
+    }
+
+    [Fact]
+    public async Task History_paginates_and_normalizes_filters_with_stable_newest_first_order()
+    {
+        var service = new EventService(_db, new EventClock(new FixedTimeProvider(new DateTimeOffset(2031, 7, 1, 0, 0, 0, TimeSpan.Zero))));
+        var marker = Guid.NewGuid().ToString("N");
+        var owner = NewUser($"history-pages-{marker}@example.test");
+        for (var i = 0; i < 27; i++)
+        {
+            var start = new DateTime(2030, 8, 1, 9, 0, 0).AddDays(i / 2);
+            _db.Events.Add(new Event { Title = $"Page {i:D2} {marker}", VenueLocation = "Hall A", CreatedByUser = owner,
+                MaxCapacity = 10, EventStart = start, EventEnd = start.AddHours(1),
+                RegStart = DateOnly.FromDateTime(start.AddDays(-2)), RegEnd = DateOnly.FromDateTime(start.AddDays(-1)) });
+        }
+        await _db.SaveChangesAsync();
+        var first = await service.GetHistoryAsync($" {marker} ", 2030, "invalid", -100, default);
+        Assert.Equal(27, first.Total); Assert.Equal(1, first.Page); Assert.Equal(2, first.TotalPages);
+        Assert.Equal(25, first.Events.Count); Assert.Null(first.Outcome);
+        Assert.StartsWith("Page 26", first.Events[0].Title);
+        var last = await service.GetHistoryAsync(marker, 2030, null, int.MaxValue, default);
+        Assert.Equal(2, last.Page); Assert.Equal(2, last.Events.Count);
+        Assert.StartsWith("Page 01", last.Events[0].Title); Assert.StartsWith("Page 00", last.Events[1].Title);
+        var empty = await service.GetHistoryAsync(marker, 2029, null, int.MaxValue, default);
+        Assert.Empty(empty.Events); Assert.Equal(1, empty.Page); Assert.Equal(1, empty.TotalPages);
+        Assert.Equal(first.TotalHistorical, empty.TotalHistorical);
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");

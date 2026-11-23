@@ -15,6 +15,7 @@ public sealed class EventDetailsController(EventService events, EventBannerStore
     public async Task<IActionResult> Index(int id, bool edit = false, CancellationToken cancellationToken = default)
     {
         var model = await events.GetDetailsAsync(id, edit, cancellationToken);
+        ViewData["FromHistory"] = Request.Query["from"] == "history";
         return model is null ? NotFound() : View(model);
     }
 

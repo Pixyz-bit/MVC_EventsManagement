@@ -1,6 +1,6 @@
 # Setup and deployment
 
-Last updated: 2026-11-22 (Asia/Manila).
+Last updated: 2026-11-23 (Asia/Manila).
 
 Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); progress belongs in [milestones](MILESTONES.md). Original starter baseline commit: 8e785e5. Source application/database are unchanged. Commands below run in PowerShell from the solution root.
 
@@ -99,4 +99,4 @@ Commit the regenerated CSS with style changes. The .NET publish includes the com
 
 Creation supports optional PNG/JPEG/WEBP uploads through SkiaSharp 4.153.1 (MIT). The locked dependency includes Windows/macOS native assets. Linux deployment needs the matching supported native package and separate verification. Configure `EventImages__RootPath` to a persistent, writable directory outside wwwroot; otherwise storage defaults to `PrivateData/EventBanners` under the running content root. Keep that directory across publish-folder replacements and include it in operational backups. The local creation preview uses the repository's ignored `PrivateData/EventBanners` directory.
 
-Authentication, Event Directory, creation and Event Details/editing/cancellation are implemented. Open the directory View link or `/admin/events/{id}` for an existing MVC event; source Web Forms IDs are unrelated. Fresh databases require first-admin setup. The current development database has an active local administrator. Student/account management, registration, attendance, analytics/history, deployment and camera checks are later milestones. See [testing](TESTING.md) for the checks completed so far.
+Authentication, Event Directory, creation, Event Details/editing/cancellation and Events History are implemented. Open `/admin/events/history` for the historical catalog. Open the directory View link or `/admin/events/{id}` for an existing MVC event; source Web Forms IDs are unrelated. Fresh databases require first-admin setup. The current development database has an active local administrator. Student/account management, registration, attendance, analytics, deployment and camera checks are later milestones. History report actions stay disabled until analytics is implemented. See [testing](TESTING.md) for the checks completed so far.
