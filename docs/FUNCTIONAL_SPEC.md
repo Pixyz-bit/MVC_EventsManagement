@@ -118,22 +118,22 @@ Evidence: AdminEvents/CreateEvent/EventDetails.aspx/.cs; EventModel; EventCancel
 
 ### STUDENT-01: Student directory
 
-- [ ] Search/filter/reset by available demographics/status, create/edit, linked account activate/deactivate and password reset. Department selection controls program choices.
-- [ ] Add requires student ID, institutional email, first/last names and valid birthdate in the page flow; middle name is optional. Preserve gender/campus/department/program/state. Reject duplicate IDs/emails. Edit preserves the student identity and registration history.
-- [ ] Year and section belong to event registrations, not current StudentTable. Student profile explains year is selected during event registration.
-- [ ] Source default initial/reset password is uppercase middle-name initial (or X) plus MMddyyyy birthdate (or 01012000 if absent); admins may supply a reset password. Its predictability and display in success feedback need an explicit compatibility/security decision, not logging or exporting credentials.
-- [ ] Create linked account/profile atomically. Coordinate full student email/state/password updates rather than allowing partial success from the separate source UI calls.
+- [x] /admin/students supports ID/full-name search, college/program/campus/status filters, reset and 25-row paging; create/edit, linked student-account activate/deactivate and explicit password reset. College selection controls program choices. Profile dialogs expose email/birthdate/gender rather than putting them in rows.
+- [x] Add requires student ID, institutional email, first/last names and valid birthdate in the page flow; middle name is optional. Preserve gender/campus/department/program/state. Reject duplicate IDs/emails. Edit preserves the student identity and registration history. Birthdate may remain absent when editing an existing profile; supplied dates must be from 1900 through yesterday in Philippine time.
+- [x] Year and section belong to event registrations, not current StudentTable. Student profile explains year is selected during event registration.
+- [x] Approved credential change: Admin explicitly supplies a 15–128 character password for creation/import/reset. Birthdate-derived passwords and success-feedback credential display are removed. Import uses the supplied initial password with a fresh salted hash per account. Passwords are never selected into profile/CSV output.
+- [x] Create linked account/profile atomically. Coordinate full student email/state/password updates rather than allowing partial success from the separate source UI calls.
 
 Acceptance: no orphan account/profile on failure; duplicate prevention survives concurrent requests; updated state/password is consistent across directory/account management; history remains linked.
 
 ### CSV-01: Roster exchange
 
-- [ ] UTF-8 CSV upload/template uses StudentId,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate.
-- [ ] Retain twelve-column legacy format: same first eight fields, then YearLevel,Section,Email,BirthDate. Ignore legacy year/section for profile persistence.
-- [ ] Source skips header/blank lines, requires ID/first/last/email, rejects existing IDs/emails, and processes rows independently. Preserve valid rows when others fail; report accurate success/failure counts and row errors.
-- [ ] Imported blank gender/campus defaults to Not Specified/San Bartolome. Source invalid/missing birthdate can become null and influence default credentials; explicitly report malformed dates rather than silently guessing identity data.
-- [ ] Replace line.Split(',') with proper CSV parsing and header/schema validation; support accepted formats and quoted/Unicode content. Count success only when persistence succeeds.
-- [ ] Filtered student export columns are StudentId,FullName,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate(MM/dd/yyyy),AccountStatus. This export differs from the import format; do not promise direct re-import.
+- [x] UTF-8 CSV upload/template uses StudentId,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate.
+- [x] Retain twelve-column legacy format: same first eight fields, then YearLevel,Section,Email,BirthDate. Ignore legacy year/section for profile persistence.
+- [x] CSV skips header/blank lines, requires ID/first/last/email, rejects existing IDs/emails, and processes rows independently. Preserve valid rows when others fail; report accurate success/failure counts and row errors.
+- [x] Imported blank gender/campus defaults to Not Specified/San Bartolome. Blank imported birthdate remains null; malformed dates fail that row. Dates never determine credentials.
+- [x] Replace line.Split(',') with proper CSV parsing and header/schema validation; support accepted formats and quoted/Unicode content. Count success only when persistence succeeds.
+- [x] Filtered student export columns are StudentId,FullName,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate(MM/dd/yyyy),AccountStatus. This export differs from the import format and is not directly re-importable. Formula-like CSV cell prefixes are escaped for spreadsheet safety. Uploads are limited to 2 MB/200 rows and exports to 10,000 filtered records; over-limit files are rejected before import writes.
 
 Acceptance: template and both roster formats work; quotes/commas/Unicode, blank/malformed/duplicate rows and partial success are accurate; failed rows leave no orphan accounts.
 

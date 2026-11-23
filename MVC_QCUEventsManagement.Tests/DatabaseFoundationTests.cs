@@ -672,6 +672,98 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal(version, await _db.Events.Where(e => e.EventId == original.EventId).Select(e => e.RowVersion).SingleAsync());
     }
 
+    private StudentService StudentDirectoryService() => new(_db, new Microsoft.AspNetCore.Identity.PasswordHasher<User>(), new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider(), new EventClock(TimeProvider.System));
+    private static StudentProfileInput DirectoryInput(string? id = null) => new() { StudentId = id ?? $"DIR-{Guid.NewGuid():N}", Email = $"directory-{Guid.NewGuid():N}@example.test", FirstName = "Mikaela", LastName = "Dizon", BirthDate = new DateOnly(2005, 4, 14), Gender = "Female", Campus = "San Bartolome", College = "College of Computer Studies", Program = "BSIT", Password = "Fixture-student-password!" };
+    private static StudentProfileInput DirectoryEdit(StudentProfileData s) => new() { StudentId = s.StudentId, Email = s.Email, FirstName = s.FirstName, MiddleName = s.MiddleName, LastName = s.LastName, BirthDate = s.BirthDate, Gender = s.Gender, Campus = s.Campus, College = s.College, Program = s.Program, Active = s.Active, Token = s.Token };
+
+    [Fact]
+    public async Task Student_directory_creates_linked_accounts_and_preserves_history_with_stale_snapshot_protection()
+    {
+        var service = StudentDirectoryService(); var input = DirectoryInput(); input.Active = false;
+        await service.CreateAsync(input, default);
+        var stored = await _db.Students.AsNoTracking().Include(s => s.User).SingleAsync(s => s.StudentId == input.StudentId);
+        Assert.Equal("Student", stored.User.Role); Assert.False(stored.User.IsActive); Assert.NotEqual(input.Password, stored.User.PasswordHash);
+        var profile = Assert.Single((await service.GetAsync(new() { Q = input.StudentId }, default)).Students);
+        _db.ChangeTracker.Clear(); await service.UpdateAsync(input.StudentId, new() { Token = profile.Token, Active = true }, "access", default);
+        _db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.UpdateAsync(input.StudentId, new() { Token = profile.Token, Active = false }, "access", default));
+        profile = Assert.Single((await service.GetAsync(new() { Q = input.StudentId }, default)).Students);
+        var (ev, _) = await CreateGraphAsync();
+        _db.EventRegistrations.Add(new EventRegistration { EventId = ev.EventId, StudentId = input.StudentId, CurrentYearLvl = 3, CurrentSection = "SBIT-3A" }); await _db.SaveChangesAsync();
+        var edit = DirectoryEdit(profile); edit.FirstName = "Mikaela Ana"; edit.Email = $"edited-{Guid.NewGuid():N}@example.test";
+        _db.ChangeTracker.Clear(); await service.UpdateAsync(input.StudentId, edit, "edit", default);
+        Assert.Equal(edit.Email, await _db.Users.Where(u => u.UserId == stored.UserId).Select(u => u.Email).SingleAsync());
+        Assert.True(await _db.EventRegistrations.AnyAsync(r => r.StudentId == input.StudentId && r.CurrentYearLvl == 3));
+        var duplicate = DirectoryInput(input.StudentId); await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(duplicate, default));
+        Assert.False(await _db.Users.AnyAsync(u => u.Email == duplicate.Email));
+    }
+
+    [Fact]
+    public async Task Student_directory_password_and_identity_changes_are_bound_validated_and_atomic()
+    {
+        var service = StudentDirectoryService(); var input = DirectoryInput(); await service.CreateAsync(input, default);
+        var second = DirectoryInput(); await service.CreateAsync(second, default);
+        var profile = Assert.Single((await service.GetAsync(new() { Q = input.StudentId }, default)).Students);
+        _db.ChangeTracker.Clear();
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.UpdateAsync(second.StudentId, new() { Token = profile.Token, Active = false }, "access", default));
+        var edit = DirectoryEdit(profile); edit.FirstName = "Must not save"; edit.Email = second.Email;
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.UpdateAsync(input.StudentId, edit, "edit", default));
+        Assert.Equal(input.FirstName, await _db.Students.Where(s => s.StudentId == input.StudentId).Select(s => s.FirstName).SingleAsync());
+        _db.ChangeTracker.Clear(); const string replacement = "Replacement-fixture-password!";
+        await service.UpdateAsync(input.StudentId, new() { Token = profile.Token, Password = replacement }, "password", default);
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>(); var accounts = new AccountService(_db, hasher);
+        Assert.Null(await accounts.AuthenticateAsync(input.Email, input.Password!, default));
+        Assert.NotNull(await accounts.AuthenticateAsync(input.StudentId, replacement, default));
+        _db.ChangeTracker.Clear(); await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.UpdateAsync(input.StudentId, DirectoryEdit(profile), "edit", default));
+        var invalid = DirectoryInput(); invalid.College = "College of Engineering";
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(invalid, default));
+        Assert.False(await _db.Users.AnyAsync(u => u.Email == invalid.Email));
+    }
+
+    [Fact]
+    public async Task Student_directory_filters_and_pages_independently_of_global_options()
+    {
+        var marker = Guid.NewGuid().ToString("N");
+        for (var i = 0; i < 27; i++) { var student = NewStudent(NewUser($"dir-page-{Guid.NewGuid():N}@example.test")); student.User.Role = "Student"; student.LastName = marker; student.FirstName = $"Student {i:D2}"; student.User.IsActive = i % 2 == 0; _db.Students.Add(student); }
+        await _db.SaveChangesAsync(); var service = StudentDirectoryService();
+        var all = await service.GetAsync(new() { Q = marker, Page = -1 }, default); Assert.Equal(27, all.Total); Assert.Equal(25, all.Students.Count);
+        var last = await service.GetAsync(new() { Q = marker, Page = int.MaxValue }, default); Assert.Equal(2, last.Query.Page); Assert.Equal(2, last.Students.Count);
+        var active = await service.GetAsync(new() { Q = marker, College = "College of Computer Studies", Program = "BS Information Technology", Campus = "San Bartolome", Status = "Active" }, default);
+        Assert.Equal(14, active.Total); Assert.Contains("College of Computer Studies", active.Colleges);
+        Assert.Empty((await service.GetAsync(new() { Q = marker, Campus = "Batasan" }, default)).Students);
+    }
+
+    [Fact]
+    public async Task Student_csv_quotes_legacy_dates_duplicates_and_partial_success_leave_no_orphans()
+    {
+        var service = StudentDirectoryService(); var csv = new StudentCsvService(service);
+        var id = $"CSV-{Guid.NewGuid():N}"; var email = $"csv-{Guid.NewGuid():N}@example.test";
+        var text = StudentCsvService.Header + "\r\n" + $"{id},\"Althea, Ana\",,\"De \"\"la\"\", Cruz\",Female,San Bartolome,College of Computer Studies,BSIT,{email},2005-04-14\r\n" +
+            $"BAD-{id},Lara,,Reyes,Female,San Bartolome,College of Computer Studies,BSIT,bad-{email},wrong-date\r\n" +
+            $"{id},Duplicate,,Name,Female,San Bartolome,College of Computer Studies,BSIT,duplicate-{email},2005-04-14\r\n";
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(text)); var report = await csv.ImportAsync(stream, "Fixture-import-password!", default);
+        Assert.Equal(1, report.Created); Assert.Equal(2, report.Errors.Count);
+        var saved = await _db.Students.AsNoTracking().SingleAsync(s => s.StudentId == id); Assert.Equal("Althea, Ana", saved.FirstName); Assert.Equal("De \"la\", Cruz", saved.LastName);
+        Assert.False(await _db.Users.AnyAsync(u => u.Email == "duplicate-" + email || u.Email == "bad-" + email));
+        var legacy = "StudentId,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,YearLevel,Section,Email,BirthDate\r\n" + $"LEG-{id},Rafael,,Mendoza,,,College of Engineering,BSIE,99,Ignored,legacy-{email},\r\n";
+        using var old = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(legacy)); Assert.Equal(1, (await csv.ImportAsync(old, "Fixture-import-password!", default)).Created);
+        var legacyStudent = await _db.Students.AsNoTracking().SingleAsync(s => s.StudentId == "LEG-" + id); Assert.Null(legacyStudent.BirthDate); Assert.Equal("Not Specified", legacyStudent.Gender); Assert.Equal("San Bartolome", legacyStudent.CampusBranch);
+    }
+
+    [Fact]
+    public async Task Student_csv_rejects_wrong_schema_and_oversized_batches_before_writes_and_exports_safe_cells()
+    {
+        var service = StudentDirectoryService(); var csv = new StudentCsvService(service); var input = DirectoryInput(); input.FirstName = "=FORMULA()"; await service.CreateAsync(input, default);
+        var exported = System.Text.Encoding.UTF8.GetString(await service.ExportAsync(new() { Q = input.StudentId }, default));
+        Assert.Contains("'=" , exported); Assert.Contains("BirthDate(MM/dd/yyyy)", exported); Assert.DoesNotContain(input.Password!, exported); Assert.DoesNotContain("PasswordHash", exported);
+        using var wrong = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("wrong,header\r\n"));
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => csv.ImportAsync(wrong, "Fixture-import-password!", default));
+        var many = StudentCsvService.Header + "\r\n" + string.Concat(Enumerable.Repeat("x,a,,b,Female,San Bartolome,College of Computer Studies,BSIT,x@example.test,2005-04-14\r\n", 201));
+        using var large = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(many));
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => csv.ImportAsync(large, "Fixture-import-password!", default));
+        Assert.False(await _db.Users.AnyAsync(u => u.Email == "x@example.test"));
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");

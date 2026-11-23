@@ -55,6 +55,8 @@ builder.Services.AddScoped<AccountCookieEvents>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AttendanceService>();
+builder.Services.AddScoped<StudentService>();
+builder.Services.AddScoped<StudentCsvService>();
 builder.Services.AddScoped<AnalyticsService>();
 builder.Services.AddScoped<DevelopmentDemoData>();
 builder.Services.AddSingleton<EventBannerStore>();

@@ -27,6 +27,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetailsController.cs
 |   |   |-- EventHistoryController.cs
 |   |   |-- EventPreRegisteredController.cs
+|   |   |-- StudentDirectoryController.cs
 |   |   |-- EventAnalyticsController.cs
 |   |   |-- EventAttendanceController.cs
 |   |   |-- AttendanceScannerController.cs
@@ -60,6 +61,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventClock.cs                # Implemented Philippine wall-clock service
 |   |   |-- AccountService.cs
 |   |   |-- StudentService.cs
+|   |   |-- StudentCsvService.cs
 |   |   |-- EventService.cs
 |   |   |-- RegistrationService.cs
 |   |   `-- AttendanceService.cs
@@ -71,6 +73,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetails/
 |   |   |-- EventHistory/
 |   |   |-- EventPreRegistered/
+|   |   |-- StudentDirectory/
 |   |   |-- EventAnalytics/
 |   |   |-- EventAttendance/
 |   |   |-- AttendanceScanner/
@@ -118,6 +121,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Attendance Scanner | AttendanceScannerController | AttendanceScannerViewModel, ScanAttendee, ScanLookupResult, CheckInInput (each in ViewModels/Admin) | Views/AttendanceScanner/Index.cshtml |
 | Attendance list | EventAttendanceController | EventAttendanceViewModel, EventAttendanceQuery, AttendanceItem | Views/EventAttendance/Index.cshtml |
 | Analytics | EventAnalyticsController | EventAnalyticsViewModel, EventAnalyticsQuery and separate report result records | Views/EventAnalytics/Index.cshtml |
+| Student Directory | StudentDirectoryController | StudentDirectoryViewModel, StudentDirectoryQuery, StudentProfileData/Input, StudentImportReport/Error (one type per file) | Views/StudentDirectory/Index.cshtml and _QueryFields.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
@@ -137,3 +141,5 @@ RegistrationService is request-scoped and owns no-tracking roster projections, n
 AttendanceService is request-scoped. GET `/admin/events/{id}/scanner` (AdminAttendanceScanner) renders the scanner. Antiforgery-protected POST `/lookup` and `/confirm` under that route return JSON. The service projects pass/event/student data without email output and uses one conditional EF ExecuteUpdateAsync for admission. `wwwroot/js/admin/attendance-scanner.js` owns staging, asynchronous request ordering, confirmation and camera lifecycle; `wwwroot/js/vendor/html5-qrcode-2.3.8.min.js` and its Apache-2.0 license are reused unchanged from the source. EventAttendanceController serves Admin-only GET `/admin/events/{id}/attendance` (AdminEventAttendance). AttendanceService owns its no-tracking Present-only projection, event-wide count/options, combined filters and 25-row timestamp/ID ordering. `_EventHeader.cshtml` with EventHeaderViewModel shares title/status, schedule, venue and registered capacity across Details, Pre-registered, Scanner and Attendance; management actions appear only on eligible Details pages.
 
 AnalyticsService projects the selected event’s registrations without email, computes active/present/cancelled summaries and audience/audit groups, and bounds cohort lists to 25 rows. ArrivalSeries pages sparse 5/15/30-minute windows in groups of 24. The report view composes _Arrivals, _Turnout and _Demographics partials within its page folder. Charts use native server-rendered SVG/CSS with exact values and no chart library/CDN. event-analytics.js handles responsive straight polyline coordinates, shared chart tooltips on hover/focus/tap and demographic panel switching/query preservation. The validated Dimension query has a GET fallback. LatestCheckIn is computed globally from current Present timestamps. History report links and the shared workflow navigation use AdminEventAnalytics. DevelopmentDemoData is an explicit CLI-only transaction, never an HTTP endpoint or startup seed; its local catalog and environment restrictions are documented in DATABASE_AND_SECURITY.md.
+
+StudentDirectoryController serves AdminStudentDirectory at GET /admin/students with GET template/export and antiforgery-protected POST create/edit/access/password/import. StudentService owns bounded filters, stable 25-row paging, profile/account transactions and protected snapshots. StudentCsvService parses bounded UTF-8 current/legacy CSV and processes each valid row independently through StudentService. student-directory.js handles native profile/editor/account/import dialogs, focus return, dependent programs and password clearing; it does not persist directly. Existing entities/keys are retained; no Student year/section or schema migration was added.
