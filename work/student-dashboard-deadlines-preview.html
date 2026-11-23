@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Student Dashboard · Registration deadlines preview</title>
+    <link rel="stylesheet" href="../MVC_QCUEventsManagement/wwwroot/css/student/fonts.css">
+    <link rel="stylesheet" href="../MVC_QCUEventsManagement/wwwroot/css/student/dashboard.css">
+    <link rel="stylesheet" href="../MVC_QCUEventsManagement/wwwroot/css/student/portal-responsive.css">
+    <link rel="stylesheet" href="../MVC_QCUEventsManagement/wwwroot/css/student/mvc-portal.css">
+    <style>
+        .user-dashboard .hero-showcase-container {
+            min-height: clamp(455px, 51svh, 535px);
+            padding: 86px 0 72px;
+        }
+        .user-dashboard .hero-body-content { padding-block: 1rem; max-width: 55rem; }
+        .user-dashboard .hero-title { font-size: clamp(2.3rem, 4.2vw, 4.25rem); text-wrap: balance; line-height: 1.1; max-width: 18ch; }
+        .user-dashboard .hero-description { max-width: 46ch; margin: .7rem 0 1rem; }
+        .hero-call { display: flex; align-items: center; flex-wrap: wrap; gap: .85rem 1rem; margin-top: 1.3rem; }
+        .hero-call .deadline { color: #f6f0d6; }
+        .user-dashboard .hero-carousel-controls { bottom: 1.15rem; }
+        .user-dashboard .hero-carousel-dots { scrollbar-width: none; }
+        .user-dashboard .hero-overlay-layer { background: linear-gradient(90deg, #060911f0 0%, #060911c7 34%, #0609115e 63%, #06091112 100%), linear-gradient(0deg, #06091166, transparent 45%); }
+        .preview .events-grid { gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); }
+        .preview .event-card { min-width: 0; }
+        .preview .event-promo-banner { height: clamp(125px, 16vh, 156px); }
+        .preview .event-card-body { padding: 1.15rem; }
+        .preview .card-event-name { margin-bottom: .65rem; font-size: 1.08rem; }
+        .preview .card-meta-line { color: #bbc8db; }
+        .preview .card-action-row {
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: .6rem 1rem;
+            margin-top: .75rem;
+            padding-top: .85rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .preview .card-action-row .btn-view-details { margin-left: auto; }
+        .deadline { display: inline-flex; align-items: center; gap: .42rem; color: #cdd8e9; font: 700 .79rem/1.4 var(--font-sans); }
+        .deadline svg { color: var(--accent-gold); width: 16px; height: 16px; flex: none; }
+        .preview .btn-view-details.secondary { background: #192337; color: #e6eefb; box-shadow: none; border: 1px solid var(--border-medium); }
+        .preview .btn-view-details.secondary:hover { background: #243149; }
+        .sample-dialog { width: min(32rem, calc(100% - 2rem)); }
+        .sample-dialog .btn-view-details { margin-top: 1.25rem; }
+        .sample-dialog .deadline { margin-top: .8rem; }
+        @media (max-width: 600px) {
+            .user-dashboard .hero-showcase-container { min-height: 0; padding: 28px 0 72px; }
+            .user-dashboard .hero-body-content { padding-inline: 1.1rem; }
+            .user-dashboard .hero-title { max-width: 15ch; }
+            .user-dashboard .hero-description { font-size: .94rem; }
+            .user-dashboard .hero-overlay-layer { background: linear-gradient(90deg, #060911f0, #060911a8 62%, #06091169); }
+        }
+    </style>
+</head>
+<body class="user-portal user-dashboard preview">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4m8-4v4M3 10h18"/></symbol>
+        <symbol id="pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+        <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></symbol>
+        <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+        <symbol id="previous" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+        <symbol id="next" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    </svg>
+    <header id="portalNavbar" class="portal-navbar">
+        <div class="navbar-inner">
+            <a href="#" class="nav-brand">
+                <img src="../MVC_QCUEventsManagement/wwwroot/images/qcu-logo.png" class="nav-logo-img" alt="">
+                <div><div class="nav-brand-title">University Event Portal</div><div class="nav-brand-subtitle">Quezon City University</div></div>
+            </a>
+            <div class="nav-user-bar">
+                <div class="nav-user-badge">
+                    <div class="nav-user-avatar">MD</div>
+                    <div class="nav-user-info"><span class="nav-user-name">Mikaela Dizon</span><span class="nav-user-id">[ DEMO-2026-0001 ]</span></div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section id="heroGallery" class="hero-showcase-container" aria-label="Featured campus events">
+            <div class="hero-bg-layer" id="feature-photo"></div>
+            <div class="hero-overlay-layer"></div>
+            <div class="hero-body-content">
+                <div id="feature-copy" aria-live="polite"></div>
+                <div class="hero-call">
+                    <button type="button" class="btn-hero-action" id="feature-action">View event <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><use href="#arrow"/></svg></button>
+                    <span class="deadline" id="feature-deadline"></span>
+                </div>
+            </div>
+            <div class="hero-carousel-controls">
+                <div class="hero-carousel-dots" id="feature-dots"></div>
+                <div class="hero-carousel-nav-arrows">
+                    <button type="button" class="hero-arrow-btn" data-step="-1" aria-label="Previous featured event"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#previous"/></svg></button>
+                    <button type="button" class="hero-arrow-btn" data-step="1" aria-label="Next featured event"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><use href="#next"/></svg></button>
+                </div>
+            </div>
+        </section>
+        <section class="portal-main events-view-section" id="events-section" aria-labelledby="catalog-title">
+            <header class="section-header-row">
+                <div class="section-title-block"><h2 id="catalog-title">Campus Events</h2><p>Explore upcoming events and check when to register.</p></div>
+                <div class="tab-toggle-container" role="group" aria-label="Event views">
+                    <button type="button" class="tab-btn active" data-view="available" aria-controls="cards" aria-pressed="true">Available Events</button>
+                    <button type="button" class="tab-btn" data-view="registered" aria-controls="cards" aria-pressed="false">My Registered Events</button>
+                </div>
+            </header>
+            <div id="cards" class="events-grid"></div>
+        </section>
+    </main>
+    <dialog id="event-details" class="logout-confirm-dialog sample-dialog" aria-labelledby="details-title">
+        <h2 id="details-title"></h2>
+        <p id="details-description"></p>
+        <div id="details-deadline" class="deadline"></div>
+        <form method="dialog"><button class="btn-view-details">Close</button></form>
+    </dialog>
+    <script>
+        const assets = '../MVC_QCUEventsManagement/wwwroot/images/student/';
+        const events = [
+            { title: 'Campus Research Forum', date: 'Dec 3, 2026', time: '9:00 AM – 12:00 PM', venue: 'Main Auditorium',
+              image: 'campus-clean.jpg', state: 'Open', deadline: 'Register by Dec 1',
+              description: 'See what QCU students are researching and discuss their findings with student presenters and faculty mentors.' },
+            { title: 'Cybersecurity Essentials', date: 'Dec 8, 2026', time: '1:00 PM – 4:00 PM', venue: 'ICT Laboratory',
+              image: 'hero_cyber_ai.jpg', state: 'Soon', deadline: 'Opens Dec 1',
+              description: 'Practice spotting common security threats and learn everyday ways to protect your accounts.' },
+            { title: 'Cloud Computing Lab', date: 'Dec 10, 2026', time: '9:00 AM – 11:00 AM', venue: 'Innovation Hall',
+              image: 'hero_cloud_lab.jpg', state: 'Full', deadline: 'No seats left',
+              description: 'Join a hands-on session on deploying and maintaining a small cloud application.' },
+            { title: 'Campus Volunteer Orientation', date: 'Dec 5, 2026', time: '10:00 AM – 12:00 PM', venue: 'Student Activity Center',
+              image: 'campus-clean.jpg', state: 'Registered', deadline: 'Ticket QCU-26-1042',
+              description: 'Meet the volunteer team and review the schedule for upcoming campus activities.' }
+        ];
+        const featured = events.slice(0, 2);
+        const get = id => document.getElementById(id);
+        const icon = name => '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#' + name + '"/></svg>';
+        const meta = (className, name, value) => '<div class="' + className + '">' + icon(name) + '<span>' + value + '</span></div>';
+        const badge = { Open: '', Soon: 'card-status-soon', Full: 'card-status-closed', Registered: '' };
+        let slide = 0;
+
+        function renderFeature() {
+            const event = featured[slide];
+            get('feature-photo').style.backgroundImage = 'url("' + assets + event.image + '")';
+            get('feature-copy').innerHTML = '<h1 class="hero-title">' + event.title + '</h1><p class="hero-description">' +
+                event.description + '</p><div class="hero-meta-list">' + meta('hero-meta-item', 'pin', event.venue) +
+                meta('hero-meta-item', 'calendar', event.date) + meta('hero-meta-item', 'clock', event.time) + '</div>';
+            get('feature-deadline').innerHTML = icon('calendar') + event.deadline;
+            document.querySelectorAll('[data-slide]').forEach(dot => {
+                const active = Number(dot.dataset.slide) === slide;
+                dot.classList.toggle('active', active);
+                dot.setAttribute('aria-pressed', String(active));
+            });
+        }
+
+        function renderCards(view) {
+            const registered = view === 'registered';
+            get('catalog-title').textContent = registered ? 'My Registered Events & Passes' : 'Campus Events';
+            get('cards').innerHTML = events.map((event, index) => ({ event, index }))
+                .filter(({ event }) => (event.state === 'Registered') === registered)
+                .map(({ event, index }) => '<article class="event-card"><div class="event-promo-banner" style="background-image:url(' +
+                    assets + event.image + ')"><span class="card-status-pill ' + badge[event.state] + '">' + event.state +
+                    '</span></div><div class="event-card-body"><h3 class="card-event-name">' + event.title + '</h3>' +
+                    meta('card-meta-line', 'pin', event.venue) + meta('card-meta-line', 'calendar', event.date) +
+                    meta('card-meta-line', 'clock', event.time) + '<div class="card-action-row"><span class="deadline">' +
+                    icon(event.state === 'Full' ? 'clock' : 'calendar') + event.deadline + '</span>' +
+                    '<button type="button" class="btn-view-details' + (event.state === 'Open' || registered ? '' : ' secondary') +
+                    '" data-details="' + index + '">' + (registered ? 'View pass' : 'View details') + ' →</button></div></div></article>').join('');
+        }
+
+        function showDetails(event) {
+            get('details-title').textContent = event.title;
+            get('details-description').textContent = event.description;
+            get('details-deadline').innerHTML = icon('calendar') + event.deadline;
+            get('event-details').showModal();
+        }
+
+        get('feature-dots').innerHTML = featured.map((event, index) =>
+            '<button type="button" class="hero-dot-btn" data-slide="' + index + '" aria-label="' + event.title + '"></button>').join('');
+        document.querySelectorAll('[data-slide]').forEach(dot =>
+            dot.addEventListener('click', () => { slide = Number(dot.dataset.slide); renderFeature(); }));
+        document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click', () => {
+            slide = (slide + Number(button.dataset.step) + featured.length) % featured.length;
+            renderFeature();
+        }));
+        const tabs = [...document.querySelectorAll('[data-view]')];
+        tabs.forEach(tab => tab.addEventListener('click', () => {
+            tabs.forEach(item => {
+                item.classList.toggle('active', item === tab);
+                item.setAttribute('aria-pressed', String(item === tab));
+            });
+            renderCards(tab.dataset.view);
+        }));
+        get('cards').addEventListener('click', event => {
+            const button = event.target.closest('[data-details]');
+            if (button) showDetails(events[Number(button.dataset.details)]);
+        });
+        get('feature-action').addEventListener('click', () => showDetails(featured[slide]));
+        addEventListener('scroll', () => get('portalNavbar').classList.toggle('nav-scrolled',
+            get('heroGallery').getBoundingClientRect().bottom <= get('portalNavbar').offsetHeight), { passive: true });
+        renderFeature();
+        renderCards('available');
+    </script>
+</body>
+</html>
