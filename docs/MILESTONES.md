@@ -36,3 +36,5 @@ M0-M2 are complete. Source application/database are unchanged. The new MVC_Event
 M4 authentication is complete, and the login uses the restored white fade. The M5 sidebar follows the supplied white Web Forms reference with the first MVC branding. The directory and sidebar link to Create Event. The temporary preview routes have been removed; access uses normal administrator sign-in. Creation and banner validation have passing integration coverage, and viewport/step interactions were checked with a rendered fixture. Continue with event details/editing/cancellation using their supplied references.
 
 The redundant creation footer step counter was removed on 2026-11-23. Event details, editing and cancellation remain the next M5 workflows.
+
+Directory row spacing and typography were refined on 2026-11-23 and verified on five desktop/mobile widths. Suggested additional row data remains unimplemented pending user selection.
