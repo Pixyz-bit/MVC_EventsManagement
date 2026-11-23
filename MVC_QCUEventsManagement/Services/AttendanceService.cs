@@ -16,8 +16,44 @@ public sealed class AttendanceService(ApplicationDbContext db, EventClock clock)
         var now = clock.Now;
         var ev = await db.Events.AsNoTracking().Where(e => e.EventId == id)
             .Select(e => new EventRosterContext(e.EventId, e.Title, e.VenueLocation, e.EventStart, e.MaxCapacity,
-                e.CurrentRegistrations, e.Status == "Upcoming" && e.EventEnd <= now ? "Completed" : e.Status, e.RowVersion)).SingleOrDefaultAsync(ct);
+                e.CurrentRegistrations, e.Status == "Upcoming" && e.EventEnd <= now ? "Completed" : e.Status, e.RowVersion, e.EventEnd)).SingleOrDefaultAsync(ct);
         return ev is null ? null : new AttendanceScannerViewModel(ev, fromHistory);
+    }
+
+    public async Task<EventAttendanceViewModel?> GetAttendanceAsync(int id, EventAttendanceQuery input, CancellationToken ct)
+    {
+        var scanner = await GetScannerAsync(id, input.From == "history", ct);
+        if (scanner is null) return null;
+        static string? Limit(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim()[..Math.Min(value.Trim().Length, 150)];
+        var query = new EventAttendanceQuery { Q = Limit(input.Q), College = Limit(input.College),
+            Program = Limit(input.Program), From = input.From == "history" ? "history" : null };
+        var present = db.EventRegistrations.AsNoTracking().Where(r => r.EventId == id && r.Status == "Present");
+        var count = await present.CountAsync(ct);
+        var colleges = await present.Select(r => r.Student.Department).Distinct().OrderBy(c => c).ToListAsync(ct);
+        var programs = await present.Select(r => r.Student.Program).Distinct().OrderBy(p => p).ToListAsync(ct);
+        var matching = present;
+        if (query.Q is { } text)
+        {
+            // References are generated display values, not stored admission credentials.
+            var ticket = Ticket.Match(text);
+            if (ticket.Success && int.TryParse(ticket.Groups[1].Value, out var eventId)
+                && int.TryParse(ticket.Groups[2].Value, out var registrationId))
+                matching = matching.Where(r => r.EventId == eventId && r.EventRegistrationId == registrationId);
+            else
+                matching = matching.Where(r => EF.Functions.Collate(r.StudentId, "Latin1_General_100_CI_AS").Contains(text)
+                    || EF.Functions.Collate(r.Student.FirstName + " " + (r.Student.MiddleName == null || r.Student.MiddleName == "" ? "" : r.Student.MiddleName + " ") + r.Student.LastName, "Latin1_General_100_CI_AS").Contains(text));
+        }
+        if (query.College is { } college) matching = matching.Where(r => r.Student.Department == college);
+        if (query.Program is { } program) matching = matching.Where(r => r.Student.Program == program);
+        var total = await matching.CountAsync(ct);
+        var pages = Math.Max(1, (int)Math.Ceiling(total / 25d));
+        query.Page = Math.Clamp(input.Page, 1, pages);
+        var attendees = await matching.OrderByDescending(r => r.CheckInTimestamp).ThenByDescending(r => r.EventRegistrationId)
+            .Skip((query.Page - 1) * 25).Take(25)
+            .Select(r => new AttendanceItem(r.EventRegistrationId, r.StudentId,
+                r.Student.FirstName + " " + (r.Student.MiddleName == null || r.Student.MiddleName == "" ? "" : r.Student.MiddleName + " ") + r.Student.LastName,
+                r.Student.Department, r.Student.Program, r.CurrentYearLvl, r.CurrentSection, r.CheckInTimestamp)).ToListAsync(ct);
+        return new(scanner.Event, query, count, colleges, programs, attendees, total, pages);
     }
 
     private static IQueryable<ScanAttendee> Project(IQueryable<EventRegistration> rows) => rows.Select(r => new ScanAttendee(

@@ -27,6 +27,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetailsController.cs
 |   |   |-- EventHistoryController.cs
 |   |   |-- EventPreRegisteredController.cs
+|   |   |-- EventAttendanceController.cs
 |   |   |-- AttendanceScannerController.cs
 |   |   |-- PrivacyController.cs
 |   |   |-- ErrorController.cs
@@ -69,6 +70,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetails/
 |   |   |-- EventHistory/
 |   |   |-- EventPreRegistered/
+|   |   |-- EventAttendance/
 |   |   |-- AttendanceScanner/
 |   |   |-- Student/
 |   |   |-- Privacy/
@@ -112,6 +114,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Events History | EventHistoryController | ViewModels/Admin/EventHistoryViewModel.cs and EventHistoryItem.cs | Views/EventHistory/Index.cshtml |
 | Pre-registered roster/void | EventPreRegisteredController | EventRosterViewModel, EventRosterQuery, EventRosterContext, RosterAttendee, VoidPassInput (each in ViewModels/Admin) | Views/EventPreRegistered/Index.cshtml |
 | Attendance Scanner | AttendanceScannerController | AttendanceScannerViewModel, ScanAttendee, ScanLookupResult, CheckInInput (each in ViewModels/Admin) | Views/AttendanceScanner/Index.cshtml |
+| Attendance list | EventAttendanceController | EventAttendanceViewModel, EventAttendanceQuery, AttendanceItem | Views/EventAttendance/Index.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
@@ -128,4 +131,4 @@ EventHistoryController serves the Admin-only named route AdminEventHistory at GE
 
 RegistrationService is request-scoped and owns no-tracking roster projections, normalized filters, metadata/counts, 25-row pagination and atomic administrator pass voiding. EventPreRegisteredController serves GET `/admin/events/{id}/preregistered` (AdminEventPreRegistered) and POST `/admin/events/{id}/preregistered/{registrationId}/void`. `_EventWorkflowNavigation.cshtml` with EventWorkflowViewModel is shared by Details and Pre-registered. `wwwroot/js/admin/event-roster.js` manages native attendee dialogs, confirmation and focus only; persistence uses antiforgery-protected MVC forms. No email is loaded by the roster projection.
 
-AttendanceService is request-scoped. GET `/admin/events/{id}/scanner` (AdminAttendanceScanner) renders the scanner. Antiforgery-protected POST `/lookup` and `/confirm` under that route return JSON. The service projects pass/event/student data without email output and uses one conditional EF ExecuteUpdateAsync for admission. `wwwroot/js/admin/attendance-scanner.js` owns staging, asynchronous request ordering, confirmation and camera lifecycle; `wwwroot/js/vendor/html5-qrcode-2.3.8.min.js` and its Apache-2.0 license are reused unchanged from the source. No attendance-list endpoint exists until the next proposal is approved.
+AttendanceService is request-scoped. GET `/admin/events/{id}/scanner` (AdminAttendanceScanner) renders the scanner. Antiforgery-protected POST `/lookup` and `/confirm` under that route return JSON. The service projects pass/event/student data without email output and uses one conditional EF ExecuteUpdateAsync for admission. `wwwroot/js/admin/attendance-scanner.js` owns staging, asynchronous request ordering, confirmation and camera lifecycle; `wwwroot/js/vendor/html5-qrcode-2.3.8.min.js` and its Apache-2.0 license are reused unchanged from the source. EventAttendanceController serves Admin-only GET `/admin/events/{id}/attendance` (AdminEventAttendance). AttendanceService owns its no-tracking Present-only projection, event-wide count/options, combined filters and 25-row timestamp/ID ordering. `_EventHeader.cshtml` with EventHeaderViewModel shares title/status, schedule, venue and registered capacity across Details, Pre-registered, Scanner and Attendance; management actions appear only on eligible Details pages.

@@ -1,0 +1,51 @@
+@using System.Globalization
+@using MVC_QCUEventsManagement.ViewModels.Admin
+@model EventAttendanceViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Attendance · {Model.Event.Title}";
+    var ev = Model.Event;
+    var q = Model.Query;
+    var fromHistory = q.From == "history";
+    ViewData["AdminSection"] = fromHistory ? "History" : "Events";
+    var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
+    const string columns = "xl:grid-cols-[8.5rem_minmax(0,1fr)_minmax(0,1.1fr)_7rem_10rem]";
+    var filtered = q.Q is not null || q.College is not null || q.Program is not null;
+    Dictionary<string, string> Routes(int page) => new() { ["id"] = ev.Id.ToString(CultureInfo.InvariantCulture), ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "", ["page"] = page.ToString(CultureInfo.InvariantCulture), ["from"] = q.From ?? "" };
+}
+<main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
+    <a asp-route="@(fromHistory ? "AdminEventHistory" : "AdminEvents")" class="@focus mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-campus-muted hover:text-campus-action"><span aria-hidden="true">←</span> @(fromHistory ? "Back to history" : "Back to events")</a>
+    <partial name="_EventHeader" model="@(new EventHeaderViewModel(ev.Title, ev.Status, ev.StartsAt, ev.EndsAt, ev.Venue, ev.Registered, ev.Capacity))" />
+    <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Attendance", fromHistory))" />
+    <section aria-labelledby="attendance-heading" class="mt-6 overflow-hidden rounded-xl border border-campus-line bg-white">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-campus-line p-4"><h2 id="attendance-heading" class="text-sm font-bold text-campus-navy">Checked-in students <span class="ml-1 rounded-md bg-campus-input px-1.5 py-0.5 text-xs tabular-nums">@Model.CheckedIn</span></h2><p class="text-xs text-campus-muted">Newest check-in first</p></div>
+        <form asp-route="AdminEventAttendance" asp-route-id="@ev.Id" method="get" role="search" class="grid items-end gap-3 p-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,.8fr)_auto]">
+            <input type="hidden" name="from" value="@q.From" />
+            <div class="min-w-0"><label for="attendance-search" class="event-label">Search attendance</label><input id="attendance-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID, name or ticket reference" class="@focus event-input" /></div>
+            <div class="min-w-0"><label for="attendance-college" class="event-label">College</label><select id="attendance-college" name="college" class="@focus event-input"><option value="">All colleges</option>@if (q.College is not null && !Model.Colleges.Contains(q.College)) { <option selected>@q.College</option> }@foreach (var college in Model.Colleges) { <option selected="@(q.College == college)">@college</option> }</select></div>
+            <div class="min-w-0"><label for="attendance-program" class="event-label">Program</label><select id="attendance-program" name="program" class="@focus event-input"><option value="">All programs</option>@if (q.Program is not null && !Model.Programs.Contains(q.Program)) { <option selected>@q.Program</option> }@foreach (var program in Model.Programs) { <option selected="@(q.Program == program)">@program</option> }</select></div>
+            <div class="flex flex-wrap gap-2"><button type="submit" class="@focus event-primary">Search</button><a asp-route="AdminEventAttendance" asp-route-id="@ev.Id" asp-route-from="@q.From" class="@focus event-secondary">Reset filters</a></div>
+        </form>
+        @if (Model.Attendees.Count == 0)
+        {
+            <div class="border-t border-campus-line px-4 py-10 text-center"><h3 class="text-base font-bold text-campus-navy">@(filtered ? "No matching students" : "No checked-in students yet")</h3><p class="mx-auto mt-2 max-w-sm text-sm leading-6 text-campus-muted">@(filtered ? "Try another search or reset your filters." : "Students will appear here after their check-in is confirmed in Attendance scanner.")</p></div>
+        }
+        else
+        {
+            <div aria-hidden="true" class="@columns hidden items-center gap-x-4 border-y border-campus-line bg-campus-input px-4 py-3 text-xs font-semibold text-campus-muted xl:grid"><span>Ticket ref</span><span>Student</span><span>College & program</span><span>Year & section</span><span>Checked in (PHT)</span></div>
+            <ul role="list" class="divide-y divide-campus-line">
+                @foreach (var attendee in Model.Attendees)
+                {
+                    <li class="@columns grid gap-x-4 gap-y-4 px-4 py-5 text-sm sm:grid-cols-2 xl:items-center">
+                        <div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">Ticket ref</span><span class="text-xs font-medium wrap-break-word tabular-nums">@attendee.TicketReference(ev.Id)</span></div>
+                        <div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">Student</span><h3 class="text-sm font-semibold wrap-break-word text-campus-navy">@attendee.Name</h3><p class="mt-1 text-xs wrap-break-word text-campus-muted">@attendee.StudentId</p></div>
+                        <div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">College & program</span><p class="text-sm font-semibold wrap-break-word">@attendee.Program</p><p class="mt-1 text-xs wrap-break-word text-campus-muted">@attendee.College</p></div>
+                        <div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">Year & section</span><p>Year @attendee.Year</p><p class="mt-1 text-xs wrap-break-word text-campus-muted">@attendee.Section</p></div>
+                        <div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">Checked in (PHT)</span>@if (attendee.CheckedInAt is { } timestamp) { <time datetime="@timestamp.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)+08:00">@timestamp.ToString("MMM d, yyyy", CultureInfo.InvariantCulture)<span class="mt-1 block text-xs font-medium tabular-nums text-campus-muted">@timestamp.ToString("h:mm:ss tt", CultureInfo.InvariantCulture)</span></time> } else { <span class="text-xs text-campus-muted">Time unavailable</span> }</div>
+                    </li>
+                }
+            </ul>
+        }
+        <nav aria-label="Attendance pages" class="flex flex-wrap items-center justify-between gap-3 border-t border-campus-line px-4 py-3 text-xs text-campus-muted"><span>@Model.Total matching · @Model.CheckedIn checked in</span><div class="flex items-center gap-2"><span>Page @q.Page of @Model.TotalPages</span>@if (q.Page > 1) { <a asp-route="AdminEventAttendance" asp-all-route-data="@Routes(q.Page - 1)" class="@focus event-secondary">Previous</a> }@if (q.Page < Model.TotalPages) { <a asp-route="AdminEventAttendance" asp-all-route-data="@Routes(q.Page + 1)" class="@focus event-secondary">Next</a> }</div></nav>
+    </section>
+</main>

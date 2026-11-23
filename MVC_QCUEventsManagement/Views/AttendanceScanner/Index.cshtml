@@ -8,18 +8,10 @@
     var ev = Model.Event;
     var inactive = ev.Status != "Upcoming";
     var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
-    var badge = ev.Status == "Cancelled" ? "bg-red-50 text-red-800" : inactive ? "bg-campus-input text-campus-muted" : "bg-emerald-50 text-emerald-800";
 }
 <main id="attendance-scanner" data-confirm-url="@Url.Action("Confirm", new { id = ev.Id })" class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <a asp-route="@(Model.FromHistory ? "AdminEventHistory" : "AdminEvents")" class="@focus mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-campus-muted hover:text-campus-action"><span aria-hidden="true">←</span> @(Model.FromHistory ? "Back to history" : "Back to events")</a>
-    <header>
-        <div class="flex flex-wrap items-center gap-3"><h1 class="min-w-0 text-2xl leading-tight font-extrabold tracking-tight wrap-break-word text-campus-navy sm:text-[1.75rem]">@ev.Title</h1><span class="@badge rounded-full px-3 py-1 text-xs font-semibold">@ev.Status</span></div>
-        <dl class="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
-            <div><dt class="mb-1 text-xs text-campus-muted">Event date</dt><dd class="font-semibold"><time datetime="@ev.StartsAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@ev.StartsAt.ToString("dddd, MMM d, yyyy", CultureInfo.InvariantCulture)</time></dd></div>
-            <div class="min-w-0"><dt class="mb-1 text-xs text-campus-muted">Venue</dt><dd class="font-semibold wrap-break-word">@ev.Venue</dd></div>
-            <div><dt class="mb-1 text-xs text-campus-muted">Registered seats</dt><dd class="font-semibold tabular-nums">@ev.Registered / @ev.Capacity</dd></div>
-        </dl>
-    </header>
+    <partial name="_EventHeader" model="@(new EventHeaderViewModel(ev.Title, ev.Status, ev.StartsAt, ev.EndsAt, ev.Venue, ev.Registered, ev.Capacity))" />
     <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Attendance scanner", Model.FromHistory))" />
     @if (inactive) { <p role="status" class="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">This event is inactive. Pass lookup is available, but check-in is blocked.</p> }
     <div class="mt-6 grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">

@@ -537,6 +537,66 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal(change == "cancel-pass" ? "Cancelled" : change == "check-in" ? "Present" : "NoShow", retained.Status);
     }
 
+    [Fact]
+    public async Task Attendance_is_present_only_event_scoped_searchable_and_read_only()
+    {
+        var (ev, student) = await CreateGraphAsync();
+        student.FirstName = "Mikaela"; student.MiddleName = "Mae"; student.LastName = "Dizon";
+        var present = NewRegistration(ev, student); present.Status = "Present"; present.CheckInTimestamp = ev.EventStart;
+        var engineer = NewStudent(NewUser($"attendance-{Guid.NewGuid():N}@example.test"));
+        engineer.Department = "College of Engineering"; engineer.Program = "BSIE";
+        var later = NewRegistration(ev, engineer); later.Status = "Present"; later.CheckInTimestamp = ev.EventStart.AddMinutes(1); later.CurrentYearLvl = 4;
+        var reserved = NewRegistration(ev, NewStudent(NewUser($"reserved-{Guid.NewGuid():N}@example.test")));
+        var cancelled = NewRegistration(ev, NewStudent(NewUser($"cancelled-{Guid.NewGuid():N}@example.test")));
+        cancelled.Status = "Cancelled"; cancelled.CheckInTimestamp = ev.EventStart.AddHours(1);
+        var (other, otherStudent) = await CreateGraphAsync();
+        var elsewhere = NewRegistration(other, otherStudent); elsewhere.Status = "Present"; elsewhere.CheckInTimestamp = other.EventStart;
+        ev.CurrentRegistrations = 3;
+        _db.EventRegistrations.AddRange(present, later, reserved, cancelled, elsewhere); await _db.SaveChangesAsync();
+        var version = ev.RowVersion.ToArray();
+        var service = new AttendanceService(_db, new EventClock(TimeProvider.System));
+        var all = await service.GetAttendanceAsync(ev.EventId, new(), default);
+        Assert.NotNull(all); Assert.Equal(2, all.CheckedIn); Assert.Equal(2, all.Total);
+        Assert.Equal(new[] { later.EventRegistrationId, present.EventRegistrationId }, all.Attendees.Select(a => a.RegistrationId));
+        Assert.Equal(ev.EventEnd, all.Event.EndsAt); Assert.Equal(2, all.Colleges.Count);
+        var filtered = await service.GetAttendanceAsync(ev.EventId, new() { Q = " mikaela mae DIZON ", College = student.Department, Program = student.Program, From = "history" }, default);
+        Assert.Equal(present.EventRegistrationId, Assert.Single(filtered!.Attendees).RegistrationId);
+        Assert.Equal(3, filtered.Attendees[0].Year); Assert.Equal("SBIT-3A", filtered.Attendees[0].Section);
+        Assert.Equal(2, filtered.CheckedIn); Assert.Equal(all.Programs, filtered.Programs); Assert.Equal("history", filtered.Query.From);
+        var byTicket = await service.GetAttendanceAsync(ev.EventId, new() { Q = $"tck-{ev.EventId:D4}-{later.EventRegistrationId:D5}" }, default);
+        Assert.Equal(later.EventRegistrationId, Assert.Single(byTicket!.Attendees).RegistrationId);
+        var byId = await service.GetAttendanceAsync(ev.EventId, new() { Q = student.StudentId.ToLowerInvariant() }, default);
+        Assert.Single(byId!.Attendees);
+        var wrongEvent = await service.GetAttendanceAsync(ev.EventId, new() { Q = $"TCK-{other.EventId:D4}-{present.EventRegistrationId:D5}" }, default);
+        Assert.Empty(wrongEvent!.Attendees);
+        Assert.Null(await service.GetAttendanceAsync(int.MaxValue, new(), default));
+        var saved = await _db.Events.AsNoTracking().SingleAsync(e => e.EventId == ev.EventId);
+        Assert.Equal(version, saved.RowVersion); Assert.Equal(3, saved.CurrentRegistrations);
+        Assert.Equal("NoShow", await _db.EventRegistrations.Where(r => r.EventRegistrationId == reserved.EventRegistrationId).Select(r => r.Status).SingleAsync());
+    }
+
+    [Fact]
+    public async Task Attendance_paginates_stable_ties_and_bounds_queries()
+    {
+        var (ev, student) = await CreateGraphAsync();
+        for (var i = 0; i < 27; i++)
+        {
+            var pass = NewRegistration(ev, i == 0 ? student : NewStudent(NewUser($"attendance-page-{Guid.NewGuid():N}@example.test")));
+            pass.Status = "Present"; pass.CheckInTimestamp = ev.EventStart;
+            _db.EventRegistrations.Add(pass);
+        }
+        ev.CurrentRegistrations = 27; await _db.SaveChangesAsync();
+        var service = new AttendanceService(_db, new EventClock(TimeProvider.System));
+        var first = await service.GetAttendanceAsync(ev.EventId, new() { Page = -1, From = "invalid" }, default);
+        Assert.Equal(25, first!.Attendees.Count); Assert.Equal(1, first.Query.Page); Assert.Null(first.Query.From);
+        Assert.Equal(first.Attendees.OrderByDescending(a => a.RegistrationId), first.Attendees);
+        var last = await service.GetAttendanceAsync(ev.EventId, new() { Page = int.MaxValue }, default);
+        Assert.Equal(2, last!.Query.Page); Assert.Equal(2, last.Attendees.Count); Assert.Equal(ev.EventStart, last.Attendees[^1].CheckedInAt);
+        Assert.DoesNotContain(last.Attendees[0].RegistrationId, first.Attendees.Select(a => a.RegistrationId));
+        var empty = await service.GetAttendanceAsync(ev.EventId, new() { Q = " " + new string('z', 200), Page = int.MaxValue }, default);
+        Assert.Empty(empty!.Attendees); Assert.Equal(150, empty.Query.Q!.Length); Assert.Equal(1, empty.Query.Page); Assert.Equal(27, empty.CheckedIn);
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");

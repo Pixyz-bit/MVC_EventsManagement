@@ -14,7 +14,7 @@ public sealed class RegistrationService(ApplicationDbContext db, EventClock cloc
         var now = clock.Now;
         var ev = await db.Events.AsNoTracking().Where(e => e.EventId == id)
             .Select(e => new EventRosterContext(e.EventId, e.Title, e.VenueLocation, e.EventStart, e.MaxCapacity,
-                e.CurrentRegistrations, e.Status == "Upcoming" && e.EventEnd <= now ? "Completed" : e.Status, e.RowVersion)).SingleOrDefaultAsync(ct);
+                e.CurrentRegistrations, e.Status == "Upcoming" && e.EventEnd <= now ? "Completed" : e.Status, e.RowVersion, e.EventEnd)).SingleOrDefaultAsync(ct);
         if (ev is null) return null;
         static string? Limit(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim()[..Math.Min(text.Trim().Length, 150)];
         var query = new EventRosterQuery { Q = Limit(input.Q), College = Limit(input.College), Program = Limit(input.Program),

@@ -1,0 +1,20 @@
+@using System.Globalization
+@model MVC_QCUEventsManagement.ViewModels.Admin.EventHeaderViewModel
+@{
+    var badge = Model.Status == "Cancelled" ? "bg-red-50 text-red-800" : Model.Status == "Completed" ? "bg-campus-input text-campus-muted" : "bg-emerald-50 text-emerald-800";
+    var culture = CultureInfo.InvariantCulture;
+}
+<header>
+    <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="flex min-w-0 flex-wrap items-center gap-3"><h1 class="min-w-0 text-2xl leading-tight font-extrabold tracking-tight wrap-break-word text-campus-navy sm:text-[1.75rem]">@Model.Title</h1><span class="@badge shrink-0 rounded-full px-3 py-1 text-xs font-semibold">@Model.Status</span></div>
+        @if (Model.ManageEventId is { } id)
+        {
+            <div class="flex flex-wrap gap-2"><button type="button" id="open-cancel-event" aria-haspopup="dialog" aria-controls="cancel-event" class="event-secondary text-red-800">Cancel event</button><a asp-route="AdminEventDetails" asp-route-id="@id" asp-route-edit="true" class="event-primary">Edit event</a></div>
+        }
+    </div>
+    <dl class="mt-4 grid gap-x-8 gap-y-4 text-sm sm:grid-cols-3">
+        <div class="min-w-0"><dt class="mb-1 text-xs text-campus-muted">Event date</dt><dd class="font-semibold"><time datetime="@Model.Start.ToString("yyyy-MM-dd", culture)">@Model.Start.ToString("dddd, MMM d, yyyy", culture)</time><span class="mt-1 block text-xs font-normal text-campus-muted">@Model.Start.ToString("h:mm tt", culture) – @Model.End.ToString(Model.Start.Date == Model.End.Date ? "h:mm tt" : "MMM d, yyyy h:mm tt", culture)</span></dd></div>
+        <div class="min-w-0"><dt class="mb-1 text-xs text-campus-muted">Venue</dt><dd class="font-semibold wrap-break-word">@Model.Venue</dd></div>
+        <div><dt class="mb-1 text-xs text-campus-muted">Registered seats</dt><dd class="font-semibold tabular-nums">@Model.Registered / @Model.Capacity</dd></div>
+    </dl>
+</header>

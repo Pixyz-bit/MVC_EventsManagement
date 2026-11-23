@@ -538,6 +538,46 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal(1, await verification.Events.Where(e => e.EventId == id).Select(e => e.CurrentRegistrations).SingleAsync());
     }
 
+    [Fact]
+    public async Task Attendance_requires_admin_renders_real_data_and_shares_the_event_header()
+    {
+        int id;
+        await using (var db = CreateContext())
+        {
+            var day = new EventClock(TimeProvider.System).Now.AddDays(5);
+            var ev = new Event { Title = "Attendance <verification>", VenueLocation = "Campus Hall", MaxCapacity = 30, CurrentRegistrations = 1,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = day, EventEnd = day.AddHours(2), RegStart = DateOnly.FromDateTime(day.AddDays(-3)), RegEnd = DateOnly.FromDateTime(day.AddDays(-1)) };
+            db.EventRegistrations.Add(new EventRegistration { Event = ev, StudentId = _studentId, CurrentYearLvl = 4, CurrentSection = "SBIT-4B", Status = "Present", CheckInTimestamp = day });
+            await db.SaveChangesAsync(); id = ev.EventId;
+        }
+        var path = $"/admin/events/{id}/attendance";
+        using var anonymous = NewClient(); using var anonymousPage = await anonymous.GetAsync(path);
+        Assert.StartsWith("/login?", RedirectPath(anonymousPage));
+        using var student = NewClient(); using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync(path); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        using var missing = await client.GetAsync("/admin/events/2147483647/attendance"); Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var page = await client.GetAsync(path + "?from=history"); Assert.Equal(HttpStatusCode.OK, page.StatusCode);
+        var html = await page.Content.ReadAsStringAsync();
+        Assert.Contains("Test Student", html); Assert.Contains(_studentId, html); Assert.Contains("SBIT-4B", html);
+        Assert.DoesNotContain(_studentEmail, html); Assert.DoesNotContain("Attendance <verification>", html);
+        Assert.Contains("Attendance &lt;verification&gt;", html); Assert.Contains("Checked in (PHT)", html);
+        Assert.Contains("Back to history", html); Assert.Contains("Page 1 of 1", html);
+        Assert.DoesNotContain("open-cancel-event", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
+        var header = Regex.Match(html, "<header>[\\s\\S]*?</header>").Value;
+        Assert.Contains("Registered seats", header); Assert.Contains("Venue", header);
+        foreach (var suffix in new[] { "", "/preregistered", "/scanner" })
+        {
+            var otherHtml = await client.GetStringAsync($"/admin/events/{id}{suffix}");
+            Assert.Contains(Regex.Match(header, "<dl[\\s\\S]*?</dl>").Value, otherHtml);
+            Assert.Contains($"/admin/events/{id}/attendance", otherHtml);
+        }
+        var empty = await client.GetStringAsync(path + "?q=absent-name&college=unlisted&program=other");
+        Assert.Contains("No matching students", empty); Assert.Contains("value=\"absent-name\"", empty);
+        Assert.Contains("Reset filters", empty);
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

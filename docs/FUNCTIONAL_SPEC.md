@@ -203,7 +203,7 @@ Evidence: Dashboard/EventRegistration/EventPass/StudentProfile.aspx/.cs; EventRe
 ### ROSTER-01: Lists
 
 - [x] `/admin/events/{id}/preregistered` includes all non-Cancelled registrations, including Present, with Cancelled in a separate cohort. Student ID/name search, college/program/registered-year filters, reset and 25-row paging combine on the server. Cohort counts/options cover the whole selected event. Rows show Ticket ref, Student name/ID, College & program, Year & section, Status, then View. NoShow displays as Reserved. The attendee modal adds campus and pass cancellation confirmation. Email is intentionally omitted from rows and modal per user direction. Registration year/section comes from the booking, not a current student year.
-- [ ] Attendance includes Present ordered by timestamp descending, search/department/program filters, latest check-in and turnout. Available booking seats use CurrentRegistrations; physical occupancy uses Present counts.
+- [x] Attendance includes only current Present registrations for the selected event, ordered by check-in timestamp then registration ID descending. Student ID/full-name/ticket-reference search combines with college/program filters and 25-row paging. Event-wide checked-in count and options remain independent of filters. Rows follow Ticket ref, Student name/ID, College & program, registered Year & section, Check-in date/time (PHT), without email or actions. Latest check-in is the first row; turnout summaries belong to the later Analytics page. Available booking seats use CurrentRegistrations; physical occupancy uses Present counts.
 
 Acceptance: check-in stays in preregistered and appears in attendance; void moves to revoked; counts and filter scope are correct, including empty lists.
 

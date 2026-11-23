@@ -14,20 +14,12 @@
     var reopen = TempData["RosterAttendee"] as int?;
     var cohortCancelled = q.Cohort == "Cancelled";
     var filters = q.Q is not null || q.College is not null || q.Program is not null || q.Year is not null;
-    var statusClass = ev.Status == "Cancelled" ? "bg-red-50 text-red-800" : ev.Status == "Completed" ? "bg-campus-input text-campus-muted" : "bg-emerald-50 text-emerald-800";
     string Badge(string status) => status == "Present" ? "bg-emerald-50 text-emerald-800" : status == "Cancelled" ? "bg-red-50 text-red-800" : "bg-blue-50 text-blue-800";
     Dictionary<string, string> Routes(int page, string? cohort = null) => new() { ["id"] = ev.Id.ToString(CultureInfo.InvariantCulture), ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "", ["year"] = q.Year?.ToString(CultureInfo.InvariantCulture) ?? "", ["cohort"] = cohort ?? q.Cohort ?? "", ["page"] = page.ToString(CultureInfo.InvariantCulture), ["from"] = q.From ?? "" };
 }
 <main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <a asp-route="@(fromHistory ? "AdminEventHistory" : "AdminEvents")" class="@focus mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-campus-muted hover:text-campus-action"><span aria-hidden="true">←</span> @(fromHistory ? "Back to history" : "Back to events")</a>
-    <header>
-        <div class="flex flex-wrap items-center gap-3"><h1 class="min-w-0 text-2xl leading-tight font-extrabold tracking-tight wrap-break-word text-campus-navy sm:text-[1.75rem]">@ev.Title</h1><span class="@statusClass rounded-full px-3 py-1 text-xs font-semibold">@ev.Status</span></div>
-        <dl class="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
-            <div><dt class="mb-1 text-xs text-campus-muted">Event date</dt><dd class="font-semibold"><time datetime="@ev.StartsAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@ev.StartsAt.ToString("dddd, MMM d, yyyy", CultureInfo.InvariantCulture)</time></dd></div>
-            <div class="min-w-0"><dt class="mb-1 text-xs text-campus-muted">Venue</dt><dd class="font-semibold wrap-break-word">@ev.Venue</dd></div>
-            <div><dt class="mb-1 text-xs text-campus-muted">Registered seats</dt><dd class="font-semibold tabular-nums">@ev.Registered / @ev.Capacity<span class="mt-1 block text-xs font-normal text-campus-muted">@(ev.Capacity - ev.Registered) seats available</span></dd></div>
-        </dl>
-    </header>
+    <partial name="_EventHeader" model="@(new EventHeaderViewModel(ev.Title, ev.Status, ev.StartsAt, ev.EndsAt, ev.Venue, ev.Registered, ev.Capacity))" />
     <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Pre-registered", fromHistory))" />
     @if (TempData["RosterMessage"] is string message) { <p role="status" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">@message</p> }
     @if (error is not null) { <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">@error</p> }
