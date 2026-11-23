@@ -27,6 +27,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetailsController.cs
 |   |   |-- EventHistoryController.cs
 |   |   |-- EventPreRegisteredController.cs
+|   |   |-- AttendanceScannerController.cs
 |   |   |-- PrivacyController.cs
 |   |   |-- ErrorController.cs
 |   |   |-- StudentController.cs
@@ -68,6 +69,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetails/
 |   |   |-- EventHistory/
 |   |   |-- EventPreRegistered/
+|   |   |-- AttendanceScanner/
 |   |   |-- Student/
 |   |   |-- Privacy/
 |   |   |-- Error/
@@ -109,6 +111,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Event Details/edit/cancel | EventDetailsController | ViewModels/Admin/EventDetailsViewModel.cs and EventDetailsData.cs; shared CreateEventInput | Views/EventDetails/Index.cshtml |
 | Events History | EventHistoryController | ViewModels/Admin/EventHistoryViewModel.cs and EventHistoryItem.cs | Views/EventHistory/Index.cshtml |
 | Pre-registered roster/void | EventPreRegisteredController | EventRosterViewModel, EventRosterQuery, EventRosterContext, RosterAttendee, VoidPassInput (each in ViewModels/Admin) | Views/EventPreRegistered/Index.cshtml |
+| Attendance Scanner | AttendanceScannerController | AttendanceScannerViewModel, ScanAttendee, ScanLookupResult, CheckInInput (each in ViewModels/Admin) | Views/AttendanceScanner/Index.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
@@ -124,3 +127,5 @@ The details cancellation UI now uses a native dialog controlled by the existing 
 EventHistoryController serves the Admin-only named route AdminEventHistory at GET `/admin/events/history`. EventService.GetHistoryAsync projects effective outcomes, global counts, academic-year options, combined filters and pagination through SQL using no tracking. Razor renders normal GET forms/links without a client data service. History title links open details with `from=history`, retaining the History navigation state and Back to history destination; historical events stay read-only.
 
 RegistrationService is request-scoped and owns no-tracking roster projections, normalized filters, metadata/counts, 25-row pagination and atomic administrator pass voiding. EventPreRegisteredController serves GET `/admin/events/{id}/preregistered` (AdminEventPreRegistered) and POST `/admin/events/{id}/preregistered/{registrationId}/void`. `_EventWorkflowNavigation.cshtml` with EventWorkflowViewModel is shared by Details and Pre-registered. `wwwroot/js/admin/event-roster.js` manages native attendee dialogs, confirmation and focus only; persistence uses antiforgery-protected MVC forms. No email is loaded by the roster projection.
+
+AttendanceService is request-scoped. GET `/admin/events/{id}/scanner` (AdminAttendanceScanner) renders the scanner. Antiforgery-protected POST `/lookup` and `/confirm` under that route return JSON. The service projects pass/event/student data without email output and uses one conditional EF ExecuteUpdateAsync for admission. `wwwroot/js/admin/attendance-scanner.js` owns staging, asynchronous request ordering, confirmation and camera lifecycle; `wwwroot/js/vendor/html5-qrcode-2.3.8.min.js` and its Apache-2.0 license are reused unchanged from the source. No attendance-list endpoint exists until the next proposal is approved.

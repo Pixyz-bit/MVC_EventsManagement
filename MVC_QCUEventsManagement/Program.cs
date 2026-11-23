@@ -53,6 +53,7 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AccountCookieEvents>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddSingleton<EventBannerStore>();
 
 await using var app = builder.Build();

@@ -1,0 +1,96 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+#attendance-preview{--a-ink:#192b40;--a-muted:#485b70;--a-blue:#155bb1;--a-line:#d6dce2;--a-fill:#f4f7fb;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--a-ink);color-scheme:light}
+#attendance-preview *{box-sizing:border-box}
+#attendance-preview .a-shell{display:grid;grid-template-columns:180px minmax(0,1fr);background:#fff;min-height:710px}
+#attendance-preview .a-sidebar{border-right:1px solid var(--a-line);padding:24px 12px;display:flex;flex-direction:column;gap:28px}
+#attendance-preview .a-brand{font-size:16px;font-weight:800;padding:0 10px;color:#142c48}
+#attendance-preview .a-brand small{display:block;font-size:12px;color:var(--a-muted);font-weight:400}
+#attendance-preview .a-group{font-size:12px;font-weight:700;color:var(--a-muted);margin:0 10px 8px}
+#attendance-preview .a-nav-item{font-size:12px;min-height:44px;padding:10px;color:var(--a-muted);border-radius:8px;margin-block:2px}
+#attendance-preview .a-nav-item.current{background:#eff6ff;color:var(--a-blue);font-weight:700;border-left:1px solid var(--a-blue)}
+#attendance-preview .a-account{margin-top:auto;border-top:1px solid var(--a-line);padding:16px 10px 0;font-size:12px;color:var(--a-muted)}
+#attendance-preview .a-mobile-brand{display:none}
+#attendance-preview .a-main{padding:24px;min-width:0}
+#attendance-preview .a-back{display:flex;min-height:36px;align-items:center;gap:8px;margin-bottom:18px;color:var(--a-muted);font-size:12px;font-weight:600}
+#attendance-preview .a-title{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+#attendance-preview h1{margin:0;font-size:26px;line-height:1.25;letter-spacing:-.025em;font-weight:800;color:#142c48}
+#attendance-preview .a-badge{font-size:12px;font-weight:600;background:#ecfdf5;color:#065f46;border-radius:99px;padding:3px 9px}
+#attendance-preview .a-meta{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:18px;margin:16px 0 22px}
+#attendance-preview dt{font-size:12px;color:var(--a-muted);margin-bottom:3px}
+#attendance-preview dd{font-size:12px;font-weight:600;margin:0;overflow-wrap:anywhere}
+#attendance-preview .a-tabs{display:flex;flex-wrap:wrap;gap:8px 22px;border-bottom:1px solid var(--a-line);font-size:12px;color:var(--a-muted);margin-bottom:24px}
+#attendance-preview .a-tabs span{min-height:44px;display:flex;align-items:center;border-bottom:2px solid transparent}
+#attendance-preview .a-tabs .active{font-weight:700;color:var(--a-blue);border-color:var(--a-blue)}
+#attendance-preview .a-results{border:1px solid var(--a-line);border-radius:12px;overflow:hidden}
+#attendance-preview .a-results-title{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:16px;border-bottom:1px solid var(--a-line)}
+#attendance-preview h2{font-size:14px;color:#142c48;font-weight:700;margin:0}
+#attendance-preview .a-count{display:inline-block;margin-left:6px;padding:1px 6px;background:var(--a-fill);border-radius:5px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+#attendance-preview .a-order{font-size:12px;color:var(--a-muted)}
+#attendance-preview .a-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;padding:16px;align-items:end}
+#attendance-preview .a-search{grid-column:1/-1}
+#attendance-preview label{display:block;font-size:12px;font-weight:600;color:var(--a-ink);margin-bottom:6px}
+#attendance-preview button,#attendance-preview input,#attendance-preview select{font:inherit}
+#attendance-preview input,#attendance-preview select{display:block;width:100%;min-width:0;min-height:44px;border:1px solid var(--a-line);border-radius:8px;background:var(--a-fill);color:var(--a-ink);padding:10px 12px;font-size:13px}
+#attendance-preview input::placeholder{color:var(--a-muted)}
+#attendance-preview .a-button{min-height:44px;background:#fff;border:1px solid var(--a-line);border-radius:8px;padding:9px 13px;color:var(--a-blue);font-size:12px;font-weight:600;cursor:pointer}
+#attendance-preview .a-button:hover{background:var(--a-fill)}
+#attendance-preview .a-grid{display:grid;grid-template-columns:126px minmax(0,1fr) minmax(0,1.1fr) 90px 132px;gap:14px;align-items:center}
+#attendance-preview .a-head{background:var(--a-fill);border-block:1px solid var(--a-line);padding:12px 16px;font-size:12px;font-weight:600;color:var(--a-muted)}
+#attendance-preview .a-row{padding:var(--a-row-padding,20px) 16px;border-bottom:1px solid var(--a-line);font-size:12px;min-width:0}
+#attendance-preview .a-row>div{min-width:0;overflow-wrap:anywhere}
+#attendance-preview .a-row strong{display:block;font-size:13px;font-weight:700;line-height:1.6}
+#attendance-preview .a-secondary{display:block;margin-top:4px;font-size:12px;color:var(--a-muted);overflow-wrap:anywhere}
+#attendance-preview .a-reference{font-size:12px;font-variant-numeric:tabular-nums}
+#attendance-preview .a-time{display:block;margin-top:4px;font-variant-numeric:tabular-nums;font-weight:600;font-size:13px}
+#attendance-preview .a-mobile-label{display:none}
+#attendance-preview .a-footer{padding:14px 16px;font-size:12px;color:var(--a-muted)}
+#attendance-preview .a-empty{padding:40px 18px;text-align:center;color:var(--a-muted);font-size:13px}
+#attendance-preview .a-note{font-size:12px;color:var(--a-muted);margin:12px 0 0}
+#attendance-preview button:focus-visible,#attendance-preview input:focus-visible,#attendance-preview select:focus-visible{outline:2px solid #28649a;outline-offset:3px}
+@media(max-width:950px){#attendance-preview .a-shell{grid-template-columns:155px minmax(0,1fr)}#attendance-preview .a-main{padding:22px 18px}#attendance-preview .a-grid{grid-template-columns:112px minmax(0,1fr) minmax(0,1fr) 78px 112px;gap:10px}}
+@media(max-width:800px){#attendance-preview .a-shell{display:block;min-height:0}#attendance-preview .a-sidebar{display:none}#attendance-preview .a-mobile-brand{display:block;padding:14px 16px;border-bottom:1px solid var(--a-line);font-size:12px;font-weight:700}}
+@media(max-width:650px){#attendance-preview .a-main{padding:20px 16px}#attendance-preview h1{font-size:23px}#attendance-preview .a-meta{grid-template-columns:1fr 1fr;gap:14px}#attendance-preview .a-meta>div:last-child{grid-column:1/-1}#attendance-preview .a-tools{grid-template-columns:1fr}#attendance-preview .a-tools>div{grid-column:auto}#attendance-preview .a-button{justify-self:start}#attendance-preview input,#attendance-preview select{font-size:16px}#attendance-preview .a-head{display:none}#attendance-preview .a-row{grid-template-columns:minmax(0,1fr) auto;gap:14px}#attendance-preview .a-row>div:nth-child(1){grid-column:1/-1}#attendance-preview .a-row>div:nth-child(2){grid-column:1/-1}#attendance-preview .a-row>div:nth-child(3){grid-column:1;grid-row:3}#attendance-preview .a-row>div:nth-child(4){grid-column:2;grid-row:3}#attendance-preview .a-row>div:nth-child(5){grid-column:1/-1;grid-row:4}#attendance-preview .a-mobile-label{display:block;font-size:12px;color:var(--a-muted);margin-bottom:4px}}
+</style>
+<div id="attendance-preview" aria-label="QCU Attendance proposed layout">
+ <div class="a-shell">
+  <aside class="a-sidebar" aria-label="Administrator sidebar preview"><div class="a-brand">QCU Events<small>Administrator portal</small></div><div><p class="a-group">CORE MANAGEMENT</p><div class="a-nav-item current">Event Directory</div><div class="a-nav-item">Create Event</div><div class="a-nav-item">Events History</div></div><div><p class="a-group">ATTENDANCE &amp; USERS</p><div class="a-nav-item">Student Directory</div><div class="a-nav-item">Account Management</div></div><div class="a-account">Administrator</div></aside>
+  <div><div class="a-mobile-brand">QCU Events · Administrator portal</div><main class="a-main">
+   <div class="a-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to events</div>
+   <header><div class="a-title"><h1>Campus Research Forum</h1><span class="a-badge">Upcoming</span></div><dl class="a-meta"><div><dt>Event date</dt><dd>Monday, Nov 30, 2026</dd></div><div><dt>Venue</dt><dd>Central Auditorium</dd></div><div><dt>Registered seats</dt><dd>3 / 150</dd></div></dl></header>
+   <nav class="a-tabs" aria-label="Event workflows preview"><span>Details</span><span>Pre-registered</span><span>Attendance scanner</span><span class="active" aria-current="page">Attendance</span><span>Analytics</span></nav>
+   <section class="a-results" aria-labelledby="a-roster-title"><div class="a-results-title"><h2 id="a-roster-title">Checked-in students <span class="a-count">2</span></h2><span class="a-order">Newest check-in first</span></div>
+    <div class="a-tools"><div class="a-search"><label for="a-search">Search attendance</label><input id="a-search" type="search" placeholder="Student ID, name or ticket reference" /></div><div><label for="a-college">College</label><select id="a-college"><option value="">All colleges</option><option>College of Computer Studies</option><option>College of Engineering</option></select></div><div><label for="a-program">Program</label><select id="a-program"><option value="">All programs</option><option>BSIT</option><option>BSIE</option></select></div><button id="a-reset" type="button" class="a-button">Reset filters</button></div>
+    <div class="a-grid a-head" aria-hidden="true"><span>Ticket ref</span><span>Student</span><span>College &amp; program</span><span>Year &amp; section</span><span>Checked in (PHT)</span></div>
+    <div id="a-rows" role="list" aria-label="Checked-in students"></div><div id="a-results" class="a-footer" role="status" aria-live="polite"></div>
+   </section><p class="a-note">Fictional sample · Only students currently marked Present appear here.</p>
+  </main></div>
+ </div>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('attendance-preview');
+ const students=[
+  {ticket:'TCK-1007-00341',id:'2024-10437',name:'Mikaela Dizon',college:'College of Computer Studies',program:'BSIT',year:3,section:'SBIT-3A',time:'9:24:09 AM'},
+  {ticket:'TCK-1007-00342',id:'2023-08716',name:'Rafael Mendoza',college:'College of Engineering',program:'BSIE',year:4,section:'SBIE-4B',time:'9:17:32 AM'}
+ ];
+ const query=root.querySelector('#a-search'),college=root.querySelector('#a-college'),program=root.querySelector('#a-program');
+ const make=(parent,text,tag='span',cls='')=>{const element=document.createElement(tag);element.textContent=text;if(cls)element.className=cls;parent.append(element);return element;};
+ function render(){
+  const text=query.value.trim().toLowerCase();const matches=students.filter(student=>(!text||[student.id,student.name,student.ticket].some(value=>value.toLowerCase().includes(text)))&&(!college.value||student.college===college.value)&&(!program.value||student.program===program.value));
+  const list=root.querySelector('#a-rows');list.replaceChildren();
+  for(const student of matches){const row=make(list,'','article','a-grid a-row');row.setAttribute('role','listitem');
+   const ticket=make(row,'','div');make(ticket,'Ticket ref','span','a-mobile-label');make(ticket,student.ticket,'span','a-reference');
+   const identity=make(row,'','div');make(identity,student.name,'strong');make(identity,student.id,'span','a-secondary');
+   const academic=make(row,'','div');make(academic,student.program,'strong');make(academic,student.college,'span','a-secondary');
+   const year=make(row,'','div');make(year,`Year ${student.year}`);make(year,student.section,'span','a-secondary');
+   const timestamp=make(row,'','div');make(timestamp,'Checked in (PHT)','span','a-mobile-label');make(timestamp,'Nov 30, 2026');make(timestamp,student.time,'span','a-time');
+  }
+  if(!matches.length)make(list,'No checked-in students match these filters. Try another search or reset filters.','p','a-empty');
+  root.querySelector('#a-results').textContent=`${matches.length} of ${students.length} checked-in students shown`;
+ }
+ query.addEventListener('input',render);college.addEventListener('change',render);program.addEventListener('change',render);
+ root.querySelector('#a-reset').addEventListener('click',()=>{query.value='';college.value='';program.value='';render();});render();
+ if(globalThis.Tweak){const state={spacing:'Comfortable'};const tweak=new Tweak({container:root,onChange:()=>root.style.setProperty('--a-row-padding',state.spacing==='Compact'?'13px':'20px')});tweak.addSelect(state,'spacing',{label:'Row spacing',options:['Comfortable','Compact']});}
+})();
+</script>

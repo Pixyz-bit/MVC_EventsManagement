@@ -1,0 +1,58 @@
+@using System.Globalization
+@using MVC_QCUEventsManagement.ViewModels.Admin
+@model AttendanceScannerViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Attendance scanner · {Model.Event.Title}";
+    ViewData["AdminSection"] = Model.FromHistory ? "History" : "Events";
+    var ev = Model.Event;
+    var inactive = ev.Status != "Upcoming";
+    var focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-campus-focus";
+    var badge = ev.Status == "Cancelled" ? "bg-red-50 text-red-800" : inactive ? "bg-campus-input text-campus-muted" : "bg-emerald-50 text-emerald-800";
+}
+<main id="attendance-scanner" data-confirm-url="@Url.Action("Confirm", new { id = ev.Id })" class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
+    <a asp-route="@(Model.FromHistory ? "AdminEventHistory" : "AdminEvents")" class="@focus mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-campus-muted hover:text-campus-action"><span aria-hidden="true">←</span> @(Model.FromHistory ? "Back to history" : "Back to events")</a>
+    <header>
+        <div class="flex flex-wrap items-center gap-3"><h1 class="min-w-0 text-2xl leading-tight font-extrabold tracking-tight wrap-break-word text-campus-navy sm:text-[1.75rem]">@ev.Title</h1><span class="@badge rounded-full px-3 py-1 text-xs font-semibold">@ev.Status</span></div>
+        <dl class="mt-4 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
+            <div><dt class="mb-1 text-xs text-campus-muted">Event date</dt><dd class="font-semibold"><time datetime="@ev.StartsAt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)">@ev.StartsAt.ToString("dddd, MMM d, yyyy", CultureInfo.InvariantCulture)</time></dd></div>
+            <div class="min-w-0"><dt class="mb-1 text-xs text-campus-muted">Venue</dt><dd class="font-semibold wrap-break-word">@ev.Venue</dd></div>
+            <div><dt class="mb-1 text-xs text-campus-muted">Registered seats</dt><dd class="font-semibold tabular-nums">@ev.Registered / @ev.Capacity</dd></div>
+        </dl>
+    </header>
+    <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Attendance scanner", Model.FromHistory))" />
+    @if (inactive) { <p role="status" class="mt-5 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">This event is inactive. Pass lookup is available, but check-in is blocked.</p> }
+    <div class="mt-6 grid items-stretch gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+        <div class="grid min-w-0 content-start gap-5 sm:grid-cols-2 xl:grid-cols-1">
+            <section class="overflow-hidden rounded-xl border border-campus-line" aria-labelledby="scanner-camera-heading">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-campus-line p-4"><h2 id="scanner-camera-heading" class="text-sm font-bold text-campus-navy">Scan QR pass</h2><button id="scanner-camera-toggle" type="button" class="@focus event-secondary" aria-pressed="false">Start camera</button></div>
+                <div class="m-4 overflow-hidden rounded-lg border border-dashed border-campus-field bg-campus-input">
+                    <div id="scanner-reader"></div>
+                    <div id="scanner-camera-placeholder" class="grid min-h-52 place-content-center gap-2 p-6 text-center"><svg class="mx-auto size-8 text-campus-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3H4a1 1 0 0 0-1 1v4m13-5h4a1 1 0 0 1 1 1v4M3 16v4a1 1 0 0 0 1 1h4m8 0h4a1 1 0 0 0 1-1v-4M7 7h3v3H7zm7 0h3v3h-3zM7 14h3v3H7zm7 0h3v3h-3z" /></svg><p id="scanner-camera-title" class="text-sm font-semibold">Camera off</p><p id="scanner-camera-message" class="mx-auto max-w-64 text-xs leading-6 text-campus-muted">Start the camera to scan a student’s QR pass.</p></div>
+                </div>
+                <div id="scanner-camera-settings" class="px-4 pb-4" hidden><label for="scanner-camera-device" class="event-label">Camera</label><select id="scanner-camera-device" class="@focus event-input"></select></div>
+            </section>
+            <section class="rounded-xl border border-campus-line" aria-labelledby="scanner-manual-heading">
+                <h2 id="scanner-manual-heading" class="border-b border-campus-line p-4 text-sm font-bold text-campus-navy">Manual lookup</h2>
+                <form asp-action="Lookup" asp-route-id="@ev.Id" method="post" id="scanner-lookup" class="space-y-4 p-4">
+                    <div><label for="scanner-query" class="event-label">Ticket reference or student ID</label><input id="scanner-query" name="query" type="text" required maxlength="150" autocomplete="off" placeholder="Enter ticket reference or student ID" class="@focus event-input" /><p class="event-hint">Also accepts a registration number or account email.</p></div>
+                    <button id="scanner-lookup-submit" type="submit" class="@focus event-primary">Look up attendee</button>
+                </form>
+            </section>
+        </div>
+        <section class="flex min-w-0 flex-col overflow-hidden rounded-xl border border-campus-line" aria-labelledby="scanner-review-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-campus-line p-4"><h2 id="scanner-review-heading" class="text-sm font-bold text-campus-navy">Review attendee</h2><span id="scanner-state" class="rounded-full bg-campus-input px-2.5 py-1 text-xs font-semibold text-campus-muted">Awaiting lookup</span></div>
+            <div class="flex-1 p-5">
+                <p id="scanner-notice" role="status" aria-live="polite" class="scanner-notice" data-tone="idle">Scan a QR pass or look up an attendee to review their details.</p>
+                <div id="scanner-profile" class="mt-5" hidden><h3 id="scanner-name" class="text-lg font-bold wrap-break-word text-campus-navy"></h3><p id="scanner-ticket" class="mt-1 text-xs tabular-nums text-campus-muted"></p><dl id="scanner-fields" class="mt-5 grid gap-5 text-sm sm:grid-cols-2"></dl></div>
+                <p id="scanner-empty" class="py-10 text-sm text-campus-muted">No attendee selected.</p>
+            </div>
+            <div class="flex flex-wrap gap-3 border-t border-campus-line bg-campus-input p-4"><button id="scanner-confirm" type="button" disabled class="@focus event-primary disabled:cursor-not-allowed disabled:opacity-50">Confirm check-in</button><button id="scanner-clear" type="button" class="@focus event-secondary">Clear attendee</button></div>
+        </section>
+    </div>
+    <noscript><p class="mt-5 text-sm text-red-800">Enable JavaScript to look up passes and confirm attendance.</p></noscript>
+</main>
+@section Scripts {
+    <script src="~/js/vendor/html5-qrcode-2.3.8.min.js" asp-append-version="true" defer></script>
+    <script src="~/js/admin/attendance-scanner.js" asp-append-version="true" defer></script>
+}

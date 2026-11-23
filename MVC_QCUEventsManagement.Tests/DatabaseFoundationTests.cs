@@ -447,6 +447,96 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal("Present", retained.Status); Assert.Equal(ev.EventStart, retained.CheckInTimestamp);
     }
 
+    [Fact]
+    public async Task Scanner_lookup_is_read_only_event_scoped_and_validates_the_full_ticket_reference()
+    {
+        var (ev, student) = await CreateGraphAsync();
+        var pass = NewRegistration(ev, student); ev.CurrentRegistrations = 1;
+        _db.EventRegistrations.Add(pass); await _db.SaveChangesAsync();
+        var version = pass.RowVersion.ToArray(); var eventVersion = ev.RowVersion.ToArray();
+        var service = new AttendanceService(_db, new EventClock(new FixedTimeProvider(new DateTimeOffset(2030, 6, 30, 0, 0, 0, TimeSpan.Zero))));
+        var reference = $"TCK-{ev.EventId:D4}-{pass.EventRegistrationId:D5}";
+        foreach (var query in new[] { reference, reference.ToLowerInvariant() + "|legacy", pass.EventRegistrationId.ToString(), student.StudentId.ToLowerInvariant(), student.User.Email.ToUpperInvariant() })
+        {
+            var lookup = await service.LookupAsync(ev.EventId, query, default);
+            Assert.Equal("ValidPending", lookup.State); Assert.True(lookup.CanConfirm);
+            Assert.Equal(reference, lookup.Attendee!.TicketReference);
+        }
+        var forged = await service.LookupAsync(ev.EventId, $"TCK-{ev.EventId + 1:D4}-{pass.EventRegistrationId:D5}", default);
+        Assert.Equal("WrongEventWarning", forged.State); Assert.False(forged.CanConfirm);
+        Assert.Equal("NotFound", (await service.LookupAsync(ev.EventId, "TCK-no-event-no-pass", default)).State);
+        Assert.Equal("NotFound", (await service.LookupAsync(ev.EventId, "not-a-student", default)).State);
+        Assert.Equal("NotFound", (await service.LookupAsync(ev.EventId, new string('x', 151), default)).State);
+        var other = new Event { Title = "Other scanner gate", VenueLocation = "Hall B", MaxCapacity = 5, CreatedByUserId = ev.CreatedByUserId,
+            EventStart = ev.EventStart, EventEnd = ev.EventEnd, RegStart = ev.RegStart, RegEnd = ev.RegEnd };
+        _db.Events.Add(other); await _db.SaveChangesAsync();
+        Assert.Equal("WrongEventWarning", (await service.LookupAsync(other.EventId, reference, default)).State);
+        var wrongGate = await service.ConfirmAsync(other.EventId, new CheckInInput { Confirmed = true, RegistrationId = pass.EventRegistrationId,
+            Version = Convert.ToBase64String(pass.RowVersion), EventVersion = Convert.ToBase64String(ev.RowVersion) }, default);
+        Assert.Equal("WrongEventWarning", wrongGate.State); Assert.False(wrongGate.CanConfirm);
+        var local = NewRegistration(other, student); _db.EventRegistrations.Add(local); await _db.SaveChangesAsync();
+        Assert.Equal(local.EventRegistrationId, (await service.LookupAsync(other.EventId, student.StudentId, default)).Attendee!.RegistrationId);
+        _db.ChangeTracker.Clear();
+        var retained = await _db.EventRegistrations.SingleAsync(r => r.EventRegistrationId == pass.EventRegistrationId);
+        Assert.Equal("NoShow", retained.Status); Assert.Null(retained.CheckInTimestamp); Assert.Equal(version, retained.RowVersion);
+        var retainedEvent = await _db.Events.SingleAsync(e => e.EventId == ev.EventId);
+        Assert.Equal(1, retainedEvent.CurrentRegistrations); Assert.Equal(eventVersion, retainedEvent.RowVersion);
+    }
+
+    [Fact]
+    public async Task Scanner_confirmation_atomically_marks_present_once_without_changing_reserved_seats()
+    {
+        var (ev, student) = await CreateGraphAsync();
+        ev.CurrentRegistrations = 1; var pass = NewRegistration(ev, student);
+        _db.EventRegistrations.Add(pass); await _db.SaveChangesAsync();
+        var service = new AttendanceService(_db, new EventClock(new FixedTimeProvider(new DateTimeOffset(2030, 6, 30, 0, 0, 0, TimeSpan.Zero))));
+        var lookup = await service.LookupAsync(ev.EventId, student.StudentId, default);
+        var input = new CheckInInput { RegistrationId = pass.EventRegistrationId, Version = Convert.ToBase64String(lookup.Attendee!.Version), EventVersion = Convert.ToBase64String(lookup.Attendee.EventVersion) };
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.ConfirmAsync(ev.EventId, input, default));
+        input.Confirmed = true;
+        var success = await service.ConfirmAsync(ev.EventId, input, default);
+        Assert.Equal("CheckedIn", success.State); Assert.False(success.CanConfirm); Assert.Equal(1, success.CheckedInCount);
+        Assert.Equal("Present", success.Attendee!.Status); Assert.NotNull(success.Attendee.CheckInTimestamp);
+        Assert.True(success.Attendee.CheckInTimestamp < ev.EventStart); // Source has no door-opening/start-time restriction.
+        var repeat = await service.ConfirmAsync(ev.EventId, input, default);
+        Assert.Equal("DuplicateWarning", repeat.State); Assert.Equal(success.Attendee.CheckInTimestamp, repeat.Attendee!.CheckInTimestamp);
+        _db.ChangeTracker.Clear();
+        Assert.Equal(1, await _db.Events.Where(e => e.EventId == ev.EventId).Select(e => e.CurrentRegistrations).SingleAsync());
+        var roster = await new RegistrationService(_db, new EventClock(TimeProvider.System)).GetRosterAsync(ev.EventId, new(), default);
+        Assert.Equal("Present", Assert.Single(roster!.Attendees).Status);
+    }
+
+    [Theory]
+    [InlineData("cancel-pass", "CancelledWarning")]
+    [InlineData("check-in", "DuplicateWarning")]
+    [InlineData("cancel-event", "CancelledWarning")]
+    [InlineData("end-event", "CancelledWarning")]
+    [InlineData("change-event", "Changed")]
+    public async Task Scanner_confirmation_revalidates_changes_after_lookup(string change, string expected)
+    {
+        var (ev, student) = await CreateGraphAsync();
+        var pass = NewRegistration(ev, student); ev.CurrentRegistrations = 1;
+        _db.EventRegistrations.Add(pass); await _db.SaveChangesAsync();
+        var clock = new EventClock(new FixedTimeProvider(new DateTimeOffset(2030, 7, 1, 4, 0, 0, TimeSpan.Zero)));
+        var service = new AttendanceService(_db, clock);
+        var lookup = await service.LookupAsync(ev.EventId, student.StudentId, default);
+        Assert.True(lookup.CanConfirm);
+        var input = new CheckInInput { Confirmed = true, RegistrationId = pass.EventRegistrationId,
+            Version = Convert.ToBase64String(lookup.Attendee!.Version), EventVersion = Convert.ToBase64String(lookup.Attendee.EventVersion) };
+        if (change == "cancel-pass") pass.Status = "Cancelled";
+        if (change == "check-in") { pass.Status = "Present"; pass.CheckInTimestamp = clock.Now.AddSeconds(-1); }
+        if (change == "cancel-event") { ev.Status = "Cancelled"; ev.CancellationReason = "Gate unavailable"; }
+        if (change == "end-event") ev.EventEnd = clock.Now;
+        if (change == "change-event") ev.Title = "Revised event";
+        await _db.SaveChangesAsync();
+        var result = await service.ConfirmAsync(ev.EventId, input, default);
+        Assert.Equal(expected, result.State); Assert.False(result.CanConfirm);
+        _db.ChangeTracker.Clear();
+        var retained = await _db.EventRegistrations.SingleAsync(r => r.EventRegistrationId == pass.EventRegistrationId);
+        if (change != "check-in") Assert.Null(retained.CheckInTimestamp);
+        Assert.Equal(change == "cancel-pass" ? "Cancelled" : change == "check-in" ? "Present" : "NoShow", retained.Status);
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");

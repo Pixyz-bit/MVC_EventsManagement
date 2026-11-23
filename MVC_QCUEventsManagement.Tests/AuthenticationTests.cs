@@ -494,6 +494,50 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Equal("Cancelled", await verification.EventRegistrations.Where(r => r.EventRegistrationId == registrationId).Select(r => r.Status).SingleAsync());
     }
 
+    [Fact]
+    public async Task Scanner_routes_are_admin_only_csrf_protected_and_confirm_only_the_selected_event()
+    {
+        int id, passId;
+        await using (var db = CreateContext())
+        {
+            var start = new EventClock(TimeProvider.System).Now.AddDays(5);
+            var ev = new Event { Title = "Scanner verification event", VenueLocation = "Campus Hall", MaxCapacity = 20, CurrentRegistrations = 1,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = start, EventEnd = start.AddHours(2), RegStart = DateOnly.FromDateTime(start.AddDays(-3)), RegEnd = DateOnly.FromDateTime(start.AddDays(-1)) };
+            var pass = new EventRegistration { Event = ev, StudentId = _studentId, CurrentYearLvl = 3, CurrentSection = "SBIT-3A" };
+            db.EventRegistrations.Add(pass); await db.SaveChangesAsync(); id = ev.EventId; passId = pass.EventRegistrationId;
+        }
+        var path = $"/admin/events/{id}/scanner";
+        using var anonymous = NewClient(); using var unauthenticated = await anonymous.GetAsync(path); Assert.StartsWith("/login?", RedirectPath(unauthenticated));
+        using var student = NewClient(); using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync(path); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        using var page = await client.GetAsync(path); Assert.Equal(HttpStatusCode.OK, page.StatusCode);
+        var html = await page.Content.ReadAsStringAsync(); Assert.Contains("Confirm check-in", html); Assert.DoesNotContain("type=\"checkbox\"", html);
+        Assert.Contains("html5-qrcode-2.3.8.min.js", html);
+        if (Environment.GetEnvironmentVariable("MVC_EVENTS_SCANNER_CAPTURE") is { Length: > 0 } capture) await File.WriteAllTextAsync(capture, html);
+        using var missingCsrf = await client.PostAsync(path + "/lookup", Form(("query", _studentId))); Assert.Equal(HttpStatusCode.BadRequest, missingCsrf.StatusCode);
+        var csrf = await TokenAsync(page);
+        using var forged = await client.PostAsync(path + "/lookup", Form(("query", $"TCK-{id + 1:D4}-{passId:D5}"), ("__RequestVerificationToken", csrf)));
+        Assert.Contains("WrongEventWarning", await forged.Content.ReadAsStringAsync());
+        using var lookup = await client.PostAsync(path + "/lookup", Form(("query", _studentEmail), ("__RequestVerificationToken", csrf)));
+        var json = await lookup.Content.ReadAsStringAsync(); Assert.DoesNotContain(_studentEmail, json);
+        using var document = System.Text.Json.JsonDocument.Parse(json); var attendee = document.RootElement.GetProperty("attendee");
+        Assert.True(document.RootElement.GetProperty("canConfirm").GetBoolean());
+        var version = attendee.GetProperty("version").GetString()!; var eventVersion = attendee.GetProperty("eventVersion").GetString()!;
+        using var missingConfirmCsrf = await client.PostAsync(path + "/confirm", Form(("RegistrationId", passId.ToString()), ("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true")));
+        Assert.Equal(HttpStatusCode.BadRequest, missingConfirmCsrf.StatusCode);
+        using var unknownGate = await client.PostAsync("/admin/events/2147483647/scanner/confirm", Form(("RegistrationId", passId.ToString()), ("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true"), ("__RequestVerificationToken", csrf)));
+        Assert.Equal(HttpStatusCode.NotFound, unknownGate.StatusCode);
+        using var success = await client.PostAsync(path + "/confirm", Form(("RegistrationId", passId.ToString()), ("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true"), ("__RequestVerificationToken", csrf)));
+        Assert.Contains("CheckedIn", await success.Content.ReadAsStringAsync());
+        using var repeat = await client.PostAsync(path + "/confirm", Form(("RegistrationId", passId.ToString()), ("Version", version), ("EventVersion", eventVersion), ("Confirmed", "true"), ("__RequestVerificationToken", csrf)));
+        Assert.Contains("DuplicateWarning", await repeat.Content.ReadAsStringAsync());
+        await using var verification = CreateContext();
+        Assert.Equal("Present", await verification.EventRegistrations.Where(r => r.EventRegistrationId == passId).Select(r => r.Status).SingleAsync());
+        Assert.Equal(1, await verification.Events.Where(e => e.EventId == id).Select(e => e.CurrentRegistrations).SingleAsync());
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

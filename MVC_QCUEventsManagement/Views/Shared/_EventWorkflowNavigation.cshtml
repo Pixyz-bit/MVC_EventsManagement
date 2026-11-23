@@ -1,6 +1,6 @@
 @model MVC_QCUEventsManagement.ViewModels.Admin.EventWorkflowViewModel
 @{
-    (string Label, string? Route)[] workflows = [ ("Details", "AdminEventDetails"), ("Pre-registered", "AdminEventPreRegistered"), ("Attendance scanner", null), ("Attendance", null), ("Analytics", null) ];
+    (string Label, string? Route)[] workflows = [ ("Details", "AdminEventDetails"), ("Pre-registered", "AdminEventPreRegistered"), ("Attendance scanner", "AdminAttendanceScanner"), ("Attendance", null), ("Analytics", null) ];
 }
 <nav aria-label="Event workflows" class="mt-6 flex flex-wrap gap-x-6 border-b border-campus-line text-sm">
     @foreach (var workflow in workflows)

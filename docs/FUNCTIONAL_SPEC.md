@@ -209,17 +209,17 @@ Acceptance: check-in stays in preregistered and appears in attendance; void move
 
 ### SCAN-01: Lookup/review
 
-- [ ] Admin selects a real event and scans with camera or queries by ticket reference, numeric registration ID, student ID or email. Search selected event first, then other events to identify wrong-event passes.
-- [ ] Lookup only stages attendee details; it does not commit attendance. Preserve Unauthorized/NotFound/WrongEventWarning/CancelledWarning(inactive)/DuplicateWarning/ValidPending outcomes and explicit university-ID review before confirmation.
-- [ ] Validate encoded ticket event as well as registration ID. Source parser primarily extracts final numeric component, tolerating trailing pipe/space text; this is not proof of signed/authenticated admission.
+- [x] Admin selects a real event; the scanner provides operator-started QR camera capture and manual lookup by ticket reference, numeric registration ID, student ID or email. Search selected event first, then other events to identify wrong-event passes. Physical camera validation remains pending in TESTING.md.
+- [x] Lookup is read-only and stages attendee details without email. Authentication protects both actions; NotFound/WrongEventWarning/CancelledWarning(inactive)/DuplicateWarning/ValidPending outcomes are represented. The operator reviews the university ID and explicitly clicks Confirm check-in; the proposed ID checkbox was removed per user instruction.
+- [x] Validate encoded ticket event as well as registration ID, correcting the source parser gap. Legacy pipe/space suffixes remain accepted; malformed/mismatched references cannot authorize admission.
 
 Acceptance: lookup never changes status/time; warnings block confirmation; manual/camera paths agree; expired auth blocks both endpoints; wrong-event matches are distinguishable.
 
 ### CHECKIN-01: Confirmation
 
-- [ ] Confirm only the selected event's real registration and recheck current state server-side. Source commit receives registration ID and verificationMethod, but no selected gate event ID; do not rely on UI warning alone.
-- [ ] Atomically transition eligible NoShow to Present and store check-in time. Reject not found, duplicate, cancelled pass, inactive/cancelled/completed/ended event. Source has no EventStart lower bound; adding a door-opening time is a separate product policy.
-- [ ] Return persisted time/reference/attendee and updated count. Source returns verificationMethod/admin identity but does not persist them; do not claim a stored attendance audit log exists.
+- [x] Confirm only the selected event's real registration. The conditional write rechecks selected event, registration, both rowversions, lifecycle and eligibility server-side. The client confirmation button is not the security boundary.
+- [x] Atomically transition eligible NoShow to Present and store the Philippine check-in time. Reject not found, duplicate, cancelled pass, inactive/cancelled/completed/ended event. Preserve the source policy allowing check-in before EventStart; no new door-opening restriction was added.
+- [x] Return persisted time/reference/attendee and updated Present count. CurrentRegistrations is unchanged. Verification method/admin identity are not persisted; no stored attendance audit log is claimed.
 
 Acceptance: concurrent confirmations yield one success and stable timestamp; selected-event tampering fails; changes after lookup are revalidated.
 

@@ -26,6 +26,11 @@
 }
 
 @layer components {
+  .scanner-notice { @apply rounded-lg border border-campus-line bg-campus-input px-4 py-3 text-sm leading-6 text-campus-muted; }
+  .scanner-notice[data-tone="pending"] { @apply border-blue-200 bg-blue-50 text-blue-900; }
+  .scanner-notice[data-tone="warning"] { @apply border-amber-200 bg-amber-50 text-amber-900; }
+  .scanner-notice[data-tone="error"] { @apply border-red-200 bg-red-50 text-red-800; }
+  .scanner-notice[data-tone="success"] { @apply border-emerald-200 bg-emerald-50 text-emerald-800; }
   .event-edit-section { @apply min-w-0 space-y-4 rounded-xl border border-campus-line bg-white p-5 sm:p-6; }
   .event-edit-heading { @apply border-b border-campus-line pb-3 text-base font-bold text-campus-navy; }
   .event-cancel-dialog { width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; overflow-y: auto; border: 1px solid var(--color-campus-line); border-radius: .875rem; padding: clamp(1rem, 4vw, 1.75rem); background: white; color: var(--color-campus-ink); }

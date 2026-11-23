@@ -60,8 +60,6 @@
 #scanner-preview .s-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;margin:22px 0 4px}
 #scanner-preview .s-fields .full{grid-column:1/-1}
 #scanner-preview .s-review-footer{border-top:1px solid var(--s-line);padding:16px 18px;background:var(--s-fill)}
-#scanner-preview .s-check{display:flex;gap:10px;align-items:flex-start;font-size:12px;font-weight:500;min-height:44px;margin:0 0 14px}
-#scanner-preview .s-check input{margin-top:4px;flex-shrink:0;accent-color:var(--s-blue)}
 #scanner-preview .s-actions{display:flex;flex-wrap:wrap;gap:10px}
 #scanner-preview .s-empty{padding:28px 0;color:var(--s-muted);font-size:13px}
 #scanner-preview .s-preview-note{font-size:12px;color:var(--s-muted);margin:12px 0 0}
@@ -81,7 +79,7 @@
      <section class="s-panel" aria-labelledby="s-camera-heading"><div class="s-panel-heading"><h2 id="s-camera-heading">Scan QR pass</h2><button type="button" id="s-camera-toggle" class="s-button"><span class="s-button-label"><i data-lucide="camera" aria-hidden="true"></i><span id="s-camera-action">Start camera</span></span></button></div><div id="s-view" class="s-view"><div class="s-camera-mark"><i data-lucide="scan-line" aria-hidden="true"></i></div><strong id="s-camera-title">Camera off</strong><p id="s-camera-copy">Start the camera to scan a student’s QR pass.</p></div><div class="s-camera-controls" id="s-camera-controls" hidden><label for="s-camera-device">Camera</label><select id="s-camera-device"><option>Back camera</option><option>Front camera</option></select></div></section>
      <section class="s-panel" aria-labelledby="s-manual-heading"><div class="s-panel-heading"><h2 id="s-manual-heading">Manual lookup</h2></div><form id="s-lookup" class="s-lookup"><div><label for="s-query">Ticket reference or student ID</label><input type="text" id="s-query" value="TCK-1007-00341" placeholder="Enter ticket reference or student ID" maxlength="150" /><p class="s-hint">Also accepts a registration number or account email.</p></div><button type="submit" class="s-button primary">Look up attendee</button></form></section>
     </div>
-    <section class="s-panel s-review" aria-labelledby="s-review-heading"><div class="s-panel-heading"><h2 id="s-review-heading">Review attendee</h2><span id="s-state-label" class="s-state">Ready for review</span></div><div class="s-review-body"><div id="s-notice" class="s-notice" role="status" aria-live="polite"></div><div id="s-profile"><h3 id="s-name"></h3><div id="s-ticket" class="s-reference"></div><dl id="s-fields" class="s-fields"></dl></div><p id="s-empty" class="s-empty" hidden>No attendee selected. Scan a QR pass or use manual lookup.</p></div><div class="s-review-footer"><label class="s-check"><input type="checkbox" id="s-id-reviewed" /><span>I checked the attendee’s university ID against these details.</span></label><div class="s-actions"><button type="button" id="s-confirm" class="s-button primary" disabled>Confirm check-in</button><button type="button" id="s-clear" class="s-button">Clear attendee</button></div></div></section>
+    <section class="s-panel s-review" aria-labelledby="s-review-heading"><div class="s-panel-heading"><h2 id="s-review-heading">Review attendee</h2><span id="s-state-label" class="s-state">Ready for review</span></div><div class="s-review-body"><div id="s-notice" class="s-notice" role="status" aria-live="polite"></div><div id="s-profile"><h3 id="s-name"></h3><div id="s-ticket" class="s-reference"></div><dl id="s-fields" class="s-fields"></dl></div><p id="s-empty" class="s-empty" hidden>No attendee selected. Scan a QR pass or use manual lookup.</p></div><div class="s-review-footer"><div class="s-actions"><button type="button" id="s-confirm" class="s-button primary" disabled>Confirm check-in</button><button type="button" id="s-clear" class="s-button">Clear attendee</button></div></div></section>
    </div>
    <p class="s-preview-note">Fictional sample · Camera and check-ins are simulated. Attendance records belong in the Attendance tab.</p>
   </main></div>
@@ -97,7 +95,7 @@
   {registration:'344',ticket:'TCK-1008-00344',id:'2024-09652',name:'Paolo Macaraig',college:'College of Computer Studies',program:'BSIT',year:'Year 3 · SBIT-3B',campus:'San Francisco',email:'paolo.macaraig@example.test',state:'Wrong event'}
  ];
  const settings={review:'Valid pass',camera:'Off'};let selected=fixtures[0];let confirmed=false;
- const query=root.querySelector('#s-query'),reviewed=root.querySelector('#s-id-reviewed'),confirm=root.querySelector('#s-confirm');
+ const query=root.querySelector('#s-query'),confirm=root.querySelector('#s-confirm');
  const make=(parent,text,tag)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
  function render(){
   const state=settings.review;const valid=state==='Valid pass'&&selected;
@@ -106,16 +104,15 @@
   const notice=root.querySelector('#s-notice');notice.textContent=messages[state];notice.className='s-notice'+(state==='Confirmed'?' success':state==='Already checked in'?' warning':['Wrong event','Cancelled pass','Inactive event','Not found'].includes(state)?' error':state==='Ready'?' idle':'');
   const show=selected&&!['Ready','Not found'].includes(state);root.querySelector('#s-profile').hidden=!show;root.querySelector('#s-empty').hidden=!!show;
   if(show){root.querySelector('#s-name').textContent=selected.name;root.querySelector('#s-ticket').textContent=selected.ticket;const fields=root.querySelector('#s-fields');fields.replaceChildren();[['Student ID',selected.id],['Campus',selected.campus],['College',selected.college],['Program',selected.program],['Year & section',selected.year]].forEach(([label,value])=>{const field=make(fields,'','div');if(label==='College')field.className='full';make(field,label,'dt');make(field,value,'dd');});}
-  reviewed.disabled=!valid;confirm.disabled=!valid||!reviewed.checked;
+  confirm.disabled=!valid;
   const active=settings.camera==='Preview';root.querySelector('#s-view').className='s-view'+(active?' active':'');root.querySelector('#s-camera-controls').hidden=!active;
   root.querySelector('#s-camera-action').textContent=active?'Stop camera':'Start camera';root.querySelector('#s-camera-title').textContent=settings.camera==='Unavailable'?'Camera unavailable':active?'Camera preview':'Camera off';root.querySelector('#s-camera-copy').textContent=settings.camera==='Unavailable'?'Use manual lookup while camera access is unavailable.':active?'Align the QR pass inside the frame.':'Start the camera to scan a student’s QR pass.';
  }
  root.querySelector('#s-camera-toggle').addEventListener('click',()=>{settings.camera=settings.camera==='Preview'?'Off':'Preview';render();});
- root.querySelector('#s-lookup').addEventListener('submit',event=>{event.preventDefault();const value=query.value.trim().toLowerCase();reviewed.checked=false;selected=fixtures.find(f=>[f.registration,f.ticket,f.id,f.email].some(v=>v.toLowerCase()===value))||null;settings.review=selected?selected===fixtures[0]&&confirmed?'Already checked in':selected.state:'Not found';render();});
- reviewed.addEventListener('change',()=>{confirm.disabled=settings.review!=='Valid pass'||!reviewed.checked;});
- root.querySelector('#s-clear').addEventListener('click',()=>{selected=null;settings.review='Ready';reviewed.checked=false;query.value='';render();query.focus();});
- confirm.addEventListener('click',()=>{if(settings.review!=='Valid pass'||!reviewed.checked||!selected)return;confirmed=true;settings.review='Confirmed';reviewed.checked=false;render();});
+ root.querySelector('#s-lookup').addEventListener('submit',event=>{event.preventDefault();const value=query.value.trim().toLowerCase();selected=fixtures.find(f=>[f.registration,f.ticket,f.id,f.email].some(v=>v.toLowerCase()===value))||null;settings.review=selected?selected===fixtures[0]&&confirmed?'Already checked in':selected.state:'Not found';render();});
+ root.querySelector('#s-clear').addEventListener('click',()=>{selected=null;settings.review='Ready';query.value='';render();query.focus();});
+ confirm.addEventListener('click',()=>{if(settings.review!=='Valid pass'||!selected)return;confirmed=true;settings.review='Confirmed';render();});
  render();
- if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{selected=settings.review==='Wrong event'?fixtures[3]:settings.review==='Already checked in'?fixtures[1]:settings.review==='Cancelled pass'?fixtures[2]:fixtures[0];reviewed.checked=false;render();}});tweak.addSelect(settings,'review',{label:'Attendee state',options:['Valid pass','Ready','Already checked in','Wrong event','Cancelled pass','Inactive event','Not found']});tweak.addSelect(settings,'camera',{label:'Camera state',options:['Off','Preview','Unavailable']});}
+ if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{selected=settings.review==='Wrong event'?fixtures[3]:settings.review==='Already checked in'?fixtures[1]:settings.review==='Cancelled pass'?fixtures[2]:fixtures[0];render();}});tweak.addSelect(settings,'review',{label:'Attendee state',options:['Valid pass','Ready','Already checked in','Wrong event','Cancelled pass','Inactive event','Not found']});tweak.addSelect(settings,'camera',{label:'Camera state',options:['Off','Preview','Unavailable']});}
 })();
 </script>
