@@ -31,6 +31,8 @@ Detailed expected business outcomes have one owner: [functional specification](F
 
 ## Checks actually performed
 
+2026-11-23, Student Dashboard theme preview: the static design detector and simulated checks for the initial dark state, switching both ways, carousel navigation and catalog rendering passed. Browser rendering remains unverified.
+
 2026-11-23, Account Management and student dashboard revision: all 91 MVC tests passed. The new rollback fixture covers Admin-only listing, View dialog fields and student-workflow links, antiforgery, stale snapshot rejection, existing student identity retention, self-deactivation rejection and filtered credential-free export. CSS build, JavaScript syntax and local publish passed. The Web Forms-inspired dashboard sample passed embedded-image and carousel handler checks. Browser rendering was not inspected.
 
 2026-11-23, Account Management and student dashboard samples: syntax, label/ID checks and the static design detector passed. Simulated client checks verified one View per row, student profile population, keyboard tab switching, protected administrator fields, dashboard category filtering, registered passes and the cancellation confirmation flow. Browser rendering remains unverified. Both samples use fictional records.

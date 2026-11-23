@@ -110,3 +110,5 @@ Account Management header revision: Add new student opens grouped identity/conta
 Student dashboard proposal: Dashboard.aspx and its code-behind informed the Campus events and My registered events views. The sample uses the shared QCU palette and typography, registration status and schedule details, category filtering, event and pass previews, and confirmation before a simulated cancellation. The eligible catalog excludes owned registrations and sorts Open, Soon, then Closed.
 
 Student dashboard revision: use the Web Forms dashboard’s featured-event carousel, campus photography, segmented event views and image-led cards. The sample uses the existing campus photo and QCU emblem at reduced resolution. It retains category filtering and the pass and cancellation previews.
+
+The Student Dashboard preview starts in dark mode with a blue navbar. The Dark mode toggle compares dark and light versions in the same preview. Both use the blue navbar and preserve the selected events when switching themes.
