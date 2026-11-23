@@ -64,6 +64,9 @@ public sealed class EventDetailsController(EventService events, EventBannerStore
         catch (ValidationException ex) { ModelState.AddModelError("", ex.Message); }
         catch (DbUpdateConcurrencyException) { ModelState.AddModelError("", "This event changed. Reload it before cancelling."); }
         catch (DbUpdateException ex) { logger.LogError(ex, "Could not cancel event {EventId}", id); ModelState.AddModelError("", "Could not cancel the event. Please try again."); }
+        ViewData["OpenCancellation"] = true;
+        ViewData["CancellationReason"] = reason;
+        ViewData["CancelVersion"] = version;
         var current = await events.GetDetailsAsync(id, false, cancellationToken);
         return current is null ? NotFound() : View("Index", current);
     }

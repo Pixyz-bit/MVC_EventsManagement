@@ -1,6 +1,14 @@
 (() => {
     "use strict";
-    document.querySelector('a[href="#cancel-event"]')?.addEventListener("click", () => { document.getElementById("cancel-event").open = true; });
+    const cancellation = document.getElementById("cancel-event");
+    const trigger = document.getElementById("open-cancel-event");
+    if (cancellation && trigger) {
+        const open = () => { cancellation.showModal(); document.documentElement.classList.add("overflow-hidden"); };
+        trigger.addEventListener("click", open);
+        cancellation.querySelectorAll("[data-close-cancellation]").forEach(button => button.addEventListener("click", () => cancellation.close()));
+        cancellation.addEventListener("close", () => { document.documentElement.classList.remove("overflow-hidden"); trigger.focus(); });
+        if (cancellation.dataset.reopen === "true") open();
+    }
     const form = document.getElementById("event-edit-form");
     if (!form) return;
     const banner = document.getElementById("Input_Banner");

@@ -1,0 +1,124 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;650;700;800&display=swap');
+#history-layout{--qcu-ink:#192b40;--qcu-muted:#485b70;--qcu-blue:#155bb1;--qcu-line:#d6dce2;--qcu-fill:#f4f7fb;font-family:'Plus Jakarta Sans',sans-serif;color:var(--qcu-ink);font-size:13px;line-height:1.6;color-scheme:light}
+#history-layout *{box-sizing:border-box}
+#history-layout .history-shell{display:grid;grid-template-columns:205px minmax(0,1fr);background:#fff;min-height:690px}
+#history-layout .history-sidebar{border-right:1px solid var(--qcu-line);display:flex;flex-direction:column;padding:22px 12px 16px;gap:28px}
+#history-layout .history-brand{padding:0 10px;display:flex;gap:10px;align-items:center}
+#history-layout .history-brand i{color:var(--qcu-blue)}
+#history-layout .history-brand strong{font-size:16px;display:block}
+#history-layout .history-brand small{font-size:11px;color:var(--qcu-muted)}
+#history-layout .history-nav-label{font-size:11px;font-weight:700;color:var(--qcu-muted);padding:0 12px;margin:0 0 8px}
+#history-layout .history-nav-item{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;color:var(--qcu-muted);font-size:12px;border-radius:8px;margin:2px 0}
+#history-layout .history-nav-item.active{color:var(--qcu-blue);background:#eff6ff;font-weight:700;border-left:1px solid var(--qcu-blue)}
+#history-layout .history-user{margin-top:auto;border-top:1px solid var(--qcu-line);padding:16px 10px 0;font-size:11px;color:var(--qcu-muted)}
+#history-layout .history-main{min-width:0;padding:28px}
+#history-layout h1{font-size:28px;line-height:1.2;letter-spacing:-.025em;font-weight:800;margin:0 0 8px;color:#142c48}
+#history-layout .history-intro{margin:0;color:var(--qcu-muted);font-size:12px;max-width:65ch}
+#history-layout .history-results{margin-top:28px;border:1px solid var(--qcu-line);border-radius:12px;overflow:hidden}
+#history-layout .history-outcomes{display:flex;flex-wrap:wrap;gap:22px;padding:0 18px;border-bottom:1px solid var(--qcu-line)}
+#history-layout button,#history-layout input,#history-layout select{font:inherit}
+#history-layout .history-tab{border:0;border-bottom:2px solid transparent;background:transparent;color:var(--qcu-muted);padding:15px 0;min-height:48px;font-size:12px;cursor:pointer}
+#history-layout .history-tab[aria-pressed=true]{color:var(--qcu-blue);border-color:var(--qcu-blue);font-weight:700}
+#history-layout .history-tab span{padding:2px 6px;border-radius:5px;background:var(--qcu-fill);margin-left:4px;font-size:11px;font-variant-numeric:tabular-nums}
+#history-layout .history-tools{display:grid;grid-template-columns:minmax(0,1fr) 170px auto;gap:12px;align-items:end;padding:18px}
+#history-layout label{display:block;font-size:11px;font-weight:600;color:var(--qcu-muted);margin-bottom:6px}
+#history-layout input,#history-layout select{border:1px solid var(--qcu-line);border-radius:8px;background:var(--qcu-fill);color:var(--qcu-ink);width:100%;min-width:0;min-height:44px;padding:10px 12px;font-size:12px}
+#history-layout input::placeholder{color:var(--qcu-muted)}
+#history-layout .history-button{border:1px solid var(--qcu-line);border-radius:8px;padding:9px 14px;min-height:44px;color:var(--qcu-muted);background:#fff;cursor:pointer;font-weight:600;font-size:12px}
+#history-layout .history-button:hover:not(:disabled){background:var(--qcu-fill)}
+#history-layout .history-button:disabled{opacity:.65;cursor:not-allowed}
+#history-layout .history-grid{display:grid;grid-template-columns:90px minmax(0,1.2fr) minmax(0,1fr) 60px;gap:18px;align-items:center}
+#history-layout .history-head{padding:12px 18px;background:var(--qcu-fill);border-block:1px solid var(--qcu-line);font-size:11px;font-weight:650;text-transform:uppercase;letter-spacing:.035em;color:var(--qcu-muted)}
+#history-layout .history-row{padding:var(--history-row-space,20px) 18px;border-bottom:1px solid var(--qcu-line);min-width:0}
+#history-layout .history-row>div{min-width:0}
+#history-layout .history-row strong{font-size:12px;display:block;font-weight:650;overflow-wrap:anywhere}
+#history-layout .history-secondary{color:var(--qcu-muted);font-size:11px;margin-top:4px;display:block;overflow-wrap:anywhere}
+#history-layout .history-status{display:inline-block;font-size:11px;font-weight:650;padding:4px 8px;border-radius:99px;background:#ecfdf5;color:#065f46}
+#history-layout .history-status.cancelled{background:#fef2f2;color:#991b1b}
+#history-layout .history-mobile-label{display:none}
+#history-layout .history-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 18px;font-size:11px;color:var(--qcu-muted)}
+#history-layout .history-pages{display:flex;gap:8px}
+#history-layout .history-empty{padding:44px 18px;text-align:center;color:var(--qcu-muted)}
+#history-layout .history-preview{margin:12px 0 0;color:var(--qcu-muted);font-size:11px}
+#history-layout button:focus-visible,#history-layout input:focus-visible,#history-layout select:focus-visible{outline:2px solid #28649a;outline-offset:3px}
+#history-layout .history-mobile-brand{display:none}
+@media(max-width:850px){#history-layout .history-shell{grid-template-columns:170px minmax(0,1fr)}#history-layout .history-main{padding:24px 18px}#history-layout .history-grid{grid-template-columns:85px minmax(0,1fr) minmax(0,1fr) 54px;gap:12px}#history-layout .history-tools{grid-template-columns:minmax(0,1fr) 155px}#history-layout .history-tools .history-button{grid-column:2;justify-self:end}#history-layout .history-brand strong{font-size:14px}}
+@media(max-width:650px){#history-layout .history-shell{display:block;min-height:0}#history-layout .history-sidebar{display:none}#history-layout .history-mobile-brand{display:block;padding:16px;border-bottom:1px solid var(--qcu-line);font-weight:700;color:#142c48}#history-layout .history-main{padding:24px 16px}#history-layout h1{font-size:25px}#history-layout .history-tools{grid-template-columns:minmax(0,1fr)}#history-layout .history-tools .history-button{grid-column:auto;justify-self:start}#history-layout .history-head{display:none}#history-layout .history-row{grid-template-columns:minmax(0,1fr) auto;gap:12px}#history-layout .history-row>div:nth-child(2){grid-column:1;grid-row:2}#history-layout .history-row>div:nth-child(3){grid-column:1;grid-row:3}#history-layout .history-row>div:nth-child(4){grid-column:2;grid-row:2/4;align-self:end}#history-layout .history-mobile-label{display:block;font-size:11px;color:var(--qcu-muted);margin-bottom:3px}#history-layout .history-outcomes{gap:16px;padding-inline:14px}#history-layout .history-tab{font-size:11px}#history-layout .history-row strong{font-size:13px}#history-layout .history-secondary{font-size:12px}#history-layout input,#history-layout select{font-size:16px}}
+</style>
+<div id="history-layout" aria-label="QCU Event History proposed layout">
+ <div class="history-shell">
+  <aside class="history-sidebar" aria-label="Administrator sidebar preview">
+   <div class="history-brand"><i data-lucide="university" aria-hidden="true"></i><div><strong>QCU Events</strong><small>Administrator portal</small></div></div>
+   <div><p class="history-nav-label">CORE MANAGEMENT</p><div class="history-nav-item"><i data-lucide="calendar-days" aria-hidden="true"></i>Event Directory</div><div class="history-nav-item"><i data-lucide="circle-plus" aria-hidden="true"></i>Create Event</div><div class="history-nav-item active"><i data-lucide="history" aria-hidden="true"></i>Events History</div></div>
+   <div><p class="history-nav-label">ATTENDANCE &amp; USERS</p><div class="history-nav-item"><i data-lucide="users" aria-hidden="true"></i>Student Directory</div><div class="history-nav-item"><i data-lucide="contact-round" aria-hidden="true"></i>Account Management</div></div>
+   <div class="history-user">Administrator</div>
+  </aside>
+  <div><div class="history-mobile-brand">QCU Events · Administrator portal</div><main class="history-main">
+   <h1>Events History</h1><p class="history-intro">Review completed and cancelled campus events.</p>
+   <section class="history-results" aria-label="Historical event results">
+    <div class="history-outcomes" aria-label="Filter by outcome"><button class="history-tab" type="button" data-outcome="All" aria-pressed="true">All history <span>22</span></button><button class="history-tab" type="button" data-outcome="Completed" aria-pressed="false">Completed <span>17</span></button><button class="history-tab" type="button" data-outcome="Cancelled" aria-pressed="false">Cancelled <span>5</span></button></div>
+    <div class="history-tools"><div><label for="history-query">Search events</label><input id="history-query" type="search" placeholder="Title, venue or college" /></div><div><label for="history-year">Academic year</label><select id="history-year"><option value="All">All academic years</option><option value="2026-2027">2026–2027</option></select></div><button class="history-button" id="history-reset" type="button">Reset filters</button></div>
+    <div class="history-grid history-head" aria-hidden="true"><span>Outcome</span><span>Event title &amp; scope</span><span>Venue &amp; date</span><span>Actions</span></div>
+    <div id="history-records" role="list" aria-label="Historical events"></div>
+    <footer class="history-footer"><span id="history-range" role="status" aria-live="polite"></span><div class="history-pages"><button class="history-button" id="history-prev" type="button">Previous</button><button class="history-button" id="history-next" type="button">Next</button></div></footer>
+   </section>
+   <p class="history-preview">Layout sample using the Web Forms records. Report actions await the analytics workflow.</p>
+  </main></div>
+ </div>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('history-layout');
+const rows=[
+ ['Completed','qwe2asd','Open to all colleges','Auditorium','Nov 19, 2026'],
+ ['Completed','Concert','Open to all colleges','Auditorium','Oct 16, 2026'],
+ ['Completed','Architectural Designs Proposal','College of Computer Studies','Auditorium','Oct 15, 2026'],
+ ['Completed','AWS Seminar','Open to all colleges','Auditorium','Oct 15, 2026'],
+ ['Completed','Feeding Programs','Open to all colleges','Canteen','Oct 15, 2026'],
+ ['Cancelled','QCU Student Orientation','Open to all colleges','Auditorium','Oct 15, 2026'],
+ ['Completed','QCU Freshman Seminar','Open to all colleges','Auditorium','Oct 15, 2026'],
+ ['Completed','beep beep','Open to all colleges','Covered Court','Oct 15, 2026'],
+ ['Completed','Free COncert','Open to all colleges','Auditorium','Oct 15, 2026'],
+ ['Cancelled','QA Simulation 20261007','Open to all colleges','QA Test Room Updated','Oct 14, 2026'],
+ ['Cancelled','QA Selected Fixes 20261007','College of Education','QA Verification Room Updated','Oct 14, 2026'],
+ ['Completed','Anime Expo','College of Computer Studies','Auditorium','Oct 14, 2026'],
+ ['Completed','Dev Cup 2026','Open to all colleges','Auditorium','Oct 14, 2026'],
+ ['Completed','Cybersecurity Seminar','College of Computer Studies','Auditorium','Oct 14, 2026'],
+ ['Completed','Orchestra Show','Open to all colleges','Auditorium','Oct 14, 2026'],
+ ['Completed','Utilizing AI in the Modern World','Open to all colleges','Auditorium','Oct 13, 2026'],
+ ['Completed','Kitchen Cooking','Open to all colleges','Dyan Lang','Oct 13, 2026'],
+ ['Completed','Hack Expo','Open to all colleges','Covered Court','Oct 12, 2026'],
+ ['Completed','Hackatong','Open to all colleges','Dyan Lang','Oct 11, 2026'],
+ ['Cancelled','Hackatong','Open to all colleges','Dyan Lang','Oct 11, 2026'],
+ ['Completed','The Future of Enterprise Growth','Open to all colleges','Auditorium','Oct 09, 2026'],
+ ['Cancelled','AUDIT DISPOSABLE 2026-10-05','College of Engineering','Audit Test Room','Oct 08, 2026']
+];
+let outcome='All',page=0;const size=6;
+const query=root.querySelector('#history-query'),year=root.querySelector('#history-year');
+const cell=(parent,text,tag,cls)=>{const el=document.createElement(tag||'span');el.textContent=text;if(cls)el.className=cls;parent.append(el);return el;};
+function render(){
+ const q=query.value.trim().toLowerCase();
+ const matching=rows.filter(row=>(outcome==='All'||row[0]===outcome)&&(!q||[row[1],row[2],row[3]].some(s=>s.toLowerCase().includes(q))));
+ const last=Math.max(0,Math.ceil(matching.length/size)-1);page=Math.min(page,last);
+ const target=root.querySelector('#history-records');target.replaceChildren();
+ matching.slice(page*size,(page+1)*size).forEach(row=>{
+  const item=cell(target,'','article','history-grid history-row');item.setAttribute('role','listitem');
+  const state=cell(item,'','div');cell(state,row[0],'span','history-status'+(row[0]==='Cancelled'?' cancelled':''));
+  const title=cell(item,'','div');cell(title,row[1],'strong');cell(title,row[2],'span','history-secondary');
+  const venue=cell(item,'','div');cell(venue,'Venue & date','span','history-mobile-label');cell(venue,row[3],'strong');cell(venue,row[4],'span','history-secondary');
+  const action=cell(item,'','div');const button=cell(action,'View','button','history-button');button.type='button';button.disabled=true;button.setAttribute('aria-label','View report for '+row[1]+' (not implemented)');
+ });
+ if(!matching.length)cell(target,'No events match these filters. Try another search or reset the filters.','p','history-empty');
+ root.querySelector('#history-range').textContent=matching.length?`${page*size+1}–${Math.min((page+1)*size,matching.length)} of ${matching.length} events`:'0 events';
+ root.querySelector('#history-prev').disabled=page===0;root.querySelector('#history-next').disabled=page>=last;
+ root.querySelectorAll('[data-outcome]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.outcome===outcome)));
+}
+root.querySelectorAll('[data-outcome]').forEach(button=>button.addEventListener('click',()=>{outcome=button.dataset.outcome;page=0;render();}));
+query.addEventListener('input',()=>{page=0;render();});year.addEventListener('change',()=>{page=0;render();});
+root.querySelector('#history-reset').addEventListener('click',()=>{query.value='';year.value='All';outcome='All';page=0;render();});
+root.querySelector('#history-prev').addEventListener('click',()=>{page--;render();});root.querySelector('#history-next').addEventListener('click',()=>{page++;render();});
+render();
+if(globalThis.Tweak){const layout={density:'Comfortable'};const tweak=new Tweak({container:root,onChange:()=>{root.style.setProperty('--history-row-space',layout.density==='Compact'?'13px':'20px');}});tweak.addSelect(layout,'density',{label:'Row spacing',options:['Comfortable','Compact']});}
+})();
+</script>

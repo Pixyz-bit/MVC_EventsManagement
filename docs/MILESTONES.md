@@ -18,7 +18,7 @@ Status vocabulary: Not started, In progress, Blocked, Complete. A blocker identi
 | M7 | Student discovery and profile | Not started | Eligible event browsing/filtering, schedules/availability/details, profile and password operations; reference-led pages and ownership checks. |
 | M8 | Registration and event passes | Not started | Registration steps/year/section, server-side dates/eligibility/capacity, duplicate/concurrent prevention, cancellation, pass ownership, compatible QR references and PNG downloads. |
 | M9 | Attendance workflows | Not started | Preregistration/attendance lists, QR/manual lookup -> review -> confirm flow, wrong-event/cancelled/duplicate rejection, atomic check-in and timestamps; real-device camera check where available. |
-| M10 | Analytics, history, supporting pages | Not started | Verified registration/attendance/cancellation/check-in metrics, charts/filters, event history, development-only diagnostics and error states. |
+| M10 | Analytics, history, supporting pages | Not started | History source inspected and sample layout prepared for user review; no MVC history implementation yet. Verified registration/attendance/cancellation/check-in metrics, charts/filters, event history, development-only diagnostics and error states. |
 | M11 | Complete workflow verification and publish readiness | Not started | All docs/TESTING.md acceptance checks, clean build/test/publish, CSS included, fresh database setup validated, docs/SETUP.md commands current, final documentation reconciliation and Git checkpoint. |
 
 M2 and M3 can advance independently where dependencies allow. Authentication can begin before all references exist. Each feature milestone includes UI/backend integration, relevant verification, documentation updates and commits; do not postpone all testing to M11. No fixed completion dates are promised before inventory and references are available.
@@ -29,7 +29,7 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
-The user approved the Event Details proposal on 2026-11-23 with header/copy refinements. Details, directory View navigation, editing and confirmed cancellation are implemented. All 53 tests pass; desktop/mobile details and mobile editing were inspected. Continue with the remaining portal workflows using supplied designs.
+The user approved the Event Details proposal on 2026-11-23 with header/copy refinements. Details, directory View navigation, editing and confirmed cancellation are implemented. All 53 tests pass; desktop/mobile details and mobile editing were inspected. The grouped editor and cancellation modal are also implemented and checked. History was inspected live and in the source files; its layout sample is awaiting user review before MVC implementation.
 
 Event Directory row content now follows the supplied field reference while retaining the shared QCU design. View opens the implemented Event Details page.
 

@@ -96,7 +96,7 @@ Acceptance: invalid fields/dates/capacity write nothing; cancelled/completed eve
 
 ### EVENT-03: Event cancellation
 
-- [x] Explicit admin confirmation plus trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
+- [x] Cancellation opens a modal with a reason and explicit confirmation, Close/Keep event and Escape dismissal. Failed submissions retain the reason and submitted concurrency token. Require a trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
 - [x] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history.
 - [ ] Future registration/admission, passes and history workflows must honor cancelled events and show the reason. Source sends no automatic emails on cancellation.
 
@@ -234,7 +234,7 @@ Acceptance: deterministic mixed-status/zero/multi-department/cross-midnight fixt
 
 ### HISTORY-01: History
 
-- [ ] Completed/Cancelled only, newest EventStart first, totals/attendee summaries and analytics navigation. UI supports search, academic year and outcome/reset; semester filtering exists in repository but is not an existing visible filter.
+- [ ] Completed/Cancelled only, newest EventStart first, total/completed/cancelled event counts and analytics navigation. The live source history rows show outcome, title/target college, venue/event date and View (analytics). Search matches title, venue or college; academic year and outcome/reset are visible filters. Semester filtering exists in the repository but is not an existing visible filter. A design sample is available for user review; this workflow is not implemented in MVC.
 - [ ] Academic year starts August; Aug-Dec first semester, Jan-May second, Jun-Jul summer. Retain cancellation reasons and history.
 
 Acceptance: August/January/June fixtures and filters agree with reports and outcome totals.

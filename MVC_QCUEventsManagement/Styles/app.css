@@ -26,6 +26,10 @@
 }
 
 @layer components {
+  .event-edit-section { @apply min-w-0 space-y-4 rounded-xl border border-campus-line bg-white p-5 sm:p-6; }
+  .event-edit-heading { @apply border-b border-campus-line pb-3 text-base font-bold text-campus-navy; }
+  .event-cancel-dialog { width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; overflow-y: auto; border: 1px solid var(--color-campus-line); border-radius: .875rem; padding: clamp(1rem, 4vw, 1.75rem); background: white; color: var(--color-campus-ink); }
+  .event-cancel-dialog::backdrop { background: rgb(20 44 72 / 55%); }
   .event-workspace { height: calc(100dvh - 65px); display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 1.25rem; background: var(--color-campus-input); }
   .event-editor { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; border: 1px solid var(--color-campus-line); border-radius: .875rem; background: white; overflow: hidden; }
   .event-stepper-wrap { padding: .625rem; border-bottom: 1px solid var(--color-campus-line); }
