@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Dashboard · QCU Events design preview</title>
+<style>
+  @font-face {
+    font-family: "Plus Jakarta Sans";
+    src: url("../MVC_QCUEventsManagement/wwwroot/fonts/plus-jakarta-sans-latin-variable.woff2") format("woff2");
+    font-weight: 200 800;
+    font-display: swap;
+  }
+  :root {
+    --paper: #f4f7fb; --surface: #fffefa; --ink: #142c48; --muted: #485b70;
+    --line: #d6dce2; --action: #155bb1; --on-action: #f8fbff; --selected: #e8f1fd;
+    --open-bg: #e8f8ef; --open-ink: #17604b; --nav: #1458a8;
+    --fade: linear-gradient(90deg, #fffefa 3%, #fffefa 27%, #fffefae8 40%, #fffefa38 69%, transparent 88%);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --paper: #0d1829; --surface: #14243a; --ink: #eaf1fc; --muted: #b3c3d9;
+    --line: #3d526e; --action: #9bc6fb; --on-action: #0b2443; --selected: #233954;
+    --open-bg: #173f36; --open-ink: #a2edc9;
+    --fade: linear-gradient(90deg, #101e33 3%, #101e33 27%, #101e33ed 40%, #101e3355 69%, #101e3326 100%);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 500 15px/1.55 "Plus Jakarta Sans", sans-serif; }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { line-height: 1.15; letter-spacing: -.035em; text-wrap: balance; }
+  img { display: block; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible, select:focus-visible { outline: 3px solid var(--action); outline-offset: 3px; }
+  .wrap { width: min(100% - 96px, 1280px); margin-inline: auto; }
+  .icon { width: 19px; height: 19px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+  .navbar { background: var(--nav); color: #f8fbff; }
+  .nav-inner, .brand, .account, .identity { display: flex; align-items: center; }
+  .nav-inner { justify-content: space-between; min-height: 72px; gap: 20px; }
+  .brand, .identity { gap: 11px; line-height: 1.25; }
+  .brand img { width: 42px; height: 42px; }
+  .brand strong { font-size: 18px; letter-spacing: -.03em; }
+  .brand small, .identity small { display: block; margin-top: 3px; color: #deedff; font-size: 12px; }
+  .account { gap: 18px; }
+  .initials { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e8f1fd; color: #144775; font-weight: 800; font-size: 12px; }
+  .button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px;
+    padding: 9px 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--line);
+    border-radius: 9px; font-weight: 700; white-space: nowrap;
+  }
+  .button:hover { background: var(--selected); }
+  .button.primary { background: var(--action); color: var(--on-action); border-color: transparent; }
+  .button.primary:hover { filter: brightness(.91); }
+  .nav-button { padding: 0; width: 44px; color: inherit; background: transparent; border-color: #ffffff60; }
+  .nav-button:hover { background: #ffffff20; }
+  .nav-button:focus-visible { outline-color: #f2f7ff; }
+  .hero {
+    background: var(--fade), url("../MVC_QCUEventsManagement/wwwroot/images/qcu-campus.png") center 42% / cover;
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-inner { padding-block: 62px 22px; }
+  .hero-content { max-width: 525px; min-height: 310px; }
+  .featured-label { margin-bottom: 16px; color: var(--action); font-size: 12px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+  h1 { max-width: 15ch; font-size: clamp(2.45rem, 5vw, 4.4rem); font-weight: 800; }
+  .hero-description { max-width: 44ch; margin-top: 14px; color: var(--muted); }
+  .schedule { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 20px 0; padding: 0; list-style: none; font-size: 13px; }
+  .schedule li { display: flex; align-items: center; gap: 7px; }
+  .schedule .icon { color: var(--action); }
+  .hero-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+  .slide-index { padding: 4px 9px; border-radius: 5px; background: var(--surface); color: var(--muted); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .arrows { display: flex; gap: 8px; }
+  .arrows .button { padding: 0; width: 44px; }
+  .catalog { padding-block: 30px 54px; }
+  .catalog-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; }
+  h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 800; }
+  .tabs { display: flex; gap: 3px; padding: 4px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface); }
+  .tabs button { min-height: 44px; padding: 7px 13px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; }
+  .tabs button:hover, .tabs button[aria-pressed="true"] { background: var(--selected); color: var(--action); }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 17px 0 15px; color: var(--muted); font-size: 13px; }
+  select { max-width: 100%; min-height: 44px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(290px, 100%), 1fr)); gap: 20px; }
+  .event { max-width: 640px; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .event-photo {
+    display: flex; align-items: start; padding: 14px; min-height: 162px;
+    background: linear-gradient(180deg, #142c4840, transparent 70%), url("../MVC_QCUEventsManagement/wwwroot/images/qcu-campus.png") center var(--photo-position, 43%) / cover;
+    background-color: var(--selected);
+  }
+  .status { display: inline-block; padding: 4px 9px; border-radius: 999px; color: var(--open-ink); background: var(--open-bg); font-size: 11px; font-weight: 800; }
+  .status.secondary { color: var(--ink); background: var(--selected); }
+  .event-body { padding: 18px 20px 20px; }
+  .event h3 { font-size: 22px; }
+  .event .schedule { margin: 14px 0; color: var(--muted); }
+  .event-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .event-footer small { color: var(--muted); font-size: 12px; }
+  .event-footer .button { color: var(--action); font-size: 13px; }
+  dialog { width: min(500px, calc(100% - 32px)); padding: 24px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--ink); }
+  dialog::backdrop { background: #0d18299c; }
+  dialog p { margin: 12px 0 20px; color: var(--muted); }
+  [hidden] { display: none !important; }
+  @media (max-width: 640px) {
+    .wrap { width: calc(100% - 32px); }
+    .nav-inner { min-height: 64px; gap: 8px; }
+    .account { gap: 8px; }
+    .brand img { width: 34px; height: 34px; }
+    .brand strong { font-size: 15px; }
+    .brand small, .identity-text { display: none; }
+    .hero { background: linear-gradient(180deg, var(--surface) 52%, transparent 93%), url("../MVC_QCUEventsManagement/wwwroot/images/qcu-campus.png") center bottom / auto 60% no-repeat, var(--surface); }
+    .hero-inner { padding-block: 28px 16px; }
+    .hero-content { min-height: 0; padding-bottom: 40px; }
+    .hero-description { max-width: 34ch; }
+    .catalog { padding-top: 22px; }
+    .tabs { width: 100%; }
+    .tabs button { flex: 1; padding-inline: 5px; }
+  }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></symbol>
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="moon" viewBox="0 0 24 24"><path d="M20.9 13.35A9 9 0 0 1 10.65 3.1 9 9 0 1 0 20.9 13.35Z"/></symbol>
+  <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19m0-14-1.5 1.5m-11 11L5 19"/></symbol>
+  <symbol id="next" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="previous" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+</svg>
+<header class="navbar">
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <img src="../MVC_QCUEventsManagement/wwwroot/images/qcu-logo.png" alt="" width="42" height="42">
+      <div><strong>QCU Events</strong><small>Student portal</small></div>
+    </div>
+    <div class="account">
+      <div class="identity" aria-label="Mikaela Dizon, student ID DEMO-001">
+        <span class="initials" aria-hidden="true">MD</span>
+        <div class="identity-text"><strong>Mikaela Dizon</strong><small>DEMO-001</small></div>
+      </div>
+      <button type="button" id="theme" class="button nav-button" aria-label="Dark mode" aria-pressed="false" title="Toggle dark mode">
+        <svg class="icon" aria-hidden="true"><use href="#moon"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main>
+  <section class="hero" aria-label="Featured events">
+    <div class="wrap hero-inner">
+      <div class="hero-content">
+        <p class="featured-label">Featured event</p>
+        <div id="feature" aria-live="polite"></div>
+        <button type="button" class="button primary" id="feature-action">View event <svg class="icon" aria-hidden="true"><use href="#arrow"/></svg></button>
+      </div>
+      <div class="hero-controls">
+        <span class="slide-index" id="feature-index"></span>
+        <div class="arrows">
+          <button type="button" class="button" id="previous-event" aria-label="Previous featured event"><svg class="icon" aria-hidden="true"><use href="#previous"/></svg></button>
+          <button type="button" class="button" id="next-event" aria-label="Next featured event"><svg class="icon" aria-hidden="true"><use href="#next"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="wrap catalog" aria-labelledby="catalog-title">
+    <header class="catalog-header">
+      <h2 id="catalog-title">Campus events</h2>
+      <div class="tabs" role="group" aria-label="Event views">
+        <button type="button" data-view="available" aria-pressed="true">Available events</button>
+        <button type="button" data-view="registered" aria-pressed="false">My registered events</button>
+      </div>
+    </header>
+    <div class="toolbar">
+      <span id="event-count" role="status"></span>
+      <select id="category" aria-label="Event category">
+        <option value="">All categories</option>
+        <option>Seminar</option>
+        <option>Workshop</option>
+      </select>
+    </div>
+    <div class="grid" id="events"></div>
+  </section>
+</main>
+<dialog id="event-dialog" aria-labelledby="dialog-title">
+  <h2 id="dialog-title"></h2>
+  <p id="dialog-copy"></p>
+  <form method="dialog"><button class="button primary">Close</button></form>
+</dialog>
+<script>
+  const events = [
+    { title: 'Campus Research Forum', date: 'Dec 2, 2026', time: '9:00 AM–12:00 PM', venue: 'QCU Auditorium', category: 'Seminar',
+      description: 'See what QCU students are researching and discuss their findings with student presenters and faculty mentors.',
+      status: 'Registration open', note: 'Registration closes Dec 1', position: '40%' },
+    { title: 'Innovation & Career Summit', date: 'Dec 9, 2026', time: '10:00 AM–3:00 PM', venue: 'Innovation Hall', category: 'Workshop',
+      description: 'Bring your portfolio for feedback and meet local employers recruiting for internships.',
+      status: 'Opens Dec 1', note: 'Registration opens Dec 1', position: '64%' },
+    { title: 'Community Leadership Workshop', date: 'Nov 20, 2026', time: '1:00 PM–4:00 PM', venue: 'Student Activity Center', category: 'Workshop',
+      description: 'A workshop on organizing campus volunteer projects and working with local partners.',
+      status: 'Attended', note: 'Ticket ref QCU-26-1042', position: '52%', registered: true }
+  ];
+  const featured = events.filter(event => !event.registered);
+  const themeButton = document.querySelector('#theme');
+  const category = document.querySelector('#category');
+  const eventGrid = document.querySelector('#events');
+  const eventDialog = document.querySelector('#event-dialog');
+  const viewButtons = [...document.querySelectorAll('[data-view]')];
+  let currentSlide = 0;
+  let currentView = 'available';
+
+  const icon = name => '<svg class="icon" aria-hidden="true"><use href="#' + name + '"/></svg>';
+  const schedule = event => '<ul class="schedule"><li>' + icon('calendar') + event.date + '</li><li>' +
+    icon('clock') + event.time + '</li><li>' + icon('pin') + event.venue + '</li></ul>';
+
+  function renderFeature() {
+    const event = featured[currentSlide];
+    document.querySelector('#feature').innerHTML = '<h1>' + event.title + '</h1><p class="hero-description">' +
+      event.description + '</p>' + schedule(event);
+    document.querySelector('#feature-index').textContent = (currentSlide + 1) + ' of ' + featured.length;
+  }
+
+  function renderEvents() {
+    const registered = currentView === 'registered';
+    const shown = events.filter(event => Boolean(event.registered) === registered &&
+      (registered || !category.value || event.category === category.value));
+    category.hidden = registered;
+    const unit = shown.length === 1 ? ' event' : ' events';
+    document.querySelector('#event-count').textContent = shown.length + (registered ? ' registered' : ' available') + unit;
+    eventGrid.innerHTML = shown.map(event => '<article class="event"><div class="event-photo" style="--photo-position:' + event.position +
+      '"><span class="status' + (event === events[0] ? '' : ' secondary') + '">' + event.status + '</span></div><div class="event-body"><h3>' +
+      event.title + '</h3>' + schedule(event) + '<footer class="event-footer"><small>' + event.note +
+      '</small><button class="button" data-event="' + events.indexOf(event) + '">' + (registered ? 'View registration' : 'View details') +
+      icon('next') + '</button></footer></div></article>').join('') || '<p>No events match this category.</p>';
+  }
+
+  function showDetails(event) {
+    document.querySelector('#dialog-title').textContent = event.title;
+    document.querySelector('#dialog-copy').textContent = event.description + ' ' + event.note + '.';
+    eventDialog.showModal();
+  }
+
+  function stepSlide(step) {
+    currentSlide = (currentSlide + step + featured.length) % featured.length;
+    renderFeature();
+  }
+
+  document.querySelector('#previous-event').addEventListener('click', () => stepSlide(-1));
+  document.querySelector('#next-event').addEventListener('click', () => stepSlide(1));
+  document.querySelector('#feature-action').addEventListener('click', () => showDetails(featured[currentSlide]));
+  themeButton.addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme === 'light';
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    themeButton.setAttribute('aria-pressed', String(dark));
+    themeButton.querySelector('use').setAttribute('href', dark ? '#sun' : '#moon');
+  });
+  category.addEventListener('change', renderEvents);
+  for (const button of viewButtons) {
+    button.addEventListener('click', () => {
+      currentView = button.dataset.view;
+      for (const view of viewButtons) view.setAttribute('aria-pressed', String(view === button));
+      renderEvents();
+    });
+  }
+  eventGrid.addEventListener('click', click => {
+    const button = click.target.closest('[data-event]');
+    if (button) showDetails(events[Number(button.dataset.event)]);
+  });
+  renderFeature();
+  renderEvents();
+</script>
+</body>
+</html>
