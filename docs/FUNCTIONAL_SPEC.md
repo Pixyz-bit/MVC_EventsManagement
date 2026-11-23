@@ -76,6 +76,8 @@ Evidence: AccountManagement.aspx/.cs; UserRepository.SaveManagedAccount/CreateAd
 
 ### EVENT-01: Matrix and lifecycle
 
+Directory rows show only status, title, venue/event date, date-only registration opening/deadline, registered/capacity occupancy and a View action. Opening and deadline are shown for every status. Department remains searchable without a visible row field. View is disabled pending the Event Details design, as explicitly requested on 2026-11-23.
+
 - [x] `/admin` and `/admin/events` list unfinished Upcoming events with All upcoming, Open, Soon, and Closed filters, search/reset, and chronological ordering. Search matches title, venue, or department. Filter counts cover all upcoming events, and results paginate at 25 per page.
 - [ ] Add event details navigation. Completed and cancelled events belong in the later history workflow.
 - [ ] Stored outcomes are Upcoming, Cancelled, Completed. Effective completion occurs at now >= EventEnd. The upcoming list excludes those rows at read time. Persistent completion and history behavior remain later work.

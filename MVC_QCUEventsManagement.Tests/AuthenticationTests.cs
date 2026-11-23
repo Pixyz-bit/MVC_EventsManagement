@@ -148,12 +148,12 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var results = await client.GetStringAsync($"/admin/events?q={query}&status=Open");
         Assert.Contains(title, results);
         Assert.Contains("Main Campus Hall", results);
-        Assert.Contains("0 of 30 registered", results);
+        Assert.Contains("0 of 30 seats registered", results);
 
         var empty = await client.GetStringAsync($"/admin/events?q={query}&status=Closed");
         Assert.Contains("No matching events", empty);
         Assert.Contains("Clear filters", empty);
-        Assert.DoesNotContain("0 of 30 registered", empty);
+        Assert.DoesNotContain("0 of 30 seats registered", empty);
     }
 
     [Fact]

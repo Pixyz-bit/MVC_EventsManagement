@@ -55,6 +55,8 @@ Admin filenames above are under source Frontend/Admin; Student filenames are und
 
 ### Established design decisions
 
+The [directory row field reference](MVC_QCUEventsManagement/DesignReferences/Admin/event-directory-row-fields.png), supplied 2026-11-23, defines content only: status, title, venue/event date, registration opening/deadline, occupancy and View action. Rows retain the existing QCU palette, typography and divided-results styling. Six columns align from the xl breakpoint; smaller layouts use labeled fields in two columns or a single column. Both registration dates appear for every status as date-only values, and the event date omits its time in the directory. Department is searchable but is not displayed in the row. Occupancy shows registered/capacity with a descriptive accessible label. Per explicit user choice, View is disabled until the Event Details design is supplied.
+
 The Event Directory header includes an enabled blue plus-icon “Create new event” link beside the heading on desktop and below the introduction on mobile. The sidebar Create Event entry links to the same workflow and has its own active state.
 
 The [Event Directory heading reference](MVC_QCUEventsManagement/DesignReferences/Admin/event-directory-heading-spacing.png) and [previous creation heading](MVC_QCUEventsManagement/DesignReferences/Admin/create-event-heading-spacing-before.png), supplied 2026-11-22, establish matching page introductions. Create Event uses the directory's responsive horizontal gutters (16px, 24px from 640px, 32px from 1024px), top padding (24px, 28px from 640px), 32px bottom padding, heading typography and 6px subtitle gap. Its subtitle reads “Set the event details, registration dates, and audience before publishing.”
