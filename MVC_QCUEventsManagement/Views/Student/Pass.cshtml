@@ -1,0 +1,169 @@
+@using MVC_QCUEventsManagement.ViewModels.Student
+@model StudentPassViewModel
+@{
+    Layout = "_StudentLayout";
+    ViewData["Title"] = "Digital Event Pass & QR Attendance Credential";
+    ViewData["StudentStyle"] = "event-pass";
+    ViewData["StudentBody"] = "user-pass";
+}
+<partial name="_StudentNavbar" model="Model.Profile.Identity" />
+<main class="pass-container">
+    <!-- Registration Success Banner -->
+    @if (Model.JustBooked)
+    {
+        <div class="success-status-banner">
+        <div class="success-icon-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <div class="success-banner-text">
+            <h3>You're Registered!</h3>
+            <p>Your electronic admission pass is active. Present this digital pass at the entrance gate scanner.</p>
+        </div>
+    </div>
+    }
+
+    <!-- Boarding Pass Card / Digital Event Ticket Template -->
+    <div class="ticket-scroll-container">
+        <div class="boarding-pass-card" id="boardingPassElement">
+            <!-- Left Ivory Section -->
+            <div class="ticket-left-body">
+                <!-- Top Row: Logo & Portal Title (Left) + Student Number (Right) -->
+                <div class="ticket-top-row">
+                    <div class="ticket-brand-lockup">
+                        <img src="~/images/qcu-logo.png" alt="QCU Emblem" class="ticket-crest-img pass-crest-img" />
+                        <div class="ticket-issuer-text">
+                            <h4>UNIVERSITY EVENT PASS</h4>
+                            <span>Quezon City University</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-student-number-block">
+                        <span class="ticket-meta-label">STUDENT NUMBER</span>
+                        <span class="ticket-student-number-val" id="litPassStudentId">@Model.Profile.Identity.Id</span>
+                    </div>
+                </div>
+
+                <!-- Middle: Event Headline -->
+                <div class="ticket-headline-block">
+                    <h1 class="ticket-event-title" id="litPassEventTitle">@Model.Event.Title</h1>
+                    <div class="pass-status @(Model.Active ? "pass-status-active" : Model.Event.CheckedIn ? "pass-status-checked-in" : "pass-status-inactive")" role="status">
+
+                        @Model.Status
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Event Schedule Specs (Left) + Student Full Name (Right) -->
+                <div class="ticket-bottom-row">
+                    <div class="ticket-schedule-specs">
+                        <div class="ticket-spec-line">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span id="litPassEventDate">@($"{Model.Event.Start:MMMM d, yyyy}")</span>
+                        </div>
+
+                        <div class="ticket-spec-line">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span id="litPassEventTime">@Model.Event.TimeRange</span>
+                        </div>
+
+                        <div class="ticket-spec-line">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span id="litPassVenue">@Model.Event.Venue</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-student-name-block">
+                        <span class="ticket-meta-label">STUDENT FULL NAME</span>
+                        <span class="ticket-student-name-val" id="litPassStudentName">@Model.Profile.Identity.Name</span>
+                        <small class="pass-registered-cohort">@Model.Profile.Program · Year @Model.Year · @Model.Section</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Navy Section (QR Stub) -->
+            <div class="ticket-right-stub">
+                <!-- Attach the seam to the stub in landscape and portrait layouts. -->
+                <div class="ticket-perforation-divider" aria-hidden="true">
+                    <div class="ticket-notch-hole ticket-notch-top"></div>
+                    <div class="ticket-notch-hole"></div>
+                    <div class="ticket-notch-hole"></div>
+                    <div class="ticket-notch-hole"></div>
+                    <div class="ticket-notch-hole"></div>
+                    <div class="ticket-notch-hole ticket-notch-bottom"></div>
+                </div>
+                <div class="ticket-qr-container">
+                    @if (Model.Active)
+                        {
+                    <canvas id="qrCanvas" data-reference="@Model.Event.PassReference" role="img" aria-label="QR code for ticket @Model.Event.PassReference"></canvas>
+                    }
+                        else
+                        {
+                    <div class="ticket-qr-unavailable">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                            <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+                            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                        </svg>
+                        <span>Pass inactive</span>
+                        <small>QR code unavailable</small>
+                    </div>
+                    }
+                    <span class="ticket-stub-ref" id="litPassTicketRef">@Model.Event.PassReference</span>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    <!-- Utility Actions Row -->
+    @if (Model.Notice is not null)
+        {
+    <div class="pass-notice @(Model.Event.CheckedIn ? "pass-notice-checked-in" : "pass-notice-inactive")" role="@(Model.Event.CheckedIn ? "status" : "alert")">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            @if (Model.Event.CheckedIn) {<path d="m8 12 3 3 5-6"></path>} else {<path d="M12 7v6m0 3h.01"></path>}
+        </svg>
+        <p>@Model.Notice</p>
+    </div>
+    }
+    <div class="pass-actions-row">
+        @if (Model.Active)
+            {
+        <button type="button" class="btn-download-pass" id="btnDownloadPass">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download Pass (PNG)</span>
+        </button>
+        }
+
+        <a href="@Url.RouteUrl("StudentDashboard")" class="btn-return-dashboard">
+            <span>Return to My Events Dashboard</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </a>
+    </div>
+    <p id="passDownloadError" class="pass-notice pass-notice-inactive" role="alert" hidden>Could not download this pass. Try again or present the digital pass at the entrance.</p>
+</main>
+@section Scripts {
+    <script src="~/lib/student/html-to-image-1.11.13.js" defer></script>
+    <script src="~/lib/student/qrcode-1.0.0.min.js" defer></script>
+    <script src="~/js/student/student-pass.js" asp-append-version="true" defer></script>
+}

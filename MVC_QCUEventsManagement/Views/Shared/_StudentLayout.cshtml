@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>@ViewData["Title"] | Quezon City University</title>
+    <link rel="icon" href="~/images/qcu-logo.png" type="image/png" />
+    <link rel="stylesheet" href="~/css/student/fonts.css" asp-append-version="true" />
+    @if ((string?)ViewData["StudentStyle"] == "event-pass")
+    {
+        <link rel="stylesheet" href="~/css/student/global.css" asp-append-version="true" />
+    }
+    <link rel="stylesheet" href="@Url.Content($"~/css/student/{ViewData["StudentStyle"]}.css")" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student/toast.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student/portal-responsive.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student/mvc-portal.css" asp-append-version="true" />
+    <script src="~/js/student/portal-responsive.js" asp-append-version="true" defer></script>
+</head>
+<body class="user-portal @ViewData["StudentBody"]">
+    @RenderBody()
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

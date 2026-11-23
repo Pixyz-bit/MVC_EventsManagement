@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-23 (Asia/Manila).
 
-The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. Do not copy the old Web Forms UI or invent final page designs before their references arrive.
+The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. The user selected the original Web Forms UI as the design reference for all four student pages. Other pages retain their selected references.
 
 For each page:
 1. Record the supplied reference identifier/link/local asset and intended scope in the register below. If the user supplies a local-copyable asset, place it in DesignReferences under its portal; this folder is outside wwwroot and is not served publicly. Do not copy private reference data into public assets.
@@ -46,10 +46,10 @@ The white admin sidebar is 16rem wide on desktop. It follows the supplied Web Fo
 | Admin | Analytics | EventAnalytics.aspx | Pending | Awaiting reference |
 | Admin | History | EventHistory.aspx and code-behind, inspected live on 2026-11-23 | [History layout sample](work/event-history-layout.html), using the established QCU design | Approved and implemented at `/admin/events/history`. Source fields preserved: outcome, title/college, venue/date and report action. Outcome counts are global filter tabs, with academic-year/search/reset and 25-row pagination. Titles open read-only details; report View stays disabled until analytics. Live desktop/mobile empty/filter states and populated HTTP rendering passed. |
 | Admin | Connection diagnostics (development scope) | TestConnection.aspx | Pending | Awaiting reference |
-| Student | Dashboard/discovery | Dashboard.aspx | work/student-dashboard-layout.html; [campus-photo proposal](work/student-dashboard-campus-preview.html) | Implemented in MVC; campus-photo proposal awaiting feedback |
-| Student | Registration/cancellation | EventRegistration.aspx | Pending | Awaiting reference |
-| Student | Pass/QR/download | EventPass.aspx | Pending | Awaiting reference |
-| Student | Profile/password | StudentProfile.aspx | Pending | Awaiting reference |
+| Student | Dashboard/discovery | Dashboard.aspx | Original Web Forms page and stylesheet | Ported to MVC |
+| Student | Registration/cancellation | EventRegistration.aspx and Dashboard.aspx | Original Web Forms registration layout and cancellation dialog | Ported to MVC |
+| Student | Pass/QR/download | EventPass.aspx | Original Web Forms boarding pass and viewport-specific styles | Ported to MVC |
+| Student | Profile/password | StudentProfile.aspx | Original Web Forms Academic and Security tabs | Ported to MVC |
 
 Admin filenames above are under source Frontend/Admin; Student filenames are under Frontend/User. Shared layouts/partials are derived from supplied page references rather than assumed to require separate screens. Backend work may proceed while references are pending; final page design must wait for its reference or an explicit user decision to reuse an established pattern.
 
@@ -115,6 +115,4 @@ The Student Dashboard preview starts in dark mode with a blue navbar. The Dark m
 
 Student Directory toolbar spacing uses a common control height and consistent gaps. The search field fills the available width above three equal-width actions on small screens. The filter panel aligns its Reset and Apply filters buttons in two equal columns.
 
-The MVC Student Dashboard uses the blue navbar, a dark default with a locally remembered theme choice, and a manual featured-event carousel. Campus imagery backs event banners, and actual event banners take precedence. The two views show eligible events and owned registration details. The category filter and detail disclosures work with real event data.
-
-The campus-photo proposal follows the supplied dashboard screenshots with a full-width featured carousel and photo-led event cards. It uses Login’s local campus photograph and left-to-right fade, and Admin’s Plus Jakarta Sans, QCU blue actions, soft-blue selection, and bordered surfaces. The sample opens in light mode and the navbar control switches to navy surfaces. Both versions include Available events, My registered events, a category filter, and a details dialog with fictional data. The standalone sample was reviewed in headless Chrome at desktop and mobile sizes. The proposal is pending review before MVC integration.
+The earlier campus-photo proposal in `work/student-dashboard-campus-preview.html` is a historical sample. The MVC student portal now uses the source Web Forms styles and fonts in its own layout. The Dashboard restores the dark, full-viewport carousel, transparent-to-solid navbar, gold actions, segmented catalog and pass views, event cards, and event-details and cancellation dialogs. Registration uses the source summary card and enrollment form. The Pass uses the source ivory ticket and dark QR stub. Account Settings uses the source academic and security panels. The MVC stylesheet adds dialog and focus behavior and enrollment feedback. New passwords follow the existing MVC policy. See [testing](docs/TESTING.md) for verification.

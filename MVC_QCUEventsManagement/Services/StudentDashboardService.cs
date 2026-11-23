@@ -44,7 +44,7 @@ public sealed class StudentDashboardService(ApplicationDbContext db, EventClock 
             ? ev.EventPhotoPath : null;
     }
 
-    private static bool Eligible(Event ev, Student student)
+    internal static bool Eligible(Event ev, Student student)
     {
         static bool Matches(string? restriction, string value) =>
             string.IsNullOrWhiteSpace(restriction) || string.Equals(restriction.Trim(), value.Trim(), StringComparison.OrdinalIgnoreCase);
@@ -65,17 +65,18 @@ public sealed class StudentDashboardService(ApplicationDbContext db, EventClock 
         return key == "BACHELOROFEARLYCHILDHOODEDUCATION" ? "BECED" : key;
     }
 
-    private static StudentDashboardEvent Card(Event ev, EventRegistration? registration, DateTime now)
+    internal static StudentDashboardEvent Card(Event ev, EventRegistration? registration, DateTime now)
     {
         var today = DateOnly.FromDateTime(now);
         var seats = Math.Max(0, ev.MaxCapacity - ev.CurrentRegistrations);
-        var status = ev.Status == "Cancelled" ? "Cancelled"
+        var status = ev.Status == "Cancelled" || registration?.Status == "Cancelled" ? "Cancelled"
             : registration is not null ? ev.Status == "Completed" || ev.EventEnd <= now ? "Completed" : registration.Status == "Present" ? "Checked in" : "Registered"
             : seats == 0 || ev.RegEnd < today ? "Closed" : ev.RegStart > today ? "Opens soon" : "Open";
         return new(ev.EventId, ev.Title, ev.Description, ev.VenueLocation, ev.EventStart, ev.EventEnd, ev.RegStart, ev.RegEnd,
             seats, status, Category(ev), ev.CancellationReason, !string.IsNullOrWhiteSpace(ev.EventPhotoPath),
             ev.Sponsors.OrderBy(s => s.SponsorEntryId).Select(s => s.SponsorName).ToList(),
-            registration is null ? null : $"TCK-{ev.EventId:D4}-{registration.EventRegistrationId:D5}", registration?.Status == "Present");
+            registration is null ? null : $"TCK-{ev.EventId:D4}-{registration.EventRegistrationId:D5}", registration?.Status == "Present",
+            registration?.EventRegistrationId, registration is not null && StudentPortalService.CanCancel(ev, registration, now), ev.MaxCapacity);
     }
 
     private static string Category(Event ev)

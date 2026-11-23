@@ -143,35 +143,35 @@ Evidence: StudentList.aspx/.cs; StudentRepository.cs/.sql; account and student e
 
 ### ELIGIBLE-01: Eligibility
 
-- [ ] Every restricted dimension must match: trimmed campus/department, whole comma-delimited program token with spaces removed and known alias equivalences, and selected year. Blank/null target means unrestricted.
-- [ ] Browse with omitted year; final commit must supply/recheck year 1-5. One matching dimension cannot bypass another restriction.
-- [ ] Preserve supported program aliases: BSIT/BS Information Technology; BSCS/BS Computer Science; BSIS/BS Information Systems; BSIE/BS Industrial Engineering; BSECE/BS Electronics Engineering; BSA/BS Accountancy; BSBA/BS Business Administration; BSEntrep/BS Entrepreneurship; BECEd/Bachelor of Early Childhood Education. Only these nine programs are supported; event creation rejects other program codes. Check actual SQL collation before choosing case semantics.
+- [x] Every restricted dimension must match: trimmed campus/department, whole comma-delimited program token with spaces removed and known alias equivalences, and selected year. Blank/null target means unrestricted.
+- [x] Browse with omitted year; final commit must supply/recheck year 1-5. One matching dimension cannot bypass another restriction.
+- [x] Preserve supported program aliases: BSIT/BS Information Technology; BSCS/BS Computer Science; BSIS/BS Information Systems; BSIE/BS Industrial Engineering; BSECE/BS Electronics Engineering; BSA/BS Accountancy; BSBA/BS Business Administration; BSEntrep/BS Entrepreneurship; BECEd/Bachelor of Early Childhood Education. Browse and booking use the same case-insensitive predicate.
 
 Acceptance: independent dimension mismatches reject, unrestricted values allow, aliases match, substrings do not, and browse/preflight/commit use consistent predicates.
 
 ### DISCOVER-01: Dashboard
 
-- [x] Discover eligible Upcoming events with image/sponsors/venue/schedule/availability and category filter. Order Open, Soon, closed, preserving schedule order within groups.
+- [x] Discover eligible Upcoming events with image, sponsors, venue, schedule and availability. Order Open, Soon, closed, preserving schedule order within groups. The original Web Forms dashboard layout shows the Available Events and My Registered Events views.
 - [x] Non-cancelled owned registrations appear in My Registered Events rather than available catalog. Cancelled bookings allow rediscovery if otherwise eligible.
 - [x] Owned registration details and ticket references remain visible when registration closes or fills. Show end, cancellation and check-in states and handle missing profiles with an empty state.
-- [ ] Full pass presentation, booking and student cancellation are tracked in their separate workflow requirements.
+- [x] Full pass presentation, booking and student cancellation follow their separate workflow requirements.
 
-Acceptance: no duplicate current-pass/catalog item, cancelled bookings release visibility, filters work, and owned tickets remain accessible after deadline.
+Acceptance: no duplicate current-pass/catalog item, cancelled bookings release visibility, and owned tickets remain accessible after deadline.
 
 ### REGISTER-01: Booking
 
-- [ ] Preserve three functional steps: event information, read-only student profile, current year/section and terms confirmation. Presentation follows supplied references.
-- [ ] Require terms, nonblank section within column length, year 1-5, real event/profile and authenticated student identity. Do not trust posted student IDs.
-- [ ] Recheck Upcoming/unfinished event, inclusive registration window, capacity, eligibility and no active booking inside the commit operation. Existing active holders navigate to their pass even when closed/full.
-- [ ] Insert NoShow with null CheckInTimestamp and increment CurrentRegistrations together. NoShow means reserved/unscanned here, not a finalized absence. Distinguish full/closed/ineligible/duplicate failures without side effects.
-- [ ] Allow new booking after cancellation if still eligible; preserve old cancelled row and generate a new reference. Protect simultaneous submissions and final-seat races.
+- [x] Show the source’s event summary, read-only student profile, current year/section and terms confirmation on one page.
+- [x] Require terms, nonblank section within column length, year 1-5, real event/profile and authenticated student identity.
+- [x] Recheck Upcoming/unfinished event, inclusive registration window, capacity, eligibility and no active booking inside the commit operation. Existing active holders navigate to their pass even when closed/full.
+- [x] Insert NoShow with null CheckInTimestamp and increment CurrentRegistrations together. NoShow means reserved/unscanned here, not a finalized absence.
+- [x] Allow new booking after cancellation if still eligible. The old cancelled row is retained and the new pass receives a separate reference. Event rowversion and the active-pass unique index protect concurrent updates.
 
 Acceptance: one registration/seat for concurrent duplicate submissions; never exceed capacity; no count change on failure; selected year/section persist per booking.
 
 ### CANCEL-01: Student cancellation
 
-- [ ] Owner only, NoShow only, event Upcoming/unfinished and today's Philippine date <= RegEnd. Source does not separately require the opening date to have arrived; do not silently add that condition.
-- [ ] Transition to Cancelled and decrement counter (never below zero) atomically. Reject Present/already-cancelled/expired/wrong-owner requests without another decrement.
+- [x] Owner only, NoShow only, event Upcoming/unfinished and today's Philippine date <= RegEnd. The opening date does not affect cancellation.
+- [x] Transition to Cancelled and decrement counter (never below zero) atomically. Reject Present/already-cancelled/expired/wrong-owner requests without another decrement.
 
 Acceptance: deadline boundary honored, repeat requests release at most one seat, and forged ownership fails.
 
@@ -184,16 +184,16 @@ Acceptance: correct attendee/event is confirmed, one transition/decrement occurs
 
 ### PASS-01: Admission pass
 
-- [ ] Resolve a real registration by ID/reference and enforce ownership. Source fallback chooses the student's first event-date-sorted registration if lookup fails; handle explicit invalid IDs deliberately rather than silently showing an unrelated pass. Never fabricate a pass.
-- [ ] Reference/QR payload is TCK-{EventId:D4}-{EventRegistrationId:D5}. Redirect ticketId GUID and displayed SEC/GetHashCode token are not stored admission secrets. Query-string tokens/success flags cannot confer validity.
-- [ ] Valid admission requires Upcoming/not-ended event and uncancelled/unconsumed registration. Checked-in passes remain visible as evidence with reuse warning; event cancellation invalidates admission and displays its reason.
-- [ ] Show real student/program/registered year-section, event schedule/venue/reference. Preserve QR generation and PNG download functionality using compatible assets and the new design.
+- [x] Resolve a real registration by numeric route ID and enforce ownership. Unknown or other students’ IDs return 404.
+- [x] Reference/QR payload is TCK-{EventId:D4}-{EventRegistrationId:D5}. Admission derives from the stored booking and event state.
+- [x] Valid admission requires Upcoming/not-ended event and uncancelled/unconsumed registration. Checked-in passes remain visible as evidence with reuse warning. Event cancellation invalidates admission and displays its reason.
+- [x] Show real student/program/registered year-section, schedule/venue/reference. Use the original ticket presentation and local QR/PNG libraries.
 
 Acceptance: cross-student access fails; known reference resolves correctly; forged flags do not activate a pass; PNG QR decodes to same reference; inactive status is clear.
 
 ### PROFILE-01: Own profile/password
 
-- [ ] Academic/account details are read-only; source offers no self-edit demographic save. Own password change requires correct current hash verification, matching confirmation and minimum length, then saves fresh salt/hash.
+- [x] Academic/account details are read-only. Password changes verify the current password and matching 15–128 character replacement, then save a fresh Identity hash.
 
 Acceptance: forged user IDs cannot affect another account; mismatch/wrong current password writes nothing; new password works and old fails after success.
 

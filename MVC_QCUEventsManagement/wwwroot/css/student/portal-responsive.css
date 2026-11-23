@@ -1,0 +1,256 @@
+/* Shared login and student portal adaptations. Load after each page's stylesheet. */
+.auth-page,
+.user-portal {
+    min-height: 100dvh;
+    line-height: 1.5;
+}
+.auth-page > form { width: 100%; max-width: 440px; min-width: 0; }
+.user-portal > form { width: 100%; min-width: 0; }
+.user-portal .nav-brand,
+.user-portal .nav-brand > div,
+.user-portal .nav-user-bar,
+.user-portal .section-title-block { min-width: 0; }
+.user-portal .nav-logo-img,
+.user-portal .nav-user-avatar,
+.user-portal .nav-user-bar { flex-shrink: 0; }
+.user-portal :is(h1, h2, h3, p, .breadcrumb-item, .modal-spec-val) { overflow-wrap: anywhere; }
+.user-portal .breadcrumb-list { flex-wrap: wrap; }
+.user-portal .events-grid,
+.user-portal .registered-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+}
+.user-portal .viewonly-student-grid,
+.user-portal .inputs-grid-2col {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+.user-portal :is(.viewonly-item, .form-group, .event-card, .modal-spec-item) { min-width: 0; }
+.user-portal :is(.form-input, .form-select) { min-width: 0; max-width: 100%; }
+.user-portal a:focus-visible,
+.user-portal button:focus-visible,
+.auth-page button:focus-visible,
+.auth-page input:focus-visible {
+    outline: 2px solid var(--accent-gold, #2563eb);
+    outline-offset: 3px;
+}
+.user-dashboard .hero-showcase-container { height: auto; min-height: 100dvh; }
+.user-portal { scroll-padding-top: calc(var(--portal-header-height, 68px) + 16px); }
+.user-dashboard #events-section { scroll-margin-top: calc(var(--portal-header-height, 68px) + 16px); }
+.user-dashboard.has-no-hero .portal-main { padding-top: calc(var(--portal-header-height, 68px) + 32px); }
+.user-portal :is(.card-meta-line > span, .sponsor-pill, .preview-meta-item, .modal-spec-sub, .viewonly-value) {
+    min-width: 0; max-width: 100%; overflow-wrap: anywhere;
+}
+.user-portal :is(.card-meta-line, .preview-meta-item) { align-items: flex-start; }
+.user-portal :is(.modal-spec-card, .meta-chip, .academic-record-field) { min-width: 0; }
+.user-portal.user-profile .feedback-alert { position: static !important; width: 100% !important; max-width: none !important; box-shadow: none !important; }
+.user-portal :is(.event-modal-dialog, .cancel-modal-dialog, .modal-box) {
+    max-height: calc(100dvh - 3rem);
+    min-height: 0;
+}
+.user-portal :is(.cancel-modal-dialog, .modal-box) { overflow-y: auto; }
+.user-portal :is(.modal-body, .cancel-modal-body) { min-height: 0; }
+.user-pass .ticket-top-row { flex-wrap: wrap; }
+.user-pass .ticket-brand-lockup { min-width: 0; flex-shrink: 1; }
+.user-pass .ticket-issuer-text { min-width: 0; }
+.user-pass :is(.ticket-issuer-text h4, .ticket-issuer-text span, .ticket-spec-line) { white-space: normal; overflow-wrap: anywhere; }
+.user-pass .ticket-bottom-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.user-pass .ticket-student-name-block { max-width: 100%; }
+.user-pass .ticket-student-name-val { overflow-wrap: anywhere; }
+
+.user-portal :is(.event-modal-dialog, .cancel-modal-dialog) { overflow: hidden; }
+.user-dashboard :is(.modal-body-content, .cancel-modal-body) {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain;
+    scrollbar-gutter: stable; -webkit-overflow-scrolling: touch;
+}
+.user-dashboard :is(.modal-footer-actions, .cancel-modal-footer, .cancel-modal-header) { flex: 0 0 auto; }
+
+@media screen and (max-width: 1024px) {
+    .user-dashboard .portal-navbar { position: sticky; background: #090d16; }
+    .user-dashboard .hero-showcase-container { min-height: min(680px, calc(100svh - var(--portal-header-height, 68px))); padding-top: 32px; padding-bottom: 88px; }
+    .user-dashboard .hero-body-content { width: 100%; min-width: 0; max-width: 100%; padding: 24px clamp(16px, 4vw, 40px); }
+    .user-dashboard.has-no-hero .portal-main { padding-top: 24px; }
+    .user-dashboard .hero-description { max-width: 65ch; }
+    .user-dashboard .modal-banner-header { height: clamp(100px, 18dvh, 180px); }
+    .user-dashboard .logout-confirm-dialog { max-height: calc(100dvh - 24px); overflow-y: auto; }
+    .user-profile :is(.profile-card-header, .profile-card-body) { padding: 24px; }
+    .user-pass .ticket-left-body { padding: 24px; }
+}
+
+@media screen and (min-width: 720px) and (max-width: 1100px) {
+    .user-dashboard :is(.events-grid, .registered-cards-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+    .user-dashboard .event-card-body { padding: 20px; }
+    .user-dashboard .pass-card-action-row { flex-wrap: wrap; }
+    .user-dashboard .pass-card-action-row > a { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+}
+
+@media screen and (max-width: 900px) {
+    .user-portal .navbar-inner {
+        padding: 12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+        gap: 12px;
+    }
+    .user-portal .nav-user-bar { gap: 8px; }
+    .user-portal .nav-user-badge { min-width: 44px; min-height: 44px; padding: 5px; justify-content: center; }
+    .user-portal .nav-user-info { display: none; }
+    .user-portal :is(.nav-btn-signout, .nav-link-back, .nav-link-dashboard) {
+        min-width: 44px; min-height: 44px; justify-content: center; flex-shrink: 0;
+    }
+    .user-dashboard .hero-body-content { width: 100%; min-width: 0; max-width: 100%; }
+    .user-pass .portal-navbar { padding: 0; }
+}
+
+@media screen and (max-width: 700px) {
+    .auth-page {
+        padding: max(24px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        background-attachment: scroll;
+    }
+    .auth-page .brand-title { font-size: clamp(1.5rem, 6vw, 2.1rem); }
+    .auth-page .card-inner { padding: 24px 20px; }
+    .auth-page .form-control,
+    .user-portal .form-input,
+    .user-portal .form-select { font-size: 16px; min-height: 48px; }
+    .auth-page .form-control::placeholder { font-size: 16px; }
+    .auth-page .password-input-wrapper .form-control { padding-right: 56px; }
+    .auth-page .btn-toggle-password { right: 4px; width: 44px; height: 44px; }
+    .auth-page .btn-submit { min-height: 48px; }
+    .user-portal { background-attachment: scroll; }
+    .user-portal .nav-brand { gap: 8px; }
+    .user-portal .nav-brand-title { font-size: clamp(0.75rem, 2.8vw, 1rem); }
+    .user-portal .nav-brand-subtitle { font-size: 0.625rem; }
+    .user-portal .nav-logo-img { width: 34px; height: 34px; }
+    .user-portal .nav-link-back { padding: 8px; font-size: 0.75rem; gap: 5px; }
+    .user-dashboard .portal-navbar { position: sticky; background: #090d16; }
+    .user-dashboard .hero-showcase-container {
+        min-height: calc(100svh - var(--portal-header-height, 68px));
+        padding-top: 24px;
+        padding-bottom: 80px;
+        justify-content: center;
+    }
+    .user-dashboard .hero-body-content { padding: 16px; }
+    .user-dashboard .hero-title { font-size: clamp(1.75rem, 7vw, 2.5rem); }
+    .user-dashboard .hero-description { line-height: 1.6; }
+    .user-dashboard .hero-meta-list { flex-direction: column; align-items: flex-start; }
+    .user-dashboard .hero-meta-item { min-width: 0; font-size: 0.875rem; overflow-wrap: anywhere; }
+    .user-dashboard .hero-meta-icon { flex-shrink: 0; }
+    .user-dashboard .hero-carousel-controls { left: 16px; right: 16px; bottom: 16px; gap: 12px; }
+    .user-dashboard .hero-carousel-dots { min-width: 0; overflow-x: auto; flex-wrap: nowrap; }
+    .user-dashboard .hero-carousel-nav-arrows { flex-shrink: 0; }
+    .user-dashboard .hero-dot-btn { position: relative; flex-shrink: 0; width: 44px; height: 44px; background: transparent; box-shadow: none; }
+    .user-dashboard .hero-dot-btn::before { content: ""; position: absolute; top: 18px; left: 8px; width: 28px; height: 8px; border-radius: 8px; background: #94a3b8; }
+    .user-dashboard .hero-dot-btn.active::before { background: var(--accent-gold); }
+    .user-portal :is(.hero-arrow-btn, .modal-close-btn, .modal-close-icon-btn, .cancel-modal-close) { width: 44px; height: 44px; flex-shrink: 0; }
+    .user-portal :is(.portal-main, .registration-container, .profile-container) {
+        padding: 24px max(16px, env(safe-area-inset-right)) max(40px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+    .user-dashboard .section-header-row { align-items: stretch; gap: 16px; }
+    .user-dashboard .tab-toggle-container { width: 100%; border-radius: 16px; }
+    .user-dashboard .tab-toggle-container .tab-btn { flex: 1; min-width: 0; min-height: 48px; padding: 8px; justify-content: center; border-radius: 12px; }
+    .user-dashboard :is(.events-grid, .registered-cards-grid) { gap: 20px; }
+    .user-dashboard .event-card-body { padding: 20px 16px; }
+    .user-dashboard .event-promo-banner { height: auto; aspect-ratio: 16 / 9; min-height: 150px; }
+    .user-dashboard .card-event-name { font-size: clamp(1.125rem, 4.5vw, 1.35rem); line-height: 1.4; }
+    .user-dashboard .card-meta-line { font-size: 0.875rem; line-height: 1.6; }
+    .user-dashboard .card-action-row { align-items: stretch; }
+    .user-dashboard .card-action-row > :is(a, button) { width: 100%; }
+    .user-dashboard .pass-card-action-row { flex-direction: column-reverse; gap: 10px; }
+    .user-dashboard .empty-passes-box { padding: 28px 20px; }
+    .user-dashboard .cat-pill { min-height: 44px; }
+    .user-dashboard :is(.btn-view-details, .btn-pass-cancel) { min-height: 44px; justify-content: center; }
+    .user-portal :is(.event-modal-backdrop, .cancel-modal-backdrop, .modal-overlay) {
+        padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    }
+    .user-portal :is(.event-modal-dialog, .cancel-modal-dialog, .modal-box) { max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+    .user-dashboard :is(.modal-body-content, .modal-body, .cancel-modal-body, .modal-header) { padding: 20px 16px; }
+    .user-dashboard :is(.modal-specs-grid, .modal-detail-grid) { grid-template-columns: minmax(0, 1fr); }
+    .user-dashboard :is(.modal-footer-actions, .modal-footer, .cancel-modal-footer) { padding: 16px; flex-wrap: wrap; }
+    .user-dashboard :is(.modal-footer-actions, .modal-footer, .cancel-modal-footer) > :is(a, button, input) { flex: 1 1 100%; min-height: 44px; justify-content: center; text-align: center; }
+    .user-registration .card-section-header { padding: 20px 16px; flex-wrap: wrap; gap: 12px; }
+    .user-registration .section-title-wrap { min-width: 0; }
+    .user-registration .section-title-wrap svg { flex-shrink: 0; }
+    .user-registration .card-section-body { padding: 20px 16px; }
+    .user-registration :is(.viewonly-student-grid, .inputs-grid-2col) { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .user-registration .form-label { flex-wrap: wrap; gap: 4px 12px; }
+    .user-registration .meta-chip-val { white-space: normal; overflow-wrap: anywhere; }
+    .user-registration .commitment-card { padding: 16px; }
+    .user-registration .event-summary-content { padding: 20px 16px; }
+    .user-registration .event-summary-title { font-size: clamp(1.25rem, 5vw, 1.6rem); }
+    .user-registration .meta-chip { padding: 12px; gap: 12px; }
+    .user-registration .viewonly-item { padding: 14px; }
+    .user-registration .form-actions-footer { gap: 12px; }
+    .user-registration .commitment-subtext { margin-left: 0; margin-top: 12px; font-size: 0.8125rem; line-height: 1.6; }
+    .user-registration .commitment-checkbox-label { min-height: 44px; }
+    .user-registration .btn-primary-confirm { min-height: 48px; padding-inline: 12px; font-size: 0.8rem; }
+    .user-profile .profile-tabs-nav { gap: 16px; }
+    .user-profile .tab-btn { flex: 1; min-width: 0; }
+    .user-profile :is(.form-grid-2, .form-grid-3, .password-grid) { grid-template-columns: minmax(0, 1fr); }
+    .user-profile .password-grid .form-group:first-child { max-width: none; }
+    .user-profile :is(.profile-card-header, .profile-card-body) { padding: 20px 16px; }
+    .user-profile .academic-record-field { padding: 14px; }
+    .user-profile .btn-update-pwd { width: 100%; min-height: 48px; }
+    .user-profile .profile-tabs-nav { position: sticky; top: var(--portal-header-height, 68px); z-index: 20; background: var(--bg-canvas); }
+    .auth-page .app-toast-container,
+    .user-portal .app-toast-container { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); width: calc(100% - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)); }
+    .auth-page .toast-close-btn,
+    .user-portal .toast-close-btn { width: 44px; height: 44px; }
+    .user-portal :is(.feedback-alert, .alert-toast, .toast-banner, .error-alert-banner) {
+        right: max(16px, env(safe-area-inset-right)) !important;
+        bottom: max(16px, env(safe-area-inset-bottom)) !important;
+        width: calc(100% - 32px - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
+    }
+}
+
+@media screen and (max-width: 780px) {
+    .user-pass .pass-container { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+    .user-pass .ticket-top-row,
+    .user-pass .ticket-bottom-row { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+    .user-pass .ticket-brand-lockup { flex-shrink: 1; }
+    .user-pass :is(.ticket-student-number-block, .ticket-student-name-block) { text-align: left; align-items: flex-start; max-width: 100%; }
+    .user-pass :is(.ticket-issuer-text h4, .ticket-issuer-text span, .ticket-spec-line, .ticket-student-number-val) { white-space: normal; overflow-wrap: anywhere; }
+    .user-pass .ticket-spec-line > span { min-width: 0; }
+    .user-pass .ticket-student-name-val { overflow-wrap: anywhere; }
+    .user-pass .ticket-right-stub { height: auto; min-height: 280px; padding: 28px 24px; }
+    .user-pass .ticket-perforation-divider {
+        top: 0; bottom: auto; left: 0; right: 0; width: 100%; height: 24px;
+        transform: translateY(-50%); flex-direction: row;
+    }
+    .user-pass .pass-actions-row { min-width: 0; }
+    .user-pass :is(.btn-download-pass, .btn-return-dashboard) { flex: auto; width: 100%; min-width: 0; max-width: 100%; min-height: 48px; padding-inline: 16px; text-align: center; }
+    .user-pass :is(.btn-download-pass, .btn-return-dashboard) span { min-width: 0; overflow-wrap: anywhere; }
+    .user-pass :is(.btn-download-pass, .btn-return-dashboard) svg { flex-shrink: 0; }
+    .user-pass .pass-notice { align-items: flex-start; padding: 16px; }
+}
+
+@media screen and (max-width: 540px) {
+    .user-registration .nav-link-back span { display: none; }
+    .user-profile .nav-link-back span { display: none; }
+    .user-dashboard .hero-description { font-size: 0.875rem; }
+    .user-dashboard .hero-showcase-container { min-height: 0; }
+    .user-dashboard .hero-title { font-size: clamp(1.6rem, 6.5vw, 2rem); }
+    .user-dashboard .modal-event-title { font-size: clamp(1.2rem, 5vw, 1.5rem); }
+    .user-dashboard .cancel-modal-header { padding: 16px 16px 0; }
+    .user-dashboard .cancel-icon-badge { width: 44px; height: 44px; }
+    .user-dashboard .logout-confirm-actions { flex-wrap: wrap; }
+    .user-dashboard .logout-confirm-actions button { flex-basis: 100%; }
+}
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .auth-page { align-items: flex-start; padding-block: 20px; }
+    .auth-page .brand-seal-wrapper { width: 52px; height: 52px; margin-bottom: 12px; }
+    .auth-page .auth-card { margin-top: 20px; }
+    .user-dashboard .hero-showcase-container { min-height: 0; }
+    .user-dashboard .hero-meta-list { flex-wrap: wrap; }
+    .user-dashboard :is(.modal-footer-actions, .cancel-modal-footer) { padding-block: 10px; }
+    .user-dashboard :is(.modal-footer-actions, .cancel-modal-footer) > :is(a, button) { flex: 1 1 0; padding-inline: 10px; }
+    .user-profile .profile-tabs-nav { position: static; }
+}
+
+@media (any-pointer: coarse) {
+    .user-portal :is(.form-input, .form-select) { font-size: 16px; min-height: 48px; }
+    .user-portal :is(.nav-user-badge, .nav-btn-signout, .nav-link-back, .nav-link-dashboard, .btn-view-details, .btn-pass-cancel, .modal-close-btn, .cancel-modal-close) { min-width: 44px; min-height: 44px; }
+}
+
+@media (hover: none) {
+    .user-portal :is(.event-card, .modal-spec-card, .btn-view-details, .btn-pass-cancel, .btn-return-dashboard, .btn-primary-confirm):hover { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-page *, .user-portal *, .auth-page *::before, .user-portal *::before { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

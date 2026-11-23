@@ -57,6 +57,7 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddScoped<StudentService>();
 builder.Services.AddScoped<StudentDashboardService>();
+builder.Services.AddScoped<StudentPortalService>();
 builder.Services.AddScoped<AccountManagementService>();
 builder.Services.AddScoped<StudentCsvService>();
 builder.Services.AddScoped<AnalyticsService>();

@@ -122,7 +122,7 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Attendance list | EventAttendanceController | EventAttendanceViewModel, EventAttendanceQuery, AttendanceItem | Views/EventAttendance/Index.cshtml |
 | Analytics | EventAnalyticsController | EventAnalyticsViewModel, EventAnalyticsQuery and separate report result records | Views/EventAnalytics/Index.cshtml |
 | Student Directory | StudentDirectoryController | StudentDirectoryViewModel, StudentDirectoryQuery, StudentProfileData/Input, StudentImportReport/Error (one type per file) | Views/StudentDirectory/Index.cshtml and _QueryFields.cshtml |
-| Student Dashboard | StudentController | StudentDashboardViewModel, StudentDashboardEvent | Views/Student/Index.cshtml and _DashboardEvent.cshtml |
+| Student portal | StudentController | StudentDashboardViewModel, StudentDashboardEvent, StudentPortalModels | Views/Student/{Index,Registration,Pass,Profile}.cshtml, _DashboardEvent, _DashboardDialogs and _StudentNavbar |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
 
@@ -146,4 +146,4 @@ StudentDirectoryController serves AdminStudentDirectory at GET /admin/students w
 
 AccountManagementController serves /admin/accounts. AccountManagementService reads filtered pages and exports, and saves account and linked student changes through one database transaction. The Account Management Razor view is enhanced by account-management.js for keyboard-accessible profile tabs. Student creation and roster import open the existing Student Directory dialogs.
 
-StudentDashboardService builds the read-only discovery and registration views at /student. The dedicated student image route uses the existing banner store and the same visibility rules as the dashboard. student-dashboard.js enhances the server-rendered cards with theme selection, featured navigation and filtering.
+StudentDashboardService builds discovery and owned registration summaries at `/student`. The protected student image route uses the existing banner store. StudentPortalService owns registration, cancellation, pass reads and password changes. StudentController binds those operations at `/student/events/{id}/register`, `/student/passes/{id}`, `/student/passes/{id}/cancel`, `/student/profile` and `/student/profile/password`. The student-only layout loads the source page styles and locally reused QR and PNG assets. The scripts under `wwwroot/js/student` handle the carousel, dialogs, profile tabs and ticket export.

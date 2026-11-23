@@ -1,38 +1,71 @@
-@using System.Globalization
 @model MVC_QCUEventsManagement.ViewModels.Student.StudentDashboardEvent
 @{
-    var format = CultureInfo.InvariantCulture;
-    var registrationText = Model.Status switch
-    {
-        "Open" => $"Closes {Model.RegEnd.ToString("MMM d, yyyy", format)} · {Model.SeatsAvailable} seats left",
-        "Opens soon" => $"Opens {Model.RegStart.ToString("MMM d, yyyy", format)}",
-        "Closed" when Model.SeatsAvailable == 0 => "Venue at capacity",
-        "Closed" => "Registration closed",
-        _ => Model.Status
-    };
+    var registered = Model.RegistrationId.HasValue;
+    var banner = Model.HasBanner ? Url.RouteUrl("StudentEventBanner", new { id = Model.Id }) : Url.Content(Model.BannerFallback);
+    var registerUrl = Url.RouteUrl("StudentEventRegistration", new { id = Model.Id });
+    var badgeClass = Model.Status switch { "Open" or "Registered" or "Checked in" => "", "Opens soon" => "card-status-soon", _ => "card-status-closed" };
+    var badgeText = Model.Status == "Opens soon" ? "SOON" : Model.Status.ToUpperInvariant();
 }
-<article class="student-card" id="student-event-@Model.Id" data-event-category="@Model.Category" tabindex="-1">
-    <div class="student-card-banner">
-        @if (Model.HasBanner) { <img data-event-banner loading="lazy" src="@Url.RouteUrl("StudentEventBanner", new { id = Model.Id })" alt="" /> }
-        <div><span class="student-category">@Model.Category</span><span class="student-status" data-status="@Model.Status">@Model.Status</span></div>
+<article class="event-card @(registered ? "registered-pass-card" : "")" id="card-@Model.Id" data-category="@Model.Category"
+         data-title="@Model.Title" data-venue="@Model.Venue" data-date="@Model.Start.ToString("MMM d, yyyy")"
+         data-time="@Model.TimeRange" data-caption="@(Model.Description ?? "Discover event agenda, network with university partners, and confirm your attendance pass.")"
+         data-banner="@banner" data-register="@registerUrl" data-status="@Model.Status" data-capacity="@Model.Capacity" data-seats="@Model.SeatsAvailable"
+         data-start="@Model.RegStart.ToString("MMM d, yyyy")" data-end="@Model.RegEnd.ToString("MMM d, yyyy")"
+         data-pass="@Model.PassReference" data-cancel="@(registered ? Url.Action("CancelPass", new { id = Model.RegistrationId }) : null)">
+    <!-- Top Half: Promotional Banner Area -->
+    <div class="event-promo-banner" style="background-image:url('@banner')">
+        <!-- Status Indicator (Top-Left of Banner) -->
+        <div class="card-status-pill @badgeClass">@badgeText</div>
     </div>
-    <div class="student-card-body">
-        <h3>@Model.Title</h3>
-        <dl>
-            <div><dt>Date and time (PHT)</dt><dd>@Model.Start.ToString("MMM d, yyyy · h:mm tt", format)–@Model.End.ToString(Model.Start.Date == Model.End.Date ? "h:mm tt" : "MMM d, h:mm tt", format)</dd></div>
-            <div><dt>Venue</dt><dd>@Model.Venue</dd></div>
-            <div><dt>@(Model.PassReference is null ? "Registration" : "Ticket reference")</dt><dd>@(Model.PassReference ?? registrationText)</dd></div>
-        </dl>
-        <details class="student-card-details">
-            <summary class="student-button">@(Model.PassReference is null ? "View event" : "View registration")</summary>
-            <div class="student-card-description">
-                @if (!string.IsNullOrWhiteSpace(Model.Description)) { <p>@Model.Description</p> }
-                @if (Model.Sponsors.Count > 0) { <p><strong>Hosted with</strong> @string.Join(", ", Model.Sponsors)</p> }
-                @if (!string.IsNullOrWhiteSpace(Model.CancellationReason)) { <p><strong>Cancellation reason</strong> @Model.CancellationReason</p> }
-                @if (Model.CheckedIn) { <p>Attendance confirmed</p> }
-                @if (Model.PassReference is null && string.IsNullOrWhiteSpace(Model.Description) && Model.Sponsors.Count == 0) { <p>@registrationText</p> }
-                @if (Model.PassReference is not null && !Model.CheckedIn && string.IsNullOrWhiteSpace(Model.Description) && string.IsNullOrWhiteSpace(Model.CancellationReason) && Model.Sponsors.Count == 0) { <p>@Model.Status · @Model.PassReference</p> }
+
+    <!-- Bottom Half: Event Details -->
+    <div class="event-card-body">
+        <!-- Event Title: Prominent, Crisp, High-Contrast -->
+        <h3 class="card-event-name">@Model.Title</h3>
+
+        <!-- Location Line with Pin Icon -->
+        <div class="card-meta-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>@Model.Venue</span>
+        </div>
+
+        <!-- Date Line with Calendar Icon -->
+        <div class="card-meta-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>@Model.Start.ToString("MM/dd/yyyy")</span>
+        </div>
+
+        <!-- Time Line with Clock Icon -->
+        <div class="card-meta-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>@Model.TimeRange</span>
+        </div>
+
+        @if (registered)
+        {
+            <div class="card-action-row pass-card-action-row">
+                @if (Model.CanCancel) { <button type="button" class="btn-pass-cancel" data-cancel-pass>Cancel Pass</button> }
+                <a asp-route="StudentPass" asp-route-id="@Model.RegistrationId" class="btn-view-details"><span>VIEW PASS &amp; QR &rarr;</span></a>
             </div>
-        </details>
+        }
+        else
+        {
+            <div class="card-sponsors-row">
+                <span class="sponsor-label">SPONSORS:</span>
+                @foreach (var sponsor in Model.Sponsors.DefaultIfEmpty("NONE")) { <span class="sponsor-pill" data-sponsor>@sponsor</span> }
+            </div>
+            <div class="card-action-row"><button type="button" class="btn-view-details" data-event-details><span>VIEW DETAILS &rarr;</span></button></div>
+        }
     </div>
 </article>

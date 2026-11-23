@@ -1,0 +1,21 @@
+.user-portal [hidden], .user-portal dialog:not([open]) { display: none !important; }
+.user-portal :focus-visible { outline: 2px solid #ffde59; outline-offset: 3px; }
+.user-dashboard dialog.event-modal-backdrop,
+.user-dashboard dialog.cancel-modal-backdrop {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border: 0;
+    color: inherit;
+}
+.user-dashboard dialog[open]::backdrop { background: transparent; }
+.user-dashboard:has(dialog[open]) { overflow: hidden; }
+.user-dashboard .nav-btn-signout { cursor: pointer; }
+.user-dashboard .btn-modal-register[aria-disabled="true"] { pointer-events: none; opacity: .55; }
+.user-registration .event-summary-card[role="status"] { padding: 1.5rem; }
+.user-registration .event-summary-card[role="status"] .btn-secondary { margin-top: 1rem; }
+.user-registration .error-alert-banner ul { margin: 0; padding-inline-start: 1.25rem; }
+.user-registration .context-tag.fully-booked { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+.user-registration .context-tag.spots-left { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.pass-registered-cohort { margin-top: .25rem; font-size: .72rem; }

@@ -789,7 +789,8 @@ public sealed class AuthenticationTests : IAsyncLifetime
         using var client = NewClient();
         using var login = await SignInAsync(client, _studentEmail, _password);
         var html = await client.GetStringAsync("/student");
-        Assert.Contains("data-theme=\"dark\"", html);
+        Assert.Contains("user-portal user-dashboard", html);
+        Assert.Contains("hero-showcase-container", html);
         Assert.Contains("Eligible workshop " + marker, html);
         Assert.Contains("Returned to catalog " + marker, html);
         Assert.DoesNotContain("Restricted campus " + marker, html);
@@ -798,13 +799,88 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Contains($"TCK-{owned.EventId:D4}-{pass.EventRegistrationId:D5}", html);
         Assert.DoesNotContain($"TCK-{owned.EventId:D4}-{foreignPass.EventRegistrationId:D5}", html);
         Assert.DoesNotContain("ANOTHER-" + marker, html);
-        Assert.Contains("Attendance confirmed", html);
+        using var ownedPass = await client.GetAsync($"/student/passes/{pass.EventRegistrationId}");
+        Assert.Contains("Attendance has already been recorded", await ownedPass.Content.ReadAsStringAsync());
+        using var foreign = await client.GetAsync($"/student/passes/{foreignPass.EventRegistrationId}");
+        Assert.Equal(HttpStatusCode.NotFound, foreign.StatusCode);
         using var missing = await client.GetAsync($"/student/events/{wrongCampus.EventId}/banner");
         Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
         using var visibleBanner = await client.GetAsync($"/student/events/{eligible.EventId}/banner");
         Assert.Equal("image/png", visibleBanner.Content.Headers.ContentType?.MediaType);
         using var ownedBanner = await client.GetAsync($"/student/events/{owned.EventId}/banner");
         Assert.Equal(HttpStatusCode.OK, ownedBanner.StatusCode);
+    }
+
+    [Fact]
+    public async Task Student_can_book_view_cancel_and_rebook_through_the_portal()
+    {
+        await using var db = CreateContext();
+        var now = new EventClock(TimeProvider.System).Now;
+        var ev = new Event
+        {
+            Title = "Student portal registration fixture", VenueLocation = "Campus Hall", MaxCapacity = 1,
+            EventStart = now.AddDays(2), EventEnd = now.AddDays(2).AddHours(2),
+            RegStart = DateOnly.FromDateTime(now), RegEnd = DateOnly.FromDateTime(now),
+            TargetYearLevel = 3, CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync()
+        };
+        db.Events.Add(ev);
+        await db.SaveChangesAsync();
+        var path = $"/student/events/{ev.EventId}/register";
+        using var client = NewClient();
+        using var login = await SignInAsync(client, _studentEmail, _password);
+        using var profile = await client.GetAsync("/student/profile");
+        Assert.Contains("Academic information", await profile.Content.ReadAsStringAsync());
+        using var page = await client.GetAsync(path);
+        var csrf = await TokenAsync(page);
+        FormUrlEncodedContent Booking(string year) => Form(("Year", year), ("Section", "BSIT-3A"),
+            ("Terms", "true"), ("__RequestVerificationToken", csrf));
+
+        using var wrongYear = await client.PostAsync(path, Booking("2"));
+        Assert.Contains("restricted to a different academic group", await wrongYear.Content.ReadAsStringAsync());
+        Assert.False(await db.EventRegistrations.AnyAsync(r => r.EventId == ev.EventId));
+        using var booked = await client.PostAsync(path, Booking("3"));
+        var passPath = RedirectPath(booked);
+        Assert.StartsWith("/student/passes/", passPath);
+        using var pass = await client.GetAsync(passPath);
+        Assert.Contains("qrCanvas", await pass.Content.ReadAsStringAsync());
+        using var duplicate = await client.PostAsync(path, Booking("3"));
+        Assert.Equal(passPath, RedirectPath(duplicate));
+        Assert.Equal(1, await db.Events.Where(e => e.EventId == ev.EventId).Select(e => e.CurrentRegistrations).SingleAsync());
+        using var rejected = await client.PostAsync(passPath + "/cancel", Form());
+        Assert.Equal(HttpStatusCode.BadRequest, rejected.StatusCode);
+        using var cancelled = await client.PostAsync(passPath + "/cancel", Form(("__RequestVerificationToken", csrf)));
+        Assert.StartsWith("/student?view=registered", RedirectPath(cancelled));
+        using var cancelledPass = await client.GetAsync(passPath);
+        Assert.Contains("Pass inactive", await cancelledPass.Content.ReadAsStringAsync());
+        using var repeated = await client.PostAsync(passPath + "/cancel", Form(("__RequestVerificationToken", csrf)));
+        Assert.Equal(0, await db.Events.Where(e => e.EventId == ev.EventId).Select(e => e.CurrentRegistrations).SingleAsync());
+        using var bookedAgain = await client.PostAsync(path, Booking("3"));
+        Assert.NotEqual(passPath, RedirectPath(bookedAgain));
+        Assert.Equal(2, await db.EventRegistrations.CountAsync(r => r.EventId == ev.EventId));
+    }
+
+    [Fact]
+    public async Task Student_password_change_requires_the_current_password_and_updates_own_sign_in()
+    {
+        using var client = NewClient();
+        using var login = await SignInAsync(client, _studentEmail, _password);
+        using var profile = await client.GetAsync("/student/profile");
+        var csrf = await TokenAsync(profile);
+        var newPassword = _password + "!updated";
+        FormUrlEncodedContent PasswordChange(string current) => Form(("CurrentPassword", current), ("NewPassword", newPassword),
+            ("ConfirmPassword", newPassword), ("__RequestVerificationToken", csrf));
+        using var wrong = await client.PostAsync("/student/profile/password", PasswordChange("incorrect"));
+        var rejected = await client.GetStringAsync(RedirectPath(wrong));
+        Assert.Contains("current password is incorrect", rejected);
+        using var saved = await client.PostAsync("/student/profile/password", PasswordChange(_password));
+        var confirmation = await client.GetStringAsync(RedirectPath(saved));
+        Assert.Contains("Your password was updated.", confirmation);
+        using var oldSession = NewClient();
+        using var oldLogin = await SignInAsync(oldSession, _studentEmail, _password);
+        Assert.Equal(HttpStatusCode.OK, oldLogin.StatusCode);
+        using var newSession = NewClient();
+        using var newLogin = await SignInAsync(newSession, _studentEmail, newPassword);
+        Assert.Equal("/student", RedirectPath(newLogin));
     }
 
     private ApplicationDbContext CreateContext()
