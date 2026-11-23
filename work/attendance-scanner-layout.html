@@ -1,0 +1,121 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+#scanner-preview{--s-ink:#192b40;--s-muted:#485b70;--s-blue:#155bb1;--s-line:#d6dce2;--s-fill:#f4f7fb;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.6;color:var(--s-ink);color-scheme:light}
+#scanner-preview *{box-sizing:border-box}
+#scanner-preview [hidden]{display:none!important}
+#scanner-preview .s-shell{display:grid;grid-template-columns:180px minmax(0,1fr);background:#fff;min-height:780px}
+#scanner-preview .s-sidebar{border-right:1px solid var(--s-line);padding:24px 12px;display:flex;flex-direction:column;gap:28px}
+#scanner-preview .s-brand{font-size:16px;font-weight:800;padding:0 10px;color:#142c48}
+#scanner-preview .s-brand small{display:block;font-size:12px;font-weight:400;color:var(--s-muted)}
+#scanner-preview .s-group{font-size:12px;font-weight:700;color:var(--s-muted);margin:0 10px 8px}
+#scanner-preview .s-nav-item{font-size:12px;padding:10px;min-height:44px;border-radius:8px;color:var(--s-muted);margin-block:2px}
+#scanner-preview .s-nav-item.current{background:#eff6ff;border-left:1px solid var(--s-blue);color:var(--s-blue);font-weight:700}
+#scanner-preview .s-account{margin-top:auto;border-top:1px solid var(--s-line);padding:16px 10px 0;font-size:12px;color:var(--s-muted)}
+#scanner-preview .s-mobile-brand{display:none}
+#scanner-preview .s-main{min-width:0;padding:24px}
+#scanner-preview .s-back{display:flex;min-height:36px;align-items:center;gap:8px;margin-bottom:18px;color:var(--s-muted);font-size:12px;font-weight:600}
+#scanner-preview .s-title{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+#scanner-preview h1{font-size:26px;line-height:1.25;font-weight:800;letter-spacing:-.025em;margin:0;color:#142c48}
+#scanner-preview .s-pill{display:inline-flex;border-radius:99px;padding:3px 9px;background:#ecfdf5;color:#065f46;font-size:12px;font-weight:600}
+#scanner-preview .s-meta{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:18px;margin:16px 0 22px}
+#scanner-preview dt{font-size:12px;color:var(--s-muted);margin-bottom:3px}
+#scanner-preview dd{font-size:12px;font-weight:600;margin:0;overflow-wrap:anywhere}
+#scanner-preview .s-tabs{display:flex;flex-wrap:wrap;gap:8px 22px;border-bottom:1px solid var(--s-line);margin-bottom:24px;font-size:12px;color:var(--s-muted)}
+#scanner-preview .s-tabs span{display:flex;align-items:center;min-height:44px;border-bottom:2px solid transparent}
+#scanner-preview .s-tabs .active{font-weight:700;color:var(--s-blue);border-color:var(--s-blue)}
+#scanner-preview .s-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:stretch}
+#scanner-preview .s-inputs{display:grid;gap:20px;grid-template-rows:auto 1fr;min-width:0}
+#scanner-preview .s-panel{border:1px solid var(--s-line);border-radius:12px;overflow:hidden;background:#fff;min-width:0}
+#scanner-preview .s-panel-heading{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--s-line)}
+#scanner-preview h2{font-size:14px;font-weight:700;margin:0;color:#142c48}
+#scanner-preview h3{font-size:20px;font-weight:700;line-height:1.4;margin:0;overflow-wrap:anywhere;color:#142c48}
+#scanner-preview button,#scanner-preview input,#scanner-preview select{font:inherit}
+#scanner-preview .s-button{min-height:44px;padding:9px 13px;border:1px solid var(--s-line);border-radius:8px;background:#fff;color:var(--s-blue);font-size:12px;font-weight:600;cursor:pointer}
+#scanner-preview .s-button:hover:not(:disabled){background:var(--s-fill)}
+#scanner-preview .s-button.primary{background:var(--s-blue);border-color:var(--s-blue);color:#fff}
+#scanner-preview .s-button.primary:hover:not(:disabled){background:#142c48}
+#scanner-preview button:disabled{cursor:not-allowed;opacity:.5}
+#scanner-preview .s-button-label{display:flex;align-items:center;gap:8px}
+#scanner-preview .s-view{margin:16px;border-radius:8px;background:var(--s-fill);min-height:210px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;padding:22px;text-align:center;border:1px dashed #8695a5}
+#scanner-preview .s-camera-mark{display:grid;place-items:center;min-height:46px;color:var(--s-muted)}
+#scanner-preview .s-view strong{font-size:14px;font-weight:600}
+#scanner-preview .s-view p{font-size:12px;color:var(--s-muted);max-width:30ch;margin:0}
+#scanner-preview .s-view.active{background:#eff6ff;border-color:var(--s-blue);color:var(--s-blue)}
+#scanner-preview .s-camera-controls{padding:0 16px 16px}
+#scanner-preview label{display:block;font-size:12px;font-weight:600;margin-bottom:7px;color:var(--s-ink)}
+#scanner-preview input[type=text],#scanner-preview select{display:block;width:100%;min-width:0;min-height:44px;border:1px solid var(--s-line);border-radius:8px;padding:10px 12px;background:var(--s-fill);color:var(--s-ink);font-size:13px}
+#scanner-preview input::placeholder{color:var(--s-muted)}
+#scanner-preview .s-lookup{padding:18px;display:flex;flex-direction:column;gap:14px}
+#scanner-preview .s-lookup .s-button{align-self:start}
+#scanner-preview .s-hint{font-size:12px;line-height:1.6;color:var(--s-muted);margin:6px 0 0}
+#scanner-preview .s-review{display:flex;flex-direction:column}
+#scanner-preview .s-review-body{padding:18px;flex:1}
+#scanner-preview .s-state{font-size:12px;font-weight:600;color:var(--s-blue);background:#eff6ff;border-radius:99px;padding:3px 9px}
+#scanner-preview .s-notice{font-size:12px;line-height:1.7;border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:8px;padding:12px 14px;margin-bottom:20px}
+#scanner-preview .s-notice.success{border-color:#a7f3d0;background:#ecfdf5;color:#065f46}
+#scanner-preview .s-notice.warning{border-color:#fcd34d;background:#fffbeb;color:#854d0e}
+#scanner-preview .s-notice.error{border-color:#fecaca;background:#fef2f2;color:#991b1b}
+#scanner-preview .s-notice.idle{border-color:var(--s-line);background:var(--s-fill);color:var(--s-muted)}
+#scanner-preview .s-reference{font-size:12px;color:var(--s-muted);font-variant-numeric:tabular-nums;margin-top:4px;overflow-wrap:anywhere}
+#scanner-preview .s-fields{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;margin:22px 0 4px}
+#scanner-preview .s-fields .full{grid-column:1/-1}
+#scanner-preview .s-review-footer{border-top:1px solid var(--s-line);padding:16px 18px;background:var(--s-fill)}
+#scanner-preview .s-check{display:flex;gap:10px;align-items:flex-start;font-size:12px;font-weight:500;min-height:44px;margin:0 0 14px}
+#scanner-preview .s-check input{margin-top:4px;flex-shrink:0;accent-color:var(--s-blue)}
+#scanner-preview .s-actions{display:flex;flex-wrap:wrap;gap:10px}
+#scanner-preview .s-empty{padding:28px 0;color:var(--s-muted);font-size:13px}
+#scanner-preview .s-preview-note{font-size:12px;color:var(--s-muted);margin:12px 0 0}
+#scanner-preview button:focus-visible,#scanner-preview input:focus-visible,#scanner-preview select:focus-visible{outline:2px solid #28649a;outline-offset:3px}
+@media(max-width:900px){#scanner-preview .s-shell{grid-template-columns:155px minmax(0,1fr)}#scanner-preview .s-main{padding:22px 18px}#scanner-preview .s-workspace{grid-template-columns:1fr}#scanner-preview .s-inputs{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:16px}#scanner-preview .s-panel-heading{padding:14px}#scanner-preview .s-view{min-height:180px;margin:14px}#scanner-preview .s-lookup{padding:14px}}
+@media(max-width:650px){#scanner-preview .s-shell{display:block;min-height:0}#scanner-preview .s-sidebar{display:none}#scanner-preview .s-mobile-brand{display:block;padding:14px 16px;border-bottom:1px solid var(--s-line);font-weight:700;font-size:12px}#scanner-preview .s-main{padding:20px 16px}#scanner-preview h1{font-size:23px}#scanner-preview .s-meta{grid-template-columns:1fr 1fr;gap:14px}#scanner-preview .s-meta>div:last-child{grid-column:1/-1}#scanner-preview .s-inputs{grid-template-columns:1fr}#scanner-preview .s-view{min-height:180px}#scanner-preview input[type=text],#scanner-preview select{font-size:16px}#scanner-preview .s-fields{grid-template-columns:1fr}#scanner-preview .s-fields .full{grid-column:auto}}
+</style>
+<div id="scanner-preview" aria-label="QCU attendance scanner proposed layout">
+ <div class="s-shell">
+  <aside class="s-sidebar" aria-label="Administrator sidebar preview"><div class="s-brand">QCU Events<small>Administrator portal</small></div><div><p class="s-group">CORE MANAGEMENT</p><div class="s-nav-item current">Event Directory</div><div class="s-nav-item">Create Event</div><div class="s-nav-item">Events History</div></div><div><p class="s-group">ATTENDANCE &amp; USERS</p><div class="s-nav-item">Student Directory</div><div class="s-nav-item">Account Management</div></div><div class="s-account">Administrator</div></aside>
+  <div><div class="s-mobile-brand">QCU Events · Administrator portal</div><main class="s-main">
+   <div class="s-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to events</div>
+   <header><div class="s-title"><h1>Campus Research Forum</h1><span class="s-pill">Upcoming</span></div><dl class="s-meta"><div><dt>Event date</dt><dd>Monday, Nov 30, 2026</dd></div><div><dt>Venue</dt><dd>Central Auditorium</dd></div><div><dt>Registered seats</dt><dd>3 / 150</dd></div></dl></header>
+   <nav class="s-tabs" aria-label="Event workflows preview"><span>Details</span><span>Pre-registered</span><span class="active" aria-current="page">Attendance scanner</span><span>Attendance</span><span>Analytics</span></nav>
+   <div class="s-workspace">
+    <div class="s-inputs">
+     <section class="s-panel" aria-labelledby="s-camera-heading"><div class="s-panel-heading"><h2 id="s-camera-heading">Scan QR pass</h2><button type="button" id="s-camera-toggle" class="s-button"><span class="s-button-label"><i data-lucide="camera" aria-hidden="true"></i><span id="s-camera-action">Start camera</span></span></button></div><div id="s-view" class="s-view"><div class="s-camera-mark"><i data-lucide="scan-line" aria-hidden="true"></i></div><strong id="s-camera-title">Camera off</strong><p id="s-camera-copy">Start the camera to scan a student’s QR pass.</p></div><div class="s-camera-controls" id="s-camera-controls" hidden><label for="s-camera-device">Camera</label><select id="s-camera-device"><option>Back camera</option><option>Front camera</option></select></div></section>
+     <section class="s-panel" aria-labelledby="s-manual-heading"><div class="s-panel-heading"><h2 id="s-manual-heading">Manual lookup</h2></div><form id="s-lookup" class="s-lookup"><div><label for="s-query">Ticket reference or student ID</label><input type="text" id="s-query" value="TCK-1007-00341" placeholder="Enter ticket reference or student ID" maxlength="150" /><p class="s-hint">Also accepts a registration number or account email.</p></div><button type="submit" class="s-button primary">Look up attendee</button></form></section>
+    </div>
+    <section class="s-panel s-review" aria-labelledby="s-review-heading"><div class="s-panel-heading"><h2 id="s-review-heading">Review attendee</h2><span id="s-state-label" class="s-state">Ready for review</span></div><div class="s-review-body"><div id="s-notice" class="s-notice" role="status" aria-live="polite"></div><div id="s-profile"><h3 id="s-name"></h3><div id="s-ticket" class="s-reference"></div><dl id="s-fields" class="s-fields"></dl></div><p id="s-empty" class="s-empty" hidden>No attendee selected. Scan a QR pass or use manual lookup.</p></div><div class="s-review-footer"><label class="s-check"><input type="checkbox" id="s-id-reviewed" /><span>I checked the attendee’s university ID against these details.</span></label><div class="s-actions"><button type="button" id="s-confirm" class="s-button primary" disabled>Confirm check-in</button><button type="button" id="s-clear" class="s-button">Clear attendee</button></div></div></section>
+   </div>
+   <p class="s-preview-note">Fictional sample · Camera and check-ins are simulated. Attendance records belong in the Attendance tab.</p>
+  </main></div>
+ </div>
+</div>
+<script>
+(()=>{
+ const root=document.getElementById('scanner-preview');
+ const fixtures=[
+  {registration:'341',ticket:'TCK-1007-00341',id:'2024-10437',name:'Mikaela Dizon',college:'College of Computer Studies',program:'BSIT',year:'Year 3 · SBIT-3A',campus:'San Bartolome',email:'mikaela.dizon@example.test',state:'Valid pass'},
+  {registration:'342',ticket:'TCK-1007-00342',id:'2023-08716',name:'Rafael Mendoza',college:'College of Engineering',program:'BSIE',year:'Year 4 · SBIE-4B',campus:'San Bartolome',email:'rafael.mendoza@example.test',state:'Already checked in'},
+  {registration:'343',ticket:'TCK-1007-00343',id:'2025-11284',name:'Andrea Villanueva',college:'College of Education',program:'BECEd',year:'Year 2 · BECEd-2A',campus:'Batasan',email:'andrea.villanueva@example.test',state:'Cancelled pass'},
+  {registration:'344',ticket:'TCK-1008-00344',id:'2024-09652',name:'Paolo Macaraig',college:'College of Computer Studies',program:'BSIT',year:'Year 3 · SBIT-3B',campus:'San Francisco',email:'paolo.macaraig@example.test',state:'Wrong event'}
+ ];
+ const settings={review:'Valid pass',camera:'Off'};let selected=fixtures[0];let confirmed=false;
+ const query=root.querySelector('#s-query'),reviewed=root.querySelector('#s-id-reviewed'),confirm=root.querySelector('#s-confirm');
+ const make=(parent,text,tag)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
+ function render(){
+  const state=settings.review;const valid=state==='Valid pass'&&selected;
+  root.querySelector('#s-state-label').textContent=state==='Valid pass'?'Ready for review':state==='Ready'?'Awaiting lookup':state==='Confirmed'?'Checked in':'Check-in blocked';
+  const messages={Ready:'Scan a QR pass or look up an attendee to review their details.','Valid pass':'Pass found. Check the student’s university ID before confirming admission.','Already checked in':'Already checked in on Nov 30, 2026 at 9:17 AM. Do not admit this pass again.','Wrong event':'This pass belongs to Student Leadership Forum (event 1008), not Campus Research Forum.','Cancelled pass':'This registration pass was cancelled. Check-in is unavailable.','Inactive event':'This event is ended or cancelled. Check-in is unavailable.','Not found':'No matching registration found. Check the reference or student ID and try again.',Confirmed:'Check-in confirmed for Mikaela Dizon · Nov 30, 2026, 9:24 AM.'};
+  const notice=root.querySelector('#s-notice');notice.textContent=messages[state];notice.className='s-notice'+(state==='Confirmed'?' success':state==='Already checked in'?' warning':['Wrong event','Cancelled pass','Inactive event','Not found'].includes(state)?' error':state==='Ready'?' idle':'');
+  const show=selected&&!['Ready','Not found'].includes(state);root.querySelector('#s-profile').hidden=!show;root.querySelector('#s-empty').hidden=!!show;
+  if(show){root.querySelector('#s-name').textContent=selected.name;root.querySelector('#s-ticket').textContent=selected.ticket;const fields=root.querySelector('#s-fields');fields.replaceChildren();[['Student ID',selected.id],['Campus',selected.campus],['College',selected.college],['Program',selected.program],['Year & section',selected.year]].forEach(([label,value])=>{const field=make(fields,'','div');if(label==='College')field.className='full';make(field,label,'dt');make(field,value,'dd');});}
+  reviewed.disabled=!valid;confirm.disabled=!valid||!reviewed.checked;
+  const active=settings.camera==='Preview';root.querySelector('#s-view').className='s-view'+(active?' active':'');root.querySelector('#s-camera-controls').hidden=!active;
+  root.querySelector('#s-camera-action').textContent=active?'Stop camera':'Start camera';root.querySelector('#s-camera-title').textContent=settings.camera==='Unavailable'?'Camera unavailable':active?'Camera preview':'Camera off';root.querySelector('#s-camera-copy').textContent=settings.camera==='Unavailable'?'Use manual lookup while camera access is unavailable.':active?'Align the QR pass inside the frame.':'Start the camera to scan a student’s QR pass.';
+ }
+ root.querySelector('#s-camera-toggle').addEventListener('click',()=>{settings.camera=settings.camera==='Preview'?'Off':'Preview';render();});
+ root.querySelector('#s-lookup').addEventListener('submit',event=>{event.preventDefault();const value=query.value.trim().toLowerCase();reviewed.checked=false;selected=fixtures.find(f=>[f.registration,f.ticket,f.id,f.email].some(v=>v.toLowerCase()===value))||null;settings.review=selected?selected===fixtures[0]&&confirmed?'Already checked in':selected.state:'Not found';render();});
+ reviewed.addEventListener('change',()=>{confirm.disabled=settings.review!=='Valid pass'||!reviewed.checked;});
+ root.querySelector('#s-clear').addEventListener('click',()=>{selected=null;settings.review='Ready';reviewed.checked=false;query.value='';render();query.focus();});
+ confirm.addEventListener('click',()=>{if(settings.review!=='Valid pass'||!reviewed.checked||!selected)return;confirmed=true;settings.review='Confirmed';reviewed.checked=false;render();});
+ render();
+ if(globalThis.Tweak){const tweak=new Tweak({container:root,onChange:()=>{selected=settings.review==='Wrong event'?fixtures[3]:settings.review==='Already checked in'?fixtures[1]:settings.review==='Cancelled pass'?fixtures[2]:fixtures[0];reviewed.checked=false;render();}});tweak.addSelect(settings,'review',{label:'Attendee state',options:['Valid pass','Ready','Already checked in','Wrong event','Cancelled pass','Inactive event','Not found']});tweak.addSelect(settings,'camera',{label:'Camera state',options:['Off','Preview','Unavailable']});}
+})();
+</script>
