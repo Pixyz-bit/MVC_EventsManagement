@@ -1,0 +1,137 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+#student-dashboard-sample{--blue:#155bb1;--ink:#192b40;--muted:#485b70;--line:#d6dce2;--fill:#f4f7fb;background:white;color:var(--ink);font:14px/1.55 'Plus Jakarta Sans',sans-serif;color-scheme:light}
+#student-dashboard-sample *{box-sizing:border-box}
+#student-dashboard-sample [hidden]{display:none!important}
+#student-dashboard-sample h1,#student-dashboard-sample h2,#student-dashboard-sample p,#student-dashboard-sample dl,#student-dashboard-sample dd{margin:0}
+#student-dashboard-sample header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 28px;border-bottom:1px solid var(--line)}
+#student-dashboard-sample .brand{font-weight:800;font-size:17px}
+#student-dashboard-sample .identity{text-align:right;font-weight:600}
+#student-dashboard-sample small{display:block;font-size:12px;color:var(--muted);font-weight:500}
+#student-dashboard-sample main{padding:28px;max-width:1080px;margin:auto}
+#student-dashboard-sample h1{font-size:28px;line-height:1.25;letter-spacing:-.025em}
+#student-dashboard-sample h2{font-size:16px;line-height:1.4;overflow-wrap:anywhere}
+#student-dashboard-sample .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0;border-bottom:1px solid var(--line);padding-bottom:12px}
+#student-dashboard-sample button,#student-dashboard-sample select{font:inherit;min-height:44px;background:white;color:var(--ink);padding:8px 12px;border:1px solid var(--line);border-radius:8px}
+#student-dashboard-sample button:hover{background:var(--fill)}
+#student-dashboard-sample button[aria-pressed=true]{background:#eff6ff;color:var(--blue);border-color:#bad2ef;font-weight:700}
+#student-dashboard-sample button.primary{background:var(--blue);border-color:var(--blue);color:white;font-weight:700}
+#student-dashboard-sample button:focus-visible,#student-dashboard-sample select:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+#student-dashboard-sample .toolbar{display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+#student-dashboard-sample label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+#student-dashboard-sample .events{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+#student-dashboard-sample article{border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;gap:12px;align-content:start}
+#student-dashboard-sample .event-heading{display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap}
+#student-dashboard-sample .badge{font-size:12px;padding:3px 9px;border-radius:20px;background:#ecfdf5;color:#065f46;font-weight:700}
+#student-dashboard-sample .badge.soon{background:#fff5dd;color:#714500}
+#student-dashboard-sample .badge.closed{background:var(--fill);color:var(--muted)}
+#student-dashboard-sample dt{font-size:12px;color:var(--muted)}
+#student-dashboard-sample dd{font-weight:600}
+#student-dashboard-sample dl{display:grid;gap:8px}
+#student-dashboard-sample article footer{display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+#student-dashboard-sample .note{margin-top:16px;color:var(--muted);font-size:12px}
+#student-dashboard-sample dialog{width:min(440px,calc(100% - 28px));max-height:calc(100dvh - 28px);overflow:auto;margin:auto;padding:20px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:white}
+#student-dashboard-sample dialog::backdrop{background:rgb(20 44 72 / 45%)}
+#student-dashboard-sample dialog p{margin-top:12px}
+#student-dashboard-sample dialog footer{display:flex;gap:8px;justify-content:end;flex-wrap:wrap;margin-top:16px}
+@media(max-width:620px){#student-dashboard-sample main,#student-dashboard-sample header{padding:18px 14px}#student-dashboard-sample .events{grid-template-columns:1fr}#student-dashboard-sample .identity{text-align:left}#student-dashboard-sample select{font-size:16px}}
+</style>
+<div id="student-dashboard-sample">
+ <header><div class="brand">QCU Events<small>Student portal</small></div><div class="identity">Mikaela Dizon<small>2024-10437</small></div></header>
+ <main>
+  <h1 id="student-dashboard-title">Campus events</h1>
+  <nav class="tabs" aria-label="Student event views"><button type="button" data-view="catalog" aria-pressed="true">Campus events</button><button type="button" data-view="registered" aria-pressed="false">My registered events</button></nav>
+  <div class="toolbar"><p id="student-dashboard-count" role="status"></p><div id="student-dashboard-filter"><label for="student-dashboard-category">Category</label><select id="student-dashboard-category"><option value="">All categories</option><option>Seminar</option><option>Workshop</option><option>Campus activity</option></select></div></div>
+  <div class="events" id="student-dashboard-events" aria-labelledby="student-dashboard-title"></div>
+  <p class="note">Design sample · Fictional events and passes</p>
+ </main>
+ <dialog id="student-dashboard-dialog" aria-labelledby="student-dashboard-dialog-title"><h2 id="student-dashboard-dialog-title"></h2><p id="student-dashboard-dialog-detail"></p><footer><button type="button" id="student-dashboard-close">Close</button><button type="button" id="student-dashboard-confirm" class="primary" hidden></button></footer></dialog>
+</div>
+<script>
+(() => {
+ const root = document.getElementById('student-dashboard-sample');
+ const find = selector => root.querySelector(selector);
+ const events = [
+  { title:'Campus Research Forum', category:'Seminar', date:'Nov 30, 2026 · 9:00 AM–12:00 PM', venue:'San Bartolome · Main Auditorium', status:'Open', registration:'Registration closes Nov 29 · 42 seats left', description:'Hear student teams present their research and join a discussion with faculty mentors.', sponsor:'Student Research Council' },
+  { title:'Portfolio and Interview Lab', category:'Workshop', date:'Dec 5, 2026 · 1:00–4:00 PM', venue:'Batasan · Computer Lab 2', status:'Soon', registration:'Registration opens Nov 26', description:'Bring a draft portfolio for a guided review and practice interview.' },
+  { title:'Campus Volunteer Orientation', category:'Campus activity', date:'Nov 27, 2026 · 10:00–11:30 AM', venue:'San Francisco · Seminar Room', status:'Closed', registration:'Registration closed Nov 22', description:'Meet the student volunteers and review the schedule for outreach activities.' },
+  { title:'Design and Technology Showcase', category:'Campus activity', date:'Dec 2, 2026 · 10:00 AM–2:00 PM', venue:'San Bartolome · Exhibit Hall', status:'Open', registration:'Registration closes Dec 1', description:'Explore prototypes from student teams.', pass:'TCK-2107-00341', canCancel:true },
+  { title:'Career Readiness Seminar', category:'Seminar', date:'Nov 20, 2026 · 9:00–11:00 AM', venue:'Batasan · Multipurpose Hall', status:'Closed', registration:'Event completed', description:'Career planning and interview preparation.', pass:'TCK-2108-00342', checkedIn:true }
+ ];
+ const dialog = find('#student-dashboard-dialog');
+ const confirm = find('#student-dashboard-confirm');
+ const category = find('#student-dashboard-category');
+ let selectedView = 'catalog';
+ let onConfirm;
+ function add(parent, tag, value, css) {
+  const element = document.createElement(tag);
+  element.textContent = value;
+  if (css) element.className = css;
+  parent.append(element);
+  return element;
+ }
+ function details(title, detail, action, callback) {
+  find('#student-dashboard-dialog-title').textContent = title;
+  find('#student-dashboard-dialog-detail').textContent = detail;
+  confirm.hidden = !action;
+  confirm.textContent = action || '';
+  onConfirm = callback;
+  dialog.showModal();
+ }
+ function render() {
+  const registered = selectedView === 'registered';
+  const filter = category.value;
+  const rows = events.filter(event => registered ? Boolean(event.pass) : !event.pass && (!filter || event.category === filter));
+  const catalogOrder = { Open:0, Soon:1, Closed:2 };
+  if (!registered) rows.sort((a,b) => catalogOrder[a.status] - catalogOrder[b.status]);
+  const list = find('#student-dashboard-events');
+  list.replaceChildren();
+  find('#student-dashboard-title').textContent = registered ? 'My registered events' : 'Campus events';
+  find('#student-dashboard-filter').hidden = registered;
+  find('#student-dashboard-count').textContent = rows.length ? rows.length + (registered ? ' registered events' : ' eligible events') : registered ? 'No active registrations' : 'No eligible events in this category';
+  for (const event of rows) {
+   const card = add(list, 'article', '');
+   add(card, 'small', event.category);
+   const heading = add(card, 'div', '', 'event-heading');
+   add(heading, 'h2', event.title);
+   const label = registered ? event.checkedIn ? 'Checked in' : 'Registered' : event.status === 'Soon' ? 'Opens soon' : event.status;
+   add(heading, 'span', label, 'badge ' + (registered ? '' : event.status.toLowerCase()));
+   const facts = add(card,'dl','');
+   for (const [term,value] of [['Date and time (PHT)',event.date],['Venue',event.venue],[registered ? 'Ticket reference' : 'Registration',registered ? event.pass : event.registration]]) {
+    const fact = add(facts,'div','');
+    add(fact,'dt',term);
+    add(fact,'dd',value);
+   }
+   const footer = add(card,'footer','');
+   const view = add(footer,'button',registered ? 'View pass' : 'View event',event.status === 'Open' || registered ? 'primary' : '');
+   view.type = 'button';
+   view.addEventListener('click', () => {
+    if (registered) details('Event pass', event.title + ' · ' + event.pass + ' · ' + label);
+    else details(event.title, event.description + (event.sponsor ? ' Hosted by ' + event.sponsor + '.' : '') + ' ' + event.registration + '.', event.status === 'Open' ? 'Preview registration' : '', () => {
+     find('#student-dashboard-dialog-detail').textContent = 'The registration flow asks for your year level, section, and confirmation.';
+     confirm.hidden = true;
+    });
+   });
+   if (registered && event.canCancel) {
+    const cancel = add(footer,'button','Cancel registration');
+    cancel.type = 'button';
+    cancel.addEventListener('click', () => details('Cancel registration?', event.title + ' will return to Campus events in this preview.', 'Confirm cancellation', () => {
+     event.pass = null;
+     dialog.close();
+     render();
+     root.querySelector('[data-view="registered"]').focus();
+    }));
+   }
+  }
+ }
+ root.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => {
+  selectedView = button.dataset.view;
+  root.querySelectorAll('[data-view]').forEach(tab => tab.setAttribute('aria-pressed', String(tab === button)));
+  render();
+ }));
+ category.addEventListener('change',render);
+ find('#student-dashboard-close').addEventListener('click', () => dialog.close());
+ confirm.addEventListener('click', () => onConfirm?.());
+ render();
+})();
+</script>
