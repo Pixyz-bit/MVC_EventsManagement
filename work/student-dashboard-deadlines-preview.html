@@ -44,9 +44,6 @@
         .sample-dialog .btn-view-details { margin-top: 1.25rem; }
         .sample-dialog .deadline { margin-top: .8rem; }
         .preview-theme {
-            display: inline-flex;
-            align-items: center;
-            gap: .45rem;
             min-height: 44px;
             padding: 0 .75rem;
             border-radius: 8px;
@@ -56,8 +53,7 @@
             font: 700 .75rem var(--font-sans);
             cursor: pointer;
         }
-        .preview-theme svg { width: 17px; height: 17px; }
-        .preview[data-palette="admin"] {
+        .preview[data-palette^="admin"] {
             --bg-canvas: #f4f7fb;
             --bg-surface: #fffefa;
             --bg-surface-hover: #eaf2ff;
@@ -66,69 +62,97 @@
             --border-subtle: #d6dce2;
             --border-medium: #cdd7e4;
             --border-hover: #9bb7d8;
-            --accent-gold: #155bb1;
+            --accent-gold: var(--preview-accent);
             --accent-gold-hover: #124c93;
             --accent-gold-gradient: #155bb1;
             --shadow-card: 0 1px 2px #142c4810;
             --shadow-hover: 0 4px 14px #142c481a;
+            --preview-heading: #142c48;
+            --preview-accent: #155bb1;
+            --preview-selected: #e8f1fd;
+            --preview-muted-dot: #bacce4;
+            --preview-hero: #fffefa;
+            --preview-fade: linear-gradient(90deg, #fffefa 4%, #fffefa 22%, #fffefaf7 36%, #fffefab8 54%, #fffefa0d 85%);
+            --preview-mobile-fade: linear-gradient(180deg, #fffefa 9%, #fffefaf7 38%, #fffefad8 70%, #fffefa65);
             background-image: none;
             color-scheme: light;
         }
-        .preview[data-palette="admin"] .portal-navbar {
-            background: #fffefa;
+        .preview[data-palette^="admin"] .portal-navbar {
+            background: var(--bg-surface);
             border-bottom: 1px solid var(--border-subtle);
             box-shadow: none;
         }
-        .preview[data-palette="admin"] :is(.nav-brand-title, .nav-user-name, .hero-title, .section-title-block h2, .card-event-name) { color: #142c48; }
-        .preview[data-palette="admin"] :is(.nav-brand-subtitle, .hero-description, .card-meta-line, .deadline, .hero-call .deadline) { color: #485b70; }
-        .preview[data-palette="admin"] :is(.nav-user-badge, .nav-user-avatar) { background: #edf4ff; }
-        .preview[data-palette="admin"] :is(.nav-user-badge, .nav-user-avatar, .nav-logo-img) { box-shadow: none; filter: none; }
-        .preview[data-palette="admin"] :is(.nav-user-avatar, .nav-user-id, .hero-meta-item) { color: #155bb1; }
-        .preview[data-palette="admin"] .nav-user-badge { border-color: #d8e5f5; border-radius: 9px; }
-        .preview[data-palette="admin"] .nav-user-id { font-family: var(--font-sans); }
-        .preview[data-palette="admin"] .hero-showcase-container { background-color: #fffefa; box-shadow: none; }
-        .preview[data-palette="admin"] .hero-overlay-layer {
-            background: linear-gradient(90deg, #fffefa 4%, #fffefa 22%, #fffefaf7 36%, #fffefab8 54%, #fffefa0d 85%);
-        }
-        .preview[data-palette="admin"] .hero-meta-item { color: #192b40; }
-        .preview[data-palette="admin"] :is(.hero-title, .hero-description, .hero-meta-item) { text-shadow: none; }
-        .preview[data-palette="admin"] .hero-meta-item svg { filter: none; }
-        .preview[data-palette="admin"] .btn-hero-action { color: #f8fbff !important; }
-        .preview[data-palette="admin"] :is(.btn-hero-action, .btn-view-details:not(.secondary)) {
+        .preview[data-palette^="admin"] :is(.nav-brand-title, .nav-user-name, .hero-title, .section-title-block h2, .card-event-name) { color: var(--preview-heading); }
+        .preview[data-palette^="admin"] :is(.nav-brand-subtitle, .hero-description, .card-meta-line, .deadline, .hero-call .deadline) { color: var(--text-secondary); }
+        .preview[data-palette^="admin"] :is(.nav-user-badge, .nav-user-avatar) { background: var(--preview-selected); }
+        .preview[data-palette^="admin"] :is(.nav-user-badge, .nav-user-avatar, .nav-logo-img) { box-shadow: none; filter: none; }
+        .preview[data-palette^="admin"] :is(.nav-user-avatar, .nav-user-id) { color: var(--preview-accent); }
+        .preview[data-palette^="admin"] .nav-user-badge { border-color: var(--border-subtle); border-radius: 9px; }
+        .preview[data-palette^="admin"] .nav-user-id { font-family: var(--font-sans); }
+        .preview[data-palette^="admin"] .hero-showcase-container { background-color: var(--preview-hero); box-shadow: none; }
+        .preview[data-palette^="admin"] .hero-overlay-layer { background: var(--preview-fade); }
+        .preview[data-palette^="admin"] .hero-meta-item { color: var(--text-primary); }
+        .preview[data-palette^="admin"] :is(.hero-title, .hero-description, .hero-meta-item) { text-shadow: none; }
+        .preview[data-palette^="admin"] .hero-meta-item svg { filter: none; }
+        .preview[data-palette^="admin"] .btn-hero-action { color: #f8fbff !important; }
+        .preview[data-palette^="admin"] :is(.btn-hero-action, .btn-view-details:not(.secondary)) {
             color: #f8fbff;
             background: #155bb1;
             border-radius: 9px;
             box-shadow: 0 2px 3px #142c481a;
         }
-        .preview[data-palette="admin"] :is(.btn-hero-action, .btn-view-details:not(.secondary)):hover { background: #124c93; }
-        .preview[data-palette="admin"] .hero-arrow-btn { background: #fffefa; color: #155bb1; border-color: #cdd7e4; }
-        .preview[data-palette="admin"] .hero-dot-btn { background: #bacce4; box-shadow: none; }
-        .preview[data-palette="admin"] .hero-dot-btn.active { background: #155bb1; }
-        .preview[data-palette="admin"] .tab-toggle-container { background: #fffefa; border: 1px solid #d6dce2; border-radius: 10px; box-shadow: none; }
-        .preview[data-palette="admin"] .tab-btn { border-radius: 7px; }
-        .preview[data-palette="admin"] .tab-btn.active { color: #155bb1; background: #e8f1fd; box-shadow: none; }
-        .preview[data-palette="admin"] .event-card { border-radius: 13px; }
-        .preview[data-palette="admin"] :is(.card-event-name, .btn-view-details) { text-transform: none; }
-        .preview[data-palette="admin"] .event-promo-banner::before { background: linear-gradient(0deg, #142c4830, transparent 70%); }
-        .preview[data-palette="admin"] .card-status-pill { background: #e8f8ef; color: #17604b; border-color: #b9e7d0; }
-        .preview[data-palette="admin"] .card-status-soon { background: #e8f1fd; color: #174d8e; border-color: #bfdbfa; }
-        .preview[data-palette="admin"] .card-status-closed { background: #fff0ef; color: #963c38; border-color: #eecbc9; }
-        .preview[data-palette="admin"] .btn-view-details.secondary { color: #155bb1; background: #f4f7fb; border-color: #cdd7e4; }
-        .preview[data-palette="admin"] .btn-view-details.secondary:hover { background: #e8f1fd; }
-        .preview[data-palette="admin"] :focus-visible { outline-color: #28649a; }
+        .preview[data-palette^="admin"] :is(.btn-hero-action, .btn-view-details:not(.secondary)):hover { background: #124c93; }
+        .preview[data-palette^="admin"] .hero-arrow-btn { background: var(--bg-surface); color: var(--preview-accent); border-color: var(--border-medium); }
+        .preview[data-palette^="admin"] .hero-dot-btn { background: var(--preview-muted-dot); box-shadow: none; }
+        .preview[data-palette^="admin"] .hero-dot-btn.active { background: var(--preview-accent); }
+        .preview[data-palette^="admin"] .tab-toggle-container { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px; box-shadow: none; }
+        .preview[data-palette^="admin"] .tab-btn { border-radius: 7px; }
+        .preview[data-palette^="admin"] .tab-btn.active { color: var(--preview-accent); background: var(--preview-selected); box-shadow: none; }
+        .preview[data-palette^="admin"] .event-card { border-radius: 13px; }
+        .preview[data-palette^="admin"] :is(.card-event-name, .btn-view-details) { text-transform: none; }
+        .preview[data-palette^="admin"] .event-promo-banner::before { background: linear-gradient(0deg, #142c4830, transparent 70%); }
+        .preview[data-palette^="admin"] .card-status-pill { background: #e8f8ef; color: #17604b; border-color: #b9e7d0; }
+        .preview[data-palette^="admin"] .card-status-soon { background: #e8f1fd; color: #174d8e; border-color: #bfdbfa; }
+        .preview[data-palette^="admin"] .card-status-closed { background: #fff0ef; color: #963c38; border-color: #eecbc9; }
+        .preview[data-palette^="admin"] .btn-view-details.secondary { color: var(--preview-accent); background: var(--bg-canvas); border-color: var(--border-medium); }
+        .preview[data-palette^="admin"] .btn-view-details.secondary:hover { background: var(--preview-selected); }
+        .preview[data-palette^="admin"] :focus-visible { outline-color: var(--preview-accent); }
+        .preview[data-palette="admin-dark"] {
+            --bg-canvas: #0d1829;
+            --bg-surface: #14243a;
+            --bg-surface-hover: #203954;
+            --text-primary: #eaf1fc;
+            --text-secondary: #b3c3d9;
+            --border-subtle: #314663;
+            --border-medium: #465d7c;
+            --border-hover: #6380a6;
+            --shadow-card: 0 1px 2px #07122644;
+            --shadow-hover: 0 4px 14px #07122666;
+            --preview-heading: #eaf1fc;
+            --preview-accent: #a8cdfb;
+            --preview-selected: #203b5c;
+            --preview-muted-dot: #607896;
+            --preview-hero: #102037;
+            --preview-fade: linear-gradient(90deg, #102037 4%, #102037 23%, #102037ef 37%, #102037be 55%, #10203720 90%);
+            --preview-mobile-fade: linear-gradient(180deg, #102037 9%, #102037f5 39%, #102037cd 70%, #10203765);
+            color-scheme: dark;
+        }
+        .preview[data-palette="admin-dark"] .card-status-pill { background: #173d35; color: #a9e8ca; border-color: #396554; }
+        .preview[data-palette="admin-dark"] .card-status-soon { background: #203b5c; color: #bdd9fc; border-color: #46648c; }
+        .preview[data-palette="admin-dark"] .card-status-closed { background: #422b38; color: #f4bec6; border-color: #6e4c58; }
         @media (max-width: 600px) {
             .user-dashboard .hero-showcase-container { min-height: 0; padding: 28px 0 72px; }
             .user-dashboard .hero-body-content { padding-inline: 1.1rem; }
             .user-dashboard .hero-title { max-width: 15ch; }
             .user-dashboard .hero-description { font-size: .94rem; }
             .user-dashboard .hero-overlay-layer { background: linear-gradient(90deg, #060911f0, #060911a8 62%, #06091169); }
-            .preview[data-palette="admin"] .hero-overlay-layer { background: linear-gradient(180deg, #fffefa 9%, #fffefaf7 38%, #fffefad8 70%, #fffefa65); }
-            .preview[data-palette="admin"] .hero-dot-btn { background: transparent; }
-            .preview[data-palette="admin"] .hero-dot-btn::before { background: #bacce4; }
-            .preview[data-palette="admin"] .hero-dot-btn.active::before { background: #155bb1; }
-            .preview-theme { padding-inline: .6rem; }
-            .preview-theme span { display: none; }
+            .preview[data-palette^="admin"] .hero-overlay-layer { background: var(--preview-mobile-fade); }
+            .preview[data-palette^="admin"] .hero-dot-btn { background: transparent; }
+            .preview[data-palette^="admin"] .hero-dot-btn::before { background: var(--preview-muted-dot); }
+            .preview[data-palette^="admin"] .hero-dot-btn.active::before { background: var(--preview-accent); }
+            .preview-theme { padding-inline: .4rem; max-width: 108px; }
         }
+        @media (max-width: 380px) { .preview .nav-user-badge { display: none; } }
     </style>
 </head>
 <body class="user-portal user-dashboard preview">
@@ -139,7 +163,6 @@
         <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
         <symbol id="previous" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
         <symbol id="next" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-        <symbol id="palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.4a1.6 1.6 0 0 0 1.1-2.7 1.6 1.6 0 0 1 1.1-2.7H18a3 3 0 0 0 3-3 9 9 0 0 0-9-9.6Z"/><path d="M7 12h.01M9 8h.01m4-1h.01m4 3h.01" stroke-width="3"/></symbol>
     </svg>
     <header id="portalNavbar" class="portal-navbar">
         <div class="navbar-inner">
@@ -152,10 +175,11 @@
                     <div class="nav-user-avatar">MD</div>
                     <div class="nav-user-info"><span class="nav-user-name">Mikaela Dizon</span><span class="nav-user-id">[ DEMO-2026-0001 ]</span></div>
                 </div>
-                <button type="button" class="preview-theme" id="preview-theme" aria-label="Admin and Login colors" aria-pressed="false" title="Compare Admin and Login colors">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><use href="#palette"/></svg>
-                    <span>Admin colors</span>
-                </button>
+                <select id="preview-theme" class="preview-theme" aria-label="Preview color scheme">
+                    <option value="webforms">Web Forms</option>
+                    <option value="admin">Admin light</option>
+                    <option value="admin-dark">Admin dark</option>
+                </select>
             </div>
         </div>
     </header>
@@ -275,15 +299,15 @@
             if (button) showDetails(events[Number(button.dataset.details)]);
         });
         get('feature-action').addEventListener('click', () => showDetails(featured[slide]));
-        const themeButton = get('preview-theme');
+        const themeSelect = get('preview-theme');
+        const themeHashes = { webforms: '', admin: '#admin-theme', 'admin-dark': '#admin-dark' };
         function renderPalette() {
-            const adminColors = location.hash === '#admin-theme';
-            document.body.dataset.palette = adminColors ? 'admin' : 'webforms';
-            themeButton.setAttribute('aria-pressed', String(adminColors));
-            themeButton.querySelector('span').textContent = adminColors ? 'Web Forms colors' : 'Admin colors';
+            const palette = Object.keys(themeHashes).find(key => themeHashes[key] === location.hash) ?? 'webforms';
+            document.body.dataset.palette = palette;
+            themeSelect.value = palette;
         }
-        themeButton.addEventListener('click', () => {
-            history.replaceState(null, '', location.hash === '#admin-theme' ? location.pathname : '#admin-theme');
+        themeSelect.addEventListener('change', () => {
+            history.replaceState(null, '', themeHashes[themeSelect.value] || location.pathname);
             renderPalette();
         });
         addEventListener('hashchange', renderPalette);
