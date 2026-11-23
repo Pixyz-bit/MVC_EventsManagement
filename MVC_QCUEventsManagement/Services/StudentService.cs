@@ -37,9 +37,11 @@ public sealed class StudentService(ApplicationDbContext db, IPasswordHasher<User
         var matching = Filter(q); var total = await matching.CountAsync(ct); var pages = Math.Max(1, (int)Math.Ceiling(total / 25d)); q.Page = Math.Clamp(input.Page, 1, pages);
         var rows = await matching.Include(s => s.User).OrderBy(s => s.LastName).ThenBy(s => s.FirstName).ThenBy(s => s.StudentId).Skip((q.Page - 1) * 25).Take(25).ToListAsync(ct);
         var all = db.Students.AsNoTracking().Where(s => s.User.Role == "Student");
-        var colleges = await all.Select(s => s.Department).Distinct().Order().ToListAsync(ct);
-        var programs = await all.Where(s => q.College == null || s.Department == q.College).Select(s => s.Program).Distinct().Order().ToListAsync(ct);
-        return new() { Query = q, Students = rows.Select(Profile).ToList(), Colleges = colleges, Programs = programs, Total = total, TotalPages = pages };
+        var placements = await all.Select(s => new { s.Department, s.Program }).Distinct().ToListAsync(ct);
+        var colleges = placements.Select(s => s.Department).Distinct().Order().ToList();
+        var programColleges = placements.GroupBy(s => s.Program)
+            .ToDictionary(group => group.Key, group => group.Select(s => s.Department).ToArray());
+        return new() { Query = q, Students = rows.Select(Profile).ToList(), Colleges = colleges, ProgramColleges = programColleges, Total = total, TotalPages = pages };
     }
     public static void ValidatePassword(string? password)
     {

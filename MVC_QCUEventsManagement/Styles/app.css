@@ -26,6 +26,8 @@
 }
 
 @layer components {
+  .directory-filter-menu { @apply sm:relative; }
+  .directory-filter-panel { @apply absolute inset-x-4 top-full z-10 mt-2 space-y-3 rounded-xl border border-campus-line bg-white p-4 shadow-md sm:right-0 sm:left-auto sm:w-60; }
   .student-directory-dialog { width: min(44rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; overflow-y: auto; border: 1px solid var(--color-campus-line); border-radius: .875rem; padding: clamp(1rem, 4vw, 1.5rem); background: white; color: var(--color-campus-ink); }
   .student-directory-dialog::backdrop { background: rgb(20 44 72 / 45%); }
   .analytics-grid-line { stroke: var(--color-campus-line); stroke-width: 1; vector-effect: non-scaling-stroke; }

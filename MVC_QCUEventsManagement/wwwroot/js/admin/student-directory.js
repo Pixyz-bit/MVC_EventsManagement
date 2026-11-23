@@ -80,7 +80,19 @@
     });
     root.querySelector('[data-open-student-import]').addEventListener('click', event => open('student-import', event.currentTarget));
     const collegeFilter = root.querySelector('#student-college');
-    collegeFilter.addEventListener('change', () => { root.querySelector('#student-program').value = ''; collegeFilter.form.requestSubmit(); });
+    const programFilter = root.querySelector('#student-program');
+    const options = [...programFilter.options].filter(option => option.dataset.colleges)
+        .map(option => ({ option, colleges: JSON.parse(option.dataset.colleges) }));
+    function filterPrograms(clearUnavailable) {
+        for (const {option, colleges} of options) {
+            const unavailable = Boolean(collegeFilter.value && !colleges.includes(collegeFilter.value));
+            option.hidden = unavailable && (!option.selected || clearUnavailable);
+            option.disabled = option.hidden;
+        }
+        if (clearUnavailable && programFilter.selectedOptions[0]?.disabled) programFilter.value = '';
+    }
+    collegeFilter.addEventListener('change', () => filterPrograms(true));
+    filterPrograms(false);
     if (root.dataset.reopen === 'create' || root.dataset.reopen === 'edit') editor(initial, root.dataset.reopen === 'edit', root.querySelector('[data-add-student]'));
     if (root.dataset.reopen === 'import') open('student-import', root.querySelector('[data-open-student-import]'));
 })();

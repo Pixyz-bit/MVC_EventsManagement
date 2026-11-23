@@ -15,10 +15,57 @@
     @if (TempData["StudentMessage"] is string message) { <p role="status" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">@message</p> }
     @if (TempData["StudentError"] is string error) { <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">@error</p> }
     @if (!ViewData.ModelState.IsValid) { <div asp-validation-summary="All" role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"></div> }
-    <section aria-label="Student directory" class="mt-6 overflow-hidden rounded-xl border border-campus-line bg-white">
-        <form asp-route="AdminStudentDirectory" method="get" role="search" class="space-y-3 p-4">
-            <div class="grid gap-3 md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,.8fr)]"><div class="min-w-0"><label for="student-search" class="event-label">Search students</label><input id="student-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="event-input" /></div><div class="min-w-0"><label for="student-college" class="event-label">College</label><select id="student-college" name="college" class="event-input"><option value="">All colleges</option>@foreach (var college in Model.Colleges.Union(q.College is null ? [] : new[] { q.College }).Order()) { <option selected="@(q.College == college)">@college</option> }</select></div><div class="min-w-0"><label for="student-program" class="event-label">Program</label><select id="student-program" name="program" class="event-input"><option value="">All programs</option>@foreach (var program in Model.Programs.Union(q.Program is null ? [] : new[] { q.Program }).Order()) { <option selected="@(q.Program == program)">@program</option> }</select></div></div>
-            <div class="flex flex-wrap items-end gap-3"><div class="min-w-0 flex-1 basis-40 sm:max-w-48"><label for="student-campus" class="event-label">Campus</label><select id="student-campus" name="campus" class="event-input"><option value="">All campuses</option>@foreach (var campus in CreateEventInput.Branches.Union(q.Campus is null ? [] : new[] { q.Campus })) { <option selected="@(q.Campus == campus)">@campus</option> }</select></div><div class="min-w-0 flex-1 basis-36 sm:max-w-44"><label for="student-status" class="event-label">Account status</label><select id="student-status" name="status" class="event-input"><option value="">All statuses</option><option selected="@(q.Status == "Active")">Active</option><option selected="@(q.Status == "Inactive")">Inactive</option></select></div><button type="submit" class="event-primary">Search</button><a asp-route="AdminStudentDirectory" class="event-secondary">Reset filters</a><a asp-action="Export" asp-all-route-data="@Routes(1)" class="event-secondary sm:ml-auto">Export CSV</a></div>
+    <section aria-label="Student directory" class="mt-6 rounded-xl border border-campus-line bg-white">
+        <form asp-route="AdminStudentDirectory" method="get" role="search" class="relative flex flex-wrap items-end gap-3 p-4">
+            <div class="min-w-0 flex-1 basis-52">
+                <label for="student-search" class="event-label">Search students</label>
+                <input id="student-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="event-input" />
+            </div>
+            <button type="submit" class="event-secondary">Search</button>
+            <details class="directory-filter-menu">
+                <summary class="event-secondary cursor-pointer list-none">
+                    Filters
+                    @{ var filterCount = new[] { q.College, q.Program, q.Campus, q.Status }.Count(value => value is not null); }
+                    @if (filterCount > 0) { <span class="rounded bg-blue-50 px-1.5 text-campus-action">@filterCount</span> }
+                </summary>
+                <div class="directory-filter-panel">
+                    <div>
+                        <label for="student-college" class="event-label">College</label>
+                        <select id="student-college" name="college" class="event-input">
+                            <option value="">All colleges</option>
+                            @foreach (var college in Model.Colleges.Union(q.College is null ? [] : new[] { q.College }).Order()) { <option selected="@(q.College == college)">@college</option> }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="student-program" class="event-label">Program</label>
+                        <select id="student-program" name="program" class="event-input">
+                            <option value="">All programs</option>
+                            @foreach (var program in Model.ProgramColleges.Keys.Union(q.Program is null ? [] : new[] { q.Program }).Order())
+                            {
+                                <option data-colleges="@JsonSerializer.Serialize(Model.ProgramColleges.GetValueOrDefault(program) ?? [])" selected="@(q.Program == program)">@program</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="student-campus" class="event-label">Campus</label>
+                        <select id="student-campus" name="campus" class="event-input">
+                            <option value="">All campuses</option>
+                            @foreach (var campus in CreateEventInput.Branches.Union(q.Campus is null ? [] : new[] { q.Campus })) { <option selected="@(q.Campus == campus)">@campus</option> }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="student-status" class="event-label">Account status</label>
+                        <select id="student-status" name="status" class="event-input">
+                            <option value="">All statuses</option><option selected="@(q.Status == "Active")">Active</option><option selected="@(q.Status == "Inactive")">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a asp-route="AdminStudentDirectory" asp-route-q="@q.Q" class="event-secondary">Reset</a>
+                        <button type="submit" class="event-primary">Apply filters</button>
+                    </div>
+                </div>
+            </details>
+            <a asp-action="Export" asp-all-route-data="@Routes(1)" class="event-secondary">Export CSV</a>
         </form>
         <div aria-hidden="true" class="@columns hidden items-center gap-4 border-y border-campus-line bg-campus-input px-4 py-3 text-xs font-semibold text-campus-muted xl:grid"><span>Student ID</span><span>Student</span><span>College &amp; program</span><span>Campus</span><span>Status</span><span>Action</span></div>
         <ul role="list" class="divide-y divide-campus-line">

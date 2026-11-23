@@ -30,9 +30,9 @@
         <form asp-route="AdminAccounts" method="get" class="relative flex flex-wrap items-end gap-3 p-4">
             <div class="min-w-0 flex-1 basis-52"><label for="account-search" class="event-label">Search accounts</label><input id="account-search" name="q" type="search" value="@Model.Q" maxlength="150" class="event-input" placeholder="Email, name or student ID" /></div>
             <button type="submit" class="event-secondary">Search</button>
-            <details class="sm:relative">
+            <details class="directory-filter-menu">
                 <summary class="event-secondary cursor-pointer list-none">Filters @if (Model.Role.Length + Model.Status.Length > 0) { <span class="rounded bg-blue-50 px-1.5 text-campus-action">@((Model.Role.Length > 0 ? 1 : 0) + (Model.Status.Length > 0 ? 1 : 0))</span> }</summary>
-                <div class="absolute inset-x-4 top-full z-10 mt-2 space-y-3 rounded-xl border border-campus-line bg-white p-4 shadow-md sm:right-0 sm:left-auto sm:w-60">
+                <div class="directory-filter-panel">
                     <div><label for="account-filter-role" class="event-label">Role</label><select id="account-filter-role" name="role" class="event-input"><option value="">All roles</option><option value="Admin" selected="@(Model.Role == "Admin")">Administrator</option><option value="Student" selected="@(Model.Role == "Student")">Student</option></select></div>
                     <div><label for="account-filter-status" class="event-label">Account status</label><select id="account-filter-status" name="status" class="event-input"><option value="">All statuses</option><option selected="@(Model.Status == "Active")">Active</option><option selected="@(Model.Status == "Inactive")">Inactive</option></select></div>
                     <div class="flex flex-wrap gap-2"><a asp-route="AdminAccounts" asp-route-q="@Model.Q" class="event-secondary">Reset</a><button type="submit" class="event-primary">Apply filters</button></div>
