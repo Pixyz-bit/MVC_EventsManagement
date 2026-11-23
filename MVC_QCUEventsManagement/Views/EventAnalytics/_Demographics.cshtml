@@ -1,0 +1,41 @@
+@using System.Globalization
+@model MVC_QCUEventsManagement.ViewModels.Admin.EventAnalyticsViewModel
+@{
+    var q = Model.Query; var culture = CultureInfo.InvariantCulture;
+    string[] palette = ["#155bb1", "#287b87", "#85713e", "#5268a6", "#945d76", "#7d8c9a"];
+    var circumference = 2 * Math.PI * 74;
+}
+<section aria-labelledby="demographics-heading" class="mt-6 rounded-xl border border-campus-line bg-white p-5" data-demographics>
+    <div class="flex flex-wrap items-start justify-between gap-4"><div><h2 id="demographics-heading" class="text-sm font-bold text-campus-navy">Target demographics</h2><p class="mt-1 text-xs text-campus-muted">Active reservations only · @Model.Reserved students</p></div>
+        <form asp-route="AdminEventAnalytics" asp-route-id="@Model.Event.Id" method="get" class="flex items-end gap-2" data-demographic-form>
+            <input type="hidden" name="from" value="@q.From" /><input type="hidden" name="interval" value="@q.Interval" /><input type="hidden" name="arrivalPage" value="@q.ArrivalPage" /><input type="hidden" name="cohort" value="@q.Cohort" /><input type="hidden" name="q" value="@q.Q" /><input type="hidden" name="college" value="@q.College" /><input type="hidden" name="program" value="@q.Program" /><input type="hidden" name="page" value="@q.Page" />
+            <div><label for="demographic-dimension" class="event-label">Group by</label><select id="demographic-dimension" name="dimension" class="event-input" data-demographic-select>@foreach (var dimension in new[] { "Program", "College", "Year level", "Campus" }) { <option selected="@(q.Dimension == dimension)">@dimension</option> }</select></div><button type="submit" class="event-secondary" data-demographic-apply>Apply</button>
+        </form>
+    </div>
+    @foreach (var dimension in new[] { "Program", "College", "Year level", "Campus" })
+    {
+        var groups = Model.Distributions[dimension]; var offset = 0d;
+        <div data-demographic-panel="@dimension" hidden="@(q.Dimension != dimension)" class="mt-5">
+            <div class="grid items-center gap-6 sm:grid-cols-[minmax(12rem,1fr)_minmax(0,1.3fr)]">
+                <div class="analytics-donut">
+                    <svg viewBox="0 0 200 200" role="img" aria-label="@dimension distribution of @Model.Reserved active reservations" class="block w-full"><circle cx="100" cy="100" r="74" fill="none" stroke="var(--color-campus-line)" stroke-width="30" />
+                        @for (var i = 0; i < groups.Count; i++)
+                        {
+                            var group = groups[i]; var length = Model.Reserved == 0 ? 0 : circumference * group.Reserved / Model.Reserved;
+                            var label = $"{group.Label}: {group.Reserved} students ({(Model.Reserved == 0 ? 0 : 100d * group.Reserved / Model.Reserved).ToString("0.0", culture)}%)";
+                            <circle data-demographic-slice="@i" data-chart-label="@label" tabindex="0" role="img" aria-label="@label" class="analytics-donut-slice" cx="100" cy="100" r="74" fill="none" stroke="@palette[i % palette.Length]" stroke-width="30" stroke-dasharray="@length.ToString("0.######", culture) @circumference.ToString("0.######", culture)" stroke-dashoffset="@((-offset).ToString("0.######", culture))" transform="rotate(-90 100 100)"><title>@label</title></circle>
+                            offset += length;
+                        }
+                    </svg>
+                    <div class="analytics-donut-center"><strong class="text-3xl font-extrabold tabular-nums">@Model.Reserved</strong><span class="mt-1 text-xs text-campus-muted">Registered</span></div>
+                </div>
+                @if (groups.Count == 0) { <p class="text-center text-sm text-campus-muted sm:text-left">No demographic cohorts registered yet.</p> }
+                else
+                {
+                    <ul class="space-y-1" aria-label="@dimension counts">@for (var i = 0; i < groups.Count; i++) { var group = groups[i]; var share = Model.Reserved == 0 ? 0 : 100d * group.Reserved / Model.Reserved; <li><button type="button" data-demographic-legend="@i" data-chart-label="@($"{group.Label}: {group.Reserved} students ({share.ToString("0.0", culture)}%)")" class="flex min-h-11 w-full items-center justify-between gap-4 rounded-lg px-2 py-2 text-left text-sm hover:bg-campus-input focus-visible:outline-2 focus-visible:outline-campus-focus"><span class="flex min-w-0 items-center gap-2"><span aria-hidden="true" class="size-2.5 shrink-0 rounded-sm" style="background:@palette[i % palette.Length]"></span><span class="wrap-break-word">@group.Label</span></span><span class="shrink-0 text-xs tabular-nums"><strong>@group.Reserved</strong> · @share.ToString("0.0", culture)%</span></button></li> }</ul>
+                }
+            </div>
+            <p data-demographic-readout role="status" class="mt-4 min-h-6 text-center text-xs text-campus-muted">@(groups.Count == 0 ? "Counts will appear after students register." : "Hover, focus or tap a slice or label to inspect its count and share.")</p>
+        </div>
+    }
+</section>

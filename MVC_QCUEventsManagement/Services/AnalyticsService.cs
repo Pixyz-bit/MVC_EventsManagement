@@ -12,6 +12,7 @@ public sealed class AnalyticsService(ApplicationDbContext db, AttendanceService 
         if (context is null) return null;
         static string? Limit(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim()[..Math.Min(value.Trim().Length, 150)];
         var query = new EventAnalyticsQuery { Interval = input.Interval is 5 or 15 or 30 ? input.Interval : 15,
+            Dimension = input.Dimension is "College" or "Campus" or "Year level" ? input.Dimension : "Program",
             Cohort = input.Cohort is "NoShow" or "Cancelled" or "Reserved" ? input.Cohort : "Present",
             Q = Limit(input.Q), College = Limit(input.College), Program = Limit(input.Program), From = input.From == "history" ? "history" : null };
         var rows = await db.EventRegistrations.AsNoTracking().Where(r => r.EventId == id)
@@ -39,7 +40,8 @@ public sealed class AnalyticsService(ApplicationDbContext db, AttendanceService 
         query.Page = Math.Clamp(input.Page, 1, pages);
         return new(context.Event, query, active.Count, present.Count, rows.Count - active.Count, distributions, arrivals,
             rows.Select(r => r.College).Distinct().Order().ToList(), rows.Select(r => r.Program).Distinct().Order().ToList(),
-            matching.OrderByDescending(r => r.CheckedInAt).ThenByDescending(r => r.Id).Skip((query.Page - 1) * 25).Take(25).ToList(), total, pages);
+            matching.OrderByDescending(r => r.CheckedInAt).ThenByDescending(r => r.Id).Skip((query.Page - 1) * 25).Take(25).ToList(), total, pages,
+            present.Select(r => r.CheckedInAt).Max());
     }
 
     public static ArrivalSeries BuildArrivals(IEnumerable<DateTime> timestamps, int minutes, int page)

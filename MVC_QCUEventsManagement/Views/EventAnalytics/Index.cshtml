@@ -8,14 +8,13 @@
     ViewData["AdminSection"] = history ? "History" : "Events";
     var culture = CultureInfo.InvariantCulture;
     string Percent(double value) => value.ToString("0.0", culture) + "%";
-    string Width(double value) => Math.Clamp(value, 0, 100).ToString("0.##", culture) + "%";
     Dictionary<string, string> Routes(int? page = null, int? arrivalPage = null, string? cohort = null) => new() {
         ["id"] = ev.Id.ToString(culture), ["interval"] = q.Interval.ToString(culture), ["arrivalPage"] = (arrivalPage ?? q.ArrivalPage).ToString(culture),
-        ["cohort"] = cohort ?? q.Cohort!, ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "",
+        ["dimension"] = q.Dimension, ["cohort"] = cohort ?? q.Cohort!, ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "",
         ["page"] = (page ?? q.Page).ToString(culture), ["from"] = q.From ?? "" };
     var columns = "xl:grid-cols-[8.5rem_minmax(0,1fr)_minmax(0,1.1fr)_7rem_6rem]";
 }
-<main class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
+<main id="event-analytics" class="w-full px-4 pt-6 pb-8 sm:px-6 sm:pt-7 lg:px-8">
     <a asp-route="@(history ? "AdminEventHistory" : "AdminEvents")" class="mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-semibold text-campus-muted hover:text-campus-action"><span aria-hidden="true">←</span> @(history ? "Back to history" : "Back to events")</a>
     <partial name="_EventHeader" model="@(new EventHeaderViewModel(ev.Title, ev.Status, ev.StartsAt, ev.EndsAt, ev.Venue, ev.Registered, ev.Capacity))" />
     <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Analytics", history))" />
@@ -27,59 +26,22 @@
             <div class="pr-4 lg:border-l lg:border-campus-line lg:px-4"><dt class="text-xs text-campus-muted">Unscanned reservations</dt><dd class="mt-1 text-2xl font-bold tabular-nums">@Model.Unscanned<span class="mt-1 block text-xs font-normal text-campus-muted">Not checked in</span></dd></div>
             <div class="border-l border-campus-line px-4"><dt class="text-xs text-campus-muted">Cancelled passes</dt><dd class="mt-1 text-2xl font-bold tabular-nums">@Model.Cancelled<span class="mt-1 block text-xs font-normal text-campus-muted">@Percent(Model.Attrition) of all passes</span></dd></div>
         </dl>
-        <div class="mt-5 grid gap-5 sm:grid-cols-2">
-            <div><div class="flex flex-wrap justify-between gap-2 text-sm"><h3 class="font-semibold">Booking fill</h3><span class="tabular-nums">@ev.Registered / @ev.Capacity · @Percent(Model.BookingFill)</span></div><div class="mt-2 h-2 overflow-hidden rounded-full bg-campus-input" role="img" aria-label="Booking fill @Percent(Model.BookingFill)"><div class="h-full bg-campus-action" style="width:@Width(Model.BookingFill)"></div></div></div>
-            <div><div class="flex flex-wrap justify-between gap-2 text-sm"><h3 class="font-semibold">Attendance / capacity</h3><span class="tabular-nums">@Model.Attended / @ev.Capacity · @Percent(Model.Occupancy)</span></div><div class="mt-2 h-2 overflow-hidden rounded-full bg-campus-input" role="img" aria-label="Attendance capacity usage @Percent(Model.Occupancy)"><div class="h-full bg-campus-action" style="width:@Width(Model.Occupancy)"></div></div></div>
-        </div>
     </section>
-    <section aria-labelledby="arrival-heading" class="mt-8 rounded-xl border border-campus-line">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-campus-line p-4"><div><h2 id="arrival-heading" class="text-sm font-bold text-campus-navy">Confirmed arrivals</h2><p class="mt-1 text-xs text-campus-muted">Check-in time in Philippine time</p></div>
-            <form asp-route="AdminEventAnalytics" asp-route-id="@ev.Id" method="get" class="flex flex-wrap items-end gap-2">
-                <input type="hidden" name="from" value="@q.From" /><input type="hidden" name="cohort" value="@q.Cohort" /><input type="hidden" name="q" value="@q.Q" /><input type="hidden" name="college" value="@q.College" /><input type="hidden" name="program" value="@q.Program" />
-                <div><label for="arrival-interval" class="event-label">Time window</label><select id="arrival-interval" name="interval" class="event-input">@foreach (var minutes in new[] { 5, 15, 30 }) { <option value="@minutes" selected="@(minutes == q.Interval)">@minutes minutes</option> }</select></div><button type="submit" class="event-secondary">Apply</button>
-            </form>
-        </div>
-        @if (Model.Arrivals.PeakStart is { } peak)
-        {
-            var buckets = Model.Arrivals.Buckets; var max = Math.Max(1, Model.Arrivals.PeakCount);
-            <div class="p-4"><p class="text-sm font-semibold">Peak: @Model.Arrivals.PeakCount check-ins · @peak.ToString("MMM d, h:mm tt", culture)–@peak.AddMinutes(q.Interval).ToString("h:mm tt", culture)</p>@if (Model.Arrivals.TiedPeaks > 1) { <p class="mt-1 text-xs text-campus-muted">First of @Model.Arrivals.TiedPeaks tied windows</p> }
-                <svg class="mt-5 block h-44 w-full text-campus-action" viewBox="0 0 720 160" preserveAspectRatio="none" role="img" aria-labelledby="arrival-chart-title"><title id="arrival-chart-title">Confirmed arrivals per @q.Interval minutes. Peak @Model.Arrivals.PeakCount; exact windows are listed below.</title><line x1="0" x2="720" y1="159" y2="159" stroke="currentColor" opacity="0.2" />
-                    @for (var i = 0; i < buckets.Count; i++)
-                    {
-                        var bucket = buckets[i]; var step = 720d / buckets.Count; var height = 145d * bucket.Count / max;
-                        <rect x="@((i * step + 2).ToString("0.##", culture))" y="@((158 - height).ToString("0.##", culture))" width="@Math.Max(1, step - 4).ToString("0.##", culture)" height="@height.ToString("0.##", culture)" fill="currentColor"><title>@bucket.Start.ToString("MMM d, h:mm tt", culture): @bucket.Count check-ins</title></rect>
-                    }
-                </svg>
-                <div class="mt-2 flex justify-between gap-4 text-xs tabular-nums text-campus-muted"><span>@buckets[0].Start.ToString("MMM d, h:mm tt", culture)</span><span>@buckets[^1].Start.AddMinutes(q.Interval).ToString("MMM d, h:mm tt", culture)</span></div>
-                <details class="mt-4"><summary class="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-campus-action">View exact arrival counts</summary><dl class="grid gap-x-8 gap-y-2 text-xs sm:grid-cols-2">@foreach (var bucket in buckets) { <div class="flex justify-between gap-3 border-b border-campus-line py-2"><dt>@bucket.Start.ToString("MMM d, h:mm tt", culture)–@bucket.Start.AddMinutes(q.Interval).ToString("h:mm tt", culture)</dt><dd class="font-semibold tabular-nums">@bucket.Count</dd></div> }</dl></details>
-                @if (Model.Arrivals.TotalPages > 1) { <nav aria-label="Arrival windows" class="mt-3 flex flex-wrap items-center gap-3 text-xs"><span>Window group @q.ArrivalPage of @Model.Arrivals.TotalPages</span>@if (q.ArrivalPage > 1) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(arrivalPage: q.ArrivalPage - 1)" class="event-secondary">Earlier windows</a> }@if (q.ArrivalPage < Model.Arrivals.TotalPages) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(arrivalPage: q.ArrivalPage + 1)" class="event-secondary">Later windows</a> }</nav> }
-            </div>
-        }
-        else { <p class="px-4 py-10 text-center text-sm text-campus-muted">No confirmed arrivals yet. Check-ins will appear here after scanner confirmation.</p> }
-    </section>
-    <section aria-labelledby="audience-heading" class="mt-8"><h2 id="audience-heading" class="text-base font-bold text-campus-navy">Audience breakdown</h2><p class="mt-1 text-xs text-campus-muted">Active reservations only · @Model.Reserved students</p>
-        <div class="mt-4 grid gap-x-8 gap-y-6 lg:grid-cols-2">
-            @foreach (var distribution in Model.Distributions)
-            {
-                <section class="min-w-0 border-t border-campus-line pt-4" aria-label="@distribution.Key distribution"><h3 class="text-sm font-semibold">@distribution.Key</h3>
-                    @if (distribution.Value.Count == 0) { <p class="mt-4 text-sm text-campus-muted">No active reservations yet.</p> }
-                    <dl class="mt-4 space-y-3">@foreach (var group in distribution.Value) { var share = Model.Reserved == 0 ? 0 : 100d * group.Reserved / Model.Reserved; <div><div class="flex items-baseline justify-between gap-4 text-xs"><dt class="min-w-0 wrap-break-word">@group.Label</dt><dd class="shrink-0 tabular-nums">@group.Reserved · @Percent(share)</dd></div><div aria-hidden="true" class="mt-1.5 h-1.5 overflow-hidden rounded-full bg-campus-input"><div class="h-full bg-campus-action" style="width:@Width(share)"></div></div></div> }</dl>
-                </section>
-            }
-        </div>
-    </section>
-    <section aria-labelledby="audit-heading" class="mt-8"><h2 id="audit-heading" class="text-base font-bold text-campus-navy">Attendance by college</h2><p class="mt-1 text-xs text-campus-muted">Ranked by turnout, then checked-in count</p>
-        <div class="mt-4 overflow-x-auto rounded-xl border border-campus-line"><table class="w-full text-left text-sm"><thead class="bg-campus-input text-xs text-campus-muted"><tr><th scope="col" class="p-4 font-semibold">College</th><th scope="col" class="p-4 text-right font-semibold">Reserved</th><th scope="col" class="p-4 text-right font-semibold">Checked in</th><th scope="col" class="p-4 text-right font-semibold">Turnout</th></tr></thead><tbody class="divide-y divide-campus-line">@foreach (var group in Model.Distributions["College"].OrderByDescending(g => g.Turnout).ThenByDescending(g => g.Attended).ThenBy(g => g.Label)) { <tr><th scope="row" class="p-4 font-medium">@group.Label</th><td class="p-4 text-right tabular-nums">@group.Reserved</td><td class="p-4 text-right tabular-nums">@group.Attended</td><td class="p-4 text-right font-semibold tabular-nums">@Percent(group.Turnout)</td></tr> }@if (Model.Reserved == 0) { <tr><td colspan="4" class="p-6 text-center text-campus-muted">No college attendance to compare yet.</td></tr> }</tbody></table></div>
-    </section>
+    <div class="mt-6 grid items-stretch gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <partial name="_Arrivals" model="Model" />
+        <partial name="_Turnout" model="Model" />
+    </div>
+    <partial name="_CollegeComparison" model="Model" />
+    <partial name="_Demographics" model="Model" />
     <section aria-labelledby="cohort-heading" class="mt-8 overflow-hidden rounded-xl border border-campus-line">
         <h2 id="cohort-heading" class="p-4 text-sm font-bold text-campus-navy">Student cohorts</h2>
         <nav aria-label="Analytics cohorts" class="flex flex-wrap gap-x-5 border-y border-campus-line px-4 text-sm">@foreach (var cohort in new[] { ("Present", "Checked in", Model.Attended), ("NoShow", "Unscanned", Model.Unscanned), ("Cancelled", "Cancelled", Model.Cancelled), ("Reserved", "All active", Model.Reserved) }) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(page: 1, cohort: cohort.Item1)" aria-current="@(q.Cohort == cohort.Item1 ? "page" : null)" class="inline-flex min-h-12 items-center gap-2 border-b-2 @(q.Cohort == cohort.Item1 ? "border-campus-action font-semibold text-campus-action" : "border-transparent text-campus-muted")">@cohort.Item2<span class="rounded-md bg-campus-input px-1.5 py-0.5 text-xs tabular-nums">@cohort.Item3</span></a> }</nav>
         <form asp-route="AdminEventAnalytics" asp-route-id="@ev.Id" method="get" role="search" class="grid items-end gap-3 p-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,.8fr)_auto]">
-            <input type="hidden" name="from" value="@q.From" /><input type="hidden" name="interval" value="@q.Interval" /><input type="hidden" name="arrivalPage" value="@q.ArrivalPage" /><input type="hidden" name="cohort" value="@q.Cohort" />
+            <input type="hidden" name="dimension" value="@q.Dimension" /><input type="hidden" name="from" value="@q.From" /><input type="hidden" name="interval" value="@q.Interval" /><input type="hidden" name="arrivalPage" value="@q.ArrivalPage" /><input type="hidden" name="cohort" value="@q.Cohort" />
             <div class="min-w-0"><label for="analytics-search" class="event-label">Search cohort</label><input id="analytics-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID, name or ticket reference" class="event-input" /></div>
             <div class="min-w-0"><label for="analytics-college" class="event-label">College</label><select id="analytics-college" name="college" class="event-input"><option value="">All colleges</option>@if (q.College is not null && !Model.Colleges.Contains(q.College)) { <option selected>@q.College</option> }@foreach (var college in Model.Colleges) { <option selected="@(q.College == college)">@college</option> }</select></div>
             <div class="min-w-0"><label for="analytics-program" class="event-label">Program</label><select id="analytics-program" name="program" class="event-input"><option value="">All programs</option>@if (q.Program is not null && !Model.Programs.Contains(q.Program)) { <option selected>@q.Program</option> }@foreach (var program in Model.Programs) { <option selected="@(q.Program == program)">@program</option> }</select></div>
-            <div class="flex flex-wrap gap-2"><button type="submit" class="event-primary">Search</button><a asp-route="AdminEventAnalytics" asp-route-id="@ev.Id" asp-route-from="@q.From" asp-route-interval="@q.Interval" asp-route-cohort="@q.Cohort" class="event-secondary">Reset filters</a></div>
+            <div class="flex flex-wrap gap-2"><button type="submit" class="event-primary">Search</button><a asp-route="AdminEventAnalytics" asp-route-id="@ev.Id" asp-route-from="@q.From" asp-route-interval="@q.Interval" asp-route-dimension="@q.Dimension" asp-route-cohort="@q.Cohort" class="event-secondary">Reset filters</a></div>
         </form>
         <div aria-hidden="true" class="@columns hidden gap-x-4 border-y border-campus-line bg-campus-input px-4 py-3 text-xs font-semibold text-campus-muted xl:grid"><span>Ticket ref</span><span>Student</span><span>College & program</span><span>Year & section</span><span>Status</span></div>
         <ul role="list" class="divide-y divide-campus-line">@foreach (var row in Model.CohortRows) { <li class="@columns grid gap-4 px-4 py-5 text-sm sm:grid-cols-2 xl:items-center"><div class="min-w-0"><span class="mb-1 block text-xs text-campus-muted xl:sr-only">Ticket ref</span><span class="text-xs wrap-break-word tabular-nums">@row.TicketReference(ev.Id)</span></div><div class="min-w-0"><h3 class="font-semibold wrap-break-word">@row.Name</h3><p class="mt-1 text-xs wrap-break-word text-campus-muted">@row.StudentId</p></div><div class="min-w-0"><p class="font-semibold wrap-break-word">@row.Program</p><p class="mt-1 text-xs wrap-break-word text-campus-muted">@row.College</p></div><div><p>Year @row.Year</p><p class="mt-1 text-xs text-campus-muted">@row.Section</p></div><div><span class="rounded-full bg-campus-input px-2.5 py-1 text-xs font-semibold">@(row.Status == "NoShow" ? "Reserved" : row.Status)</span></div></li> }</ul>
@@ -87,3 +49,7 @@
         <nav aria-label="Cohort pages" class="flex flex-wrap items-center justify-between gap-3 border-t border-campus-line px-4 py-3 text-xs text-campus-muted"><span>@Model.Total matching · Page @q.Page of @Model.TotalPages</span><div class="flex gap-2">@if (q.Page > 1) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(page: q.Page - 1)" class="event-secondary">Previous</a> }@if (q.Page < Model.TotalPages) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(page: q.Page + 1)" class="event-secondary">Next</a> }</div></nav>
     </section>
 </main>
+
+@section Scripts {
+    <script src="~/js/admin/event-analytics.js" asp-append-version="true" defer></script>
+}

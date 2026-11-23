@@ -3,7 +3,7 @@ namespace MVC_QCUEventsManagement.ViewModels.Admin;
 public sealed record EventAnalyticsViewModel(EventRosterContext Event, EventAnalyticsQuery Query,
     int Reserved, int Attended, int Cancelled, IReadOnlyDictionary<string, IReadOnlyList<AnalyticsGroup>> Distributions,
     ArrivalSeries Arrivals, IReadOnlyList<string> Colleges, IReadOnlyList<string> Programs,
-    IReadOnlyList<AnalyticsRegistration> CohortRows, int Total, int TotalPages)
+    IReadOnlyList<AnalyticsRegistration> CohortRows, int Total, int TotalPages, DateTime? LatestCheckIn = null)
 {
     public int Unscanned => Reserved - Attended;
     public double Turnout => Rate(Attended, Reserved);

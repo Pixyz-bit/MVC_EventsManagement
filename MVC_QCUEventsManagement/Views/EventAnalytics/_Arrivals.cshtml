@@ -1,0 +1,38 @@
+@using System.Globalization
+@model MVC_QCUEventsManagement.ViewModels.Admin.EventAnalyticsViewModel
+@{
+    var q = Model.Query; var culture = CultureInfo.InvariantCulture;
+    Dictionary<string, string> Routes(int page) => new() { ["id"] = Model.Event.Id.ToString(culture), ["interval"] = q.Interval.ToString(culture), ["arrivalPage"] = page.ToString(culture), ["dimension"] = q.Dimension, ["cohort"] = q.Cohort!, ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "", ["page"] = q.Page.ToString(culture), ["from"] = q.From ?? "" };
+}
+<section aria-labelledby="arrival-heading" class="min-w-0 rounded-xl border border-campus-line bg-white p-5">
+    <div class="flex flex-wrap items-start justify-between gap-4"><div><h2 id="arrival-heading" class="text-sm font-bold text-campus-navy">Check-ins over time</h2><p class="mt-1 text-xs text-campus-muted">Confirmed arrivals per window · Philippine time</p></div>
+        <form asp-route="AdminEventAnalytics" asp-route-id="@Model.Event.Id" method="get" class="flex flex-wrap items-end gap-2">
+            <input type="hidden" name="from" value="@q.From" /><input type="hidden" name="dimension" value="@q.Dimension" /><input type="hidden" name="cohort" value="@q.Cohort" /><input type="hidden" name="q" value="@q.Q" /><input type="hidden" name="college" value="@q.College" /><input type="hidden" name="program" value="@q.Program" />
+            <div><label for="arrival-interval" class="event-label">Time window</label><select id="arrival-interval" name="interval" class="event-input">@foreach (var minutes in new[] { 5, 15, 30 }) { <option value="@minutes" selected="@(minutes == q.Interval)">@minutes minutes</option> }</select></div><button type="submit" class="event-secondary">Apply</button>
+        </form>
+    </div>
+    @if (Model.Arrivals.PeakStart is { } peak)
+    {
+        var buckets = Model.Arrivals.Buckets; var max = Math.Max(1, Model.Arrivals.PeakCount);
+        double X(int i) => buckets.Count == 1 ? 360 : 12 + i * 696d / (buckets.Count - 1);
+        double Y(int count) => 188 - 176d * count / max;
+        var points = string.Join(" ", buckets.Select((b, i) => $"{X(i).ToString("0.##", culture)},{Y(b.Count).ToString("0.##", culture)}"));
+        <div class="mt-6 grid grid-cols-[2rem_minmax(0,1fr)] gap-2">
+            <div aria-hidden="true" class="flex h-52 flex-col justify-between py-3 text-right text-xs tabular-nums text-campus-muted"><span>@max</span><span>@((max / 2d).ToString("0.#", culture))</span><span>0</span></div>
+            <div class="min-w-0"><svg data-arrival-chart data-max="@max" class="block h-52 w-full overflow-visible text-campus-action" viewBox="0 0 720 200" role="img" aria-labelledby="arrival-chart-title"><title id="arrival-chart-title">Confirmed arrivals per @q.Interval minutes. Straight segments connect observed interval counts; exact windows are listed below.</title><line x1="12" x2="708" y1="188" y2="188" class="analytics-grid-line" /><line x1="12" x2="708" y1="100" y2="100" class="analytics-grid-line" /><line x1="12" x2="708" y1="12" y2="12" class="analytics-grid-line" />
+                <polyline data-arrival-line points="@points" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" />
+                @for (var i = 0; i < buckets.Count; i++)
+                {
+                    var b = buckets[i]; var label = $"{b.Start.ToString("MMM d, h:mm tt", culture)}–{b.Start.AddMinutes(q.Interval).ToString("h:mm tt", culture)}: {b.Count} check-ins";
+                    <circle data-arrival-point data-count="@b.Count" data-chart-label="@label" tabindex="0" role="img" aria-label="@label" cx="@X(i).ToString("0.##", culture)" cy="@Y(b.Count).ToString("0.##", culture)" r="4" fill="currentColor" stroke="white" stroke-width="1.5" vector-effect="non-scaling-stroke"><title>@label</title></circle>
+                }
+            </svg><div class="mt-2 flex justify-between gap-3 text-xs tabular-nums text-campus-muted"><span>@buckets[0].Start.ToString("MMM d, h:mm tt", culture)</span><span class="text-right">@buckets[^1].Start.AddMinutes(q.Interval).ToString("MMM d, h:mm tt", culture)</span></div></div>
+        </div>
+        <p data-arrival-readout aria-live="polite" class="mt-3 min-h-5 text-xs text-campus-muted">Hover or focus a point to inspect its window.</p>
+        <div class="mt-4 flex flex-wrap justify-between gap-2 border-t border-campus-line pt-4 text-xs"><strong>Peak: @Model.Arrivals.PeakCount · @peak.ToString("MMM d, h:mm tt", culture)–@peak.AddMinutes(q.Interval).ToString("h:mm tt", culture)</strong>@if (Model.LatestCheckIn is { } latest) { <span class="text-campus-muted">Latest: @latest.ToString("MMM d, h:mm:ss tt", culture)</span> }</div>
+        @if (Model.Arrivals.TiedPeaks > 1) { <p class="mt-1 text-xs text-campus-muted">First of @Model.Arrivals.TiedPeaks tied windows</p> }
+        <details class="mt-3"><summary class="inline-flex min-h-11 cursor-pointer items-center text-sm font-semibold text-campus-action">View exact arrival counts</summary><dl class="grid gap-x-8 gap-y-2 text-xs sm:grid-cols-2">@foreach (var bucket in buckets) { <div class="flex justify-between gap-3 border-b border-campus-line py-2"><dt>@bucket.Start.ToString("MMM d, h:mm tt", culture)–@bucket.Start.AddMinutes(q.Interval).ToString("h:mm tt", culture)</dt><dd class="font-semibold tabular-nums">@bucket.Count</dd></div> }</dl></details>
+        @if (Model.Arrivals.TotalPages > 1) { <nav aria-label="Arrival windows" class="mt-3 flex flex-wrap items-center gap-3 text-xs"><span>Window group @q.ArrivalPage of @Model.Arrivals.TotalPages</span>@if (q.ArrivalPage > 1) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(q.ArrivalPage - 1)" class="event-secondary">Earlier windows</a> }@if (q.ArrivalPage < Model.Arrivals.TotalPages) { <a asp-route="AdminEventAnalytics" asp-all-route-data="@Routes(q.ArrivalPage + 1)" class="event-secondary">Later windows</a> }</nav> }
+    }
+    else { <p class="grid min-h-60 place-content-center py-10 text-center text-sm text-campus-muted">No confirmed arrivals yet. Check-ins will appear here after scanner confirmation.</p> }
+</section>

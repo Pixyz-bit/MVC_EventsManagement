@@ -602,10 +602,42 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Contains("Analytics &lt;verification&gt;", html); Assert.DoesNotContain(_studentEmail, html);
         Assert.Contains("Test Student", html); Assert.Contains("SBIT-4B", html); Assert.Contains("Back to history", html);
         Assert.Contains("Confirmed arrivals per 5 minutes", html); Assert.Contains("Attendance by college", html);
+        Assert.Contains("<polyline data-arrival-line", html); Assert.Contains("data-arrival-point", html);
+        Assert.Contains("data-demographic-slice", html); Assert.Contains("data-demographic-legend", html);
+        Assert.Contains("Attendance turnout", html); Assert.Contains("Did not attend", html);
+        Assert.Contains("event-analytics.js", html); Assert.DoesNotContain("persistent.oaistatic.com", html);
+        Assert.DoesNotContain(".ToString(&quot;", html);
         Assert.DoesNotContain("open-cancel-event", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
         var empty = await client.GetStringAsync(path + "?cohort=Cancelled&q=absent&interval=30&from=history");
         Assert.Contains("No students in this cohort", empty); Assert.Contains("value=\"absent\"", empty);
         Assert.Contains("Confirmed arrivals per 30 minutes", empty);
+        var college = await client.GetStringAsync(path + "?dimension=College&interval=5&from=history");
+        Assert.Contains("data-demographic-panel=\"College\" class=", college);
+        Assert.Contains("name=\"dimension\" value=\"College\"", college);
+    }
+
+    [Theory]
+    [InlineData("Upcoming", "Awaiting registrations")]
+    [InlineData("Completed", "Final attendance")]
+    [InlineData("Cancelled", "Event cancelled")]
+    public async Task Analytics_empty_charts_are_honest_and_turnout_status_follows_event_state(string status, string label)
+    {
+        int id;
+        await using (var db = CreateContext())
+        {
+            var day = new EventClock(TimeProvider.System).Now.AddDays(3);
+            var ev = new Event { Title = "Empty graph fixture", VenueLocation = "Campus Hall", MaxCapacity = 50, Status = status,
+                CancellationReason = status == "Cancelled" ? "Fixture cancellation" : null,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = day, EventEnd = day.AddHours(2), RegStart = DateOnly.FromDateTime(day.AddDays(-3)), RegEnd = DateOnly.FromDateTime(day.AddDays(-1)) };
+            db.Events.Add(ev); await db.SaveChangesAsync(); id = ev.EventId;
+        }
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        var html = await client.GetStringAsync($"/admin/events/{id}/analytics?dimension=invalid");
+        Assert.Contains(label, html); Assert.Contains("No demographic cohorts registered yet.", html);
+        Assert.Contains("No confirmed arrivals yet.", html); Assert.DoesNotContain("data-demographic-slice=", html);
+        Assert.DoesNotContain("data-arrival-chart", html); Assert.Contains("data-demographic-panel=\"Program\" class=", html);
+        Assert.Contains("0.0%", html);
     }
 
     private ApplicationDbContext CreateContext()

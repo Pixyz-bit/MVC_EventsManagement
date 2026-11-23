@@ -4,6 +4,7 @@ public sealed class EventAnalyticsQuery
 {
     public int Interval { get; set; } = 15;
     public int ArrivalPage { get; set; } = 1;
+    public string Dimension { get; set; } = "Program";
     public string? Cohort { get; set; }
     public string? Q { get; set; }
     public string? College { get; set; }

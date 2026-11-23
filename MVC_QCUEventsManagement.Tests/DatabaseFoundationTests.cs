@@ -621,9 +621,10 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Equal(6, all.Distributions["Program"].Count); Assert.Equal("Other Programs", all.Distributions["Program"][^1].Label);
         foreach (var groups in all.Distributions.Values) Assert.Equal(30, groups.Sum(g => g.Reserved));
         Assert.Equal(2, all.Query.Page); Assert.Equal(5, all.CohortRows.Count);
-        var filtered = await service.GetAsync(ev.EventId, new() { Cohort = "Present", Q = " demo0 RESEARCHER ", College = "College A", Program = "Program 0", Interval = 99, From = "history" }, default);
+        var filtered = await service.GetAsync(ev.EventId, new() { Cohort = "Present", Q = " demo0 RESEARCHER ", College = "College A", Program = "Program 0", Interval = 99, From = "history", Dimension = "Campus" }, default);
         Assert.Single(filtered!.CohortRows); Assert.Equal(1, filtered.CohortRows[0].Year); Assert.Equal(15, filtered.Query.Interval);
         Assert.Equal(all.Reserved, filtered.Reserved); Assert.Equal("history", filtered.Query.From);
+        Assert.Equal("Campus", filtered.Query.Dimension); Assert.Equal(ev.EventStart.AddMinutes(51), filtered.LatestCheckIn);
         var ticket = filtered.CohortRows[0].TicketReference(ev.EventId);
         var exact = await service.GetAsync(ev.EventId, new() { Q = ticket.ToLowerInvariant() }, default); Assert.Single(exact!.CohortRows);
         var cancelled = await service.GetAsync(ev.EventId, new() { Cohort = "Cancelled" }, default);
@@ -642,6 +643,7 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.NotNull(empty); Assert.Equal(0d, empty.Turnout); Assert.Equal(0d, empty.Attrition); Assert.Equal(0d, empty.Occupancy); Assert.Equal(0d, empty.BookingFill);
         Assert.Empty(empty.Arrivals.Buckets); Assert.All(empty.Distributions.Values, groups => Assert.Empty(groups));
         Assert.Equal(150, empty.Query.Q!.Length); Assert.Equal("Present", empty.Query.Cohort); Assert.Null(empty.Query.From); Assert.Equal(1, empty.Query.Page);
+        Assert.Equal("Program", empty.Query.Dimension); Assert.Null(empty.LatestCheckIn);
     }
 
     [Fact]
