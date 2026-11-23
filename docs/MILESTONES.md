@@ -17,7 +17,7 @@ Status vocabulary: Not started, In progress, Blocked, Complete. A blocker identi
 | M6 | Students and account management | Not started | Student CRUD as supported by source, CSV import/export and failure reporting, admin/student accounts, activation/roles/password operations, transactions and reference-led pages. |
 | M7 | Student discovery and profile | Not started | Eligible event browsing/filtering, schedules/availability/details, profile and password operations; reference-led pages and ownership checks. |
 | M8 | Registration and event passes | Not started | Registration steps/year/section, server-side dates/eligibility/capacity, duplicate/concurrent prevention, cancellation, pass ownership, compatible QR references and PNG downloads. |
-| M9 | Attendance workflows | Not started | Preregistration/attendance lists, QR/manual lookup -> review -> confirm flow, wrong-event/cancelled/duplicate rejection, atomic check-in and timestamps; real-device camera check where available. |
+| M9 | Attendance workflows | Not started | Pre-registered source inspected and layout sample ready for user review; MVC implementation is pending. Preregistration/attendance lists, QR/manual lookup -> review -> confirm flow, wrong-event/cancelled/duplicate rejection, atomic check-in and timestamps; real-device camera check where available. |
 | M10 | Analytics, history, supporting pages | In progress | Approved Event History implemented with effective outcomes, academic-year/search/outcome filters and read-only details navigation. Analytics/report actions, verified report metrics, development-only diagnostics and remaining error states are pending. |
 | M11 | Complete workflow verification and publish readiness | Not started | All docs/TESTING.md acceptance checks, clean build/test/publish, CSS included, fresh database setup validated, docs/SETUP.md commands current, final documentation reconciliation and Git checkpoint. |
 
@@ -42,3 +42,5 @@ The redundant creation footer step counter was removed on 2026-11-23. Event deta
 Directory row spacing and typography were refined on 2026-11-23 and verified on five desktop/mobile widths. Suggested additional row data remains unimplemented pending user selection.
 
 The standalone directory count/time strip was removed and the three main data columns were equalized on 2026-11-23. Event Details/editing/cancellation now use the approved layout and refinements.
+
+Current priority: complete event-specific Pre-registered, Attendance scanner, Attendance and Analytics before Student Directory/Account Management, per the user. The Pre-registered sample is ready for review. Source event 26 has no registrations; fictional local records demonstrate populated states and confirmation behavior. No production preregistration tab has been enabled yet.

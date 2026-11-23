@@ -1,0 +1,148 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+#roster-preview{--r-ink:#192b40;--r-muted:#485b70;--r-blue:#155bb1;--r-line:#d6dce2;--r-fill:#f4f7fb;color:var(--r-ink);font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;line-height:1.6;color-scheme:light}
+#roster-preview *{box-sizing:border-box}
+#roster-preview .r-shell{display:grid;grid-template-columns:180px minmax(0,1fr);background:#fff;min-height:750px}
+#roster-preview .r-sidebar{border-right:1px solid var(--r-line);padding:24px 12px;display:flex;flex-direction:column;gap:28px}
+#roster-preview .r-brand{padding-inline:10px;font-size:16px;font-weight:800;color:#142c48}
+#roster-preview .r-brand small{display:block;font-size:11px;font-weight:400;color:var(--r-muted)}
+#roster-preview .r-group{font-size:11px;font-weight:700;color:var(--r-muted);margin:0 10px 8px}
+#roster-preview .r-nav-item{min-height:44px;padding:10px;font-size:12px;color:var(--r-muted);border-radius:8px;margin-block:2px}
+#roster-preview .r-nav-item.current{background:#eff6ff;color:var(--r-blue);font-weight:700;border-left:1px solid var(--r-blue)}
+#roster-preview .r-account{border-top:1px solid var(--r-line);padding:16px 10px 0;margin-top:auto;color:var(--r-muted);font-size:11px}
+#roster-preview .r-mobile-brand{display:none}
+#roster-preview .r-main{padding:24px;min-width:0}
+#roster-preview .r-back{margin:0 0 18px;min-height:36px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:12px;color:var(--r-muted)}
+#roster-preview .r-heading{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+#roster-preview h1{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.25;color:#142c48;margin:0}
+#roster-preview .r-badge{display:inline-flex;border-radius:99px;padding:3px 9px;font-size:11px;font-weight:600;background:#ecfdf5;color:#065f46;white-space:nowrap}
+#roster-preview .r-badge.reserved{background:#eff6ff;color:#155bb1}
+#roster-preview .r-badge.cancelled{background:#fef2f2;color:#991b1b}
+#roster-preview .r-meta{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:18px;margin:16px 0 22px}
+#roster-preview dt{color:var(--r-muted);font-size:11px;margin-bottom:3px}
+#roster-preview dd{margin:0;font-weight:600;font-size:12px;overflow-wrap:anywhere}
+#roster-preview .r-meta dd small{display:block;margin-top:3px;font-size:11px;color:var(--r-muted);font-weight:400}
+#roster-preview .r-workflows{display:flex;flex-wrap:wrap;gap:8px 22px;border-bottom:1px solid var(--r-line);margin-bottom:24px;font-size:12px;color:var(--r-muted)}
+#roster-preview .r-workflows span{display:flex;align-items:center;min-height:44px;border-bottom:2px solid transparent}
+#roster-preview .r-workflows .active{color:var(--r-blue);font-weight:700;border-bottom-color:var(--r-blue)}
+#roster-preview .r-roster{border:1px solid var(--r-line);border-radius:12px;overflow:hidden}
+#roster-preview .r-cohorts{display:flex;gap:22px;flex-wrap:wrap;border-bottom:1px solid var(--r-line);padding:0 16px}
+#roster-preview button,#roster-preview input,#roster-preview select{font:inherit}
+#roster-preview .r-tab{border:0;border-bottom:2px solid transparent;min-height:48px;padding:10px 0;color:var(--r-muted);background:transparent;font-size:12px;cursor:pointer}
+#roster-preview .r-tab[aria-pressed=true]{border-color:var(--r-blue);color:var(--r-blue);font-weight:700}
+#roster-preview .r-count{display:inline-block;background:var(--r-fill);padding:1px 6px;border-radius:5px;font-size:11px;font-variant-numeric:tabular-nums;margin-left:5px}
+#roster-preview .r-tools{padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end}
+#roster-preview .r-search{grid-column:1/-1}
+#roster-preview label{display:block;font-size:11px;font-weight:600;color:var(--r-muted);margin-bottom:6px}
+#roster-preview input,#roster-preview select{display:block;width:100%;min-width:0;min-height:44px;border:1px solid var(--r-line);border-radius:8px;padding:10px 11px;background:var(--r-fill);color:var(--r-ink);font-size:12px}
+#roster-preview input::placeholder{color:var(--r-muted)}
+#roster-preview .r-button{min-height:44px;border:1px solid var(--r-line);border-radius:8px;padding:9px 12px;background:#fff;color:var(--r-blue);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+#roster-preview .r-button:hover{background:var(--r-fill)}
+#roster-preview .r-button.danger{color:#991b1b;border-color:#fecaca}
+#roster-preview .r-button.solid-danger{background:#991b1b;border-color:#991b1b;color:#fff}
+#roster-preview .r-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.1fr) 72px 76px 108px 52px;gap:12px;align-items:center}
+#roster-preview .r-table-head{padding:12px 16px;background:var(--r-fill);border-block:1px solid var(--r-line);font-size:11px;font-weight:600;color:var(--r-muted)}
+#roster-preview .r-row{padding:var(--r-row-space,18px) 16px;border-bottom:1px solid var(--r-line);font-size:12px;min-width:0}
+#roster-preview .r-row>div{min-width:0;overflow-wrap:anywhere}
+#roster-preview .r-row strong{display:block;font-size:12px;font-weight:700;line-height:1.6}
+#roster-preview .r-secondary{display:block;color:var(--r-muted);font-size:11px;margin-top:3px;overflow-wrap:anywhere}
+#roster-preview .r-reference{font-size:11px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#roster-preview .r-row .r-button{padding-inline:10px}
+#roster-preview .r-field-label{display:none}
+#roster-preview .r-footer{padding:14px 16px;color:var(--r-muted);font-size:11px}
+#roster-preview .r-empty{padding:36px 18px;color:var(--r-muted);text-align:center;font-size:12px}
+#roster-preview .r-note{font-size:11px;color:var(--r-muted);margin:12px 0 0}
+#roster-preview .r-toast{padding:12px 16px;background:#ecfdf5;color:#065f46;border-bottom:1px solid #a7f3d0;font-size:12px}
+#roster-preview [hidden]{display:none!important}
+#roster-preview dialog{width:min(560px,calc(100% - 32px));max-height:calc(100dvh - 32px);overflow:auto;margin:auto;border:1px solid var(--r-line);border-radius:14px;background:#fff;color:var(--r-ink);padding:24px;font:inherit}
+#roster-preview dialog::backdrop{background:rgb(20 44 72 / 55%)}
+#roster-preview .r-modal-heading{display:flex;align-items:start;justify-content:space-between;gap:16px;border-bottom:1px solid var(--r-line);padding-bottom:16px}
+#roster-preview h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.015em;color:#142c48;line-height:1.4}
+#roster-preview h3{margin:18px 0 4px;font-size:18px;font-weight:700}
+#roster-preview .r-profile{display:grid;grid-template-columns:1fr 1fr;gap:18px 24px;margin-block:22px}
+#roster-preview .r-full{grid-column:1/-1}
+#roster-preview .r-modal-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-top:1px solid var(--r-line);padding-top:18px;margin-top:20px}
+#roster-preview .r-confirm-copy{font-size:13px;line-height:1.8;margin:20px 0;color:var(--r-muted)}
+#roster-preview button:focus-visible,#roster-preview input:focus-visible,#roster-preview select:focus-visible{outline:2px solid #28649a;outline-offset:3px}
+@media(max-width:1000px){#roster-preview .r-shell{grid-template-columns:160px minmax(0,1fr)}#roster-preview .r-main{padding:22px 18px}#roster-preview .r-grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 65px 72px 92px 50px;gap:10px}#roster-preview .r-tools{grid-template-columns:repeat(3,minmax(0,1fr))}#roster-preview .r-reset{grid-column:1/-1;justify-self:start}}
+@media(max-width:830px){#roster-preview .r-shell{display:block}#roster-preview .r-sidebar{display:none}#roster-preview .r-mobile-brand{display:block;padding:14px 16px;border-bottom:1px solid var(--r-line);font-size:12px;font-weight:700}#roster-preview .r-grid{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) 65px 74px 105px 52px}}
+@media(max-width:650px){#roster-preview .r-main{padding:20px 16px}#roster-preview h1{font-size:23px}#roster-preview .r-meta{grid-template-columns:1fr 1fr;gap:14px}#roster-preview .r-meta>div:last-child{grid-column:1/-1}#roster-preview .r-tools{grid-template-columns:1fr}#roster-preview .r-tools>div,#roster-preview .r-reset{grid-column:auto}#roster-preview input,#roster-preview select{font-size:16px}#roster-preview .r-table-head{display:none}#roster-preview .r-row{grid-template-columns:minmax(0,1fr) auto;gap:14px 12px}#roster-preview .r-row>div:nth-child(1){grid-column:1/-1}#roster-preview .r-row>div:nth-child(2){grid-column:1;grid-row:2}#roster-preview .r-row>div:nth-child(3){grid-column:2;grid-row:2}#roster-preview .r-row>div:nth-child(4){grid-column:1;grid-row:3}#roster-preview .r-row>div:nth-child(5){grid-column:1;grid-row:4}#roster-preview .r-row>div:nth-child(6){grid-column:2;grid-row:3/5;align-self:end}#roster-preview .r-row strong{font-size:14px}#roster-preview .r-secondary{font-size:12px}#roster-preview .r-field-label{display:block;font-size:11px;color:var(--r-muted);margin-bottom:3px}#roster-preview dialog{padding:18px}#roster-preview .r-profile{grid-template-columns:1fr}#roster-preview .r-full{grid-column:auto}}
+</style>
+<div id="roster-preview" aria-label="QCU Pre-registered proposed layout">
+ <div class="r-shell">
+  <aside class="r-sidebar" aria-label="Administrator sidebar preview">
+   <div class="r-brand">QCU Events<small>Administrator portal</small></div>
+   <div><p class="r-group">CORE MANAGEMENT</p><div class="r-nav-item current">Event Directory</div><div class="r-nav-item">Create Event</div><div class="r-nav-item">Events History</div></div>
+   <div><p class="r-group">ATTENDANCE &amp; USERS</p><div class="r-nav-item">Student Directory</div><div class="r-nav-item">Account Management</div></div>
+   <div class="r-account">Administrator</div>
+  </aside>
+  <div><div class="r-mobile-brand">QCU Events · Administrator portal</div><main class="r-main">
+   <div class="r-back"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to events</div>
+   <header><div class="r-heading"><h1>Campus Research Forum</h1><span class="r-badge">Upcoming</span></div><dl class="r-meta"><div><dt>Event date</dt><dd>Monday, Nov 30, 2026</dd></div><div><dt>Venue</dt><dd>Central Auditorium</dd></div><div><dt>Registered seats</dt><dd id="r-capacity"></dd></div></dl></header>
+   <nav class="r-workflows" aria-label="Event workflows preview"><span>Details</span><span class="active" aria-current="page">Pre-registered</span><span>Attendance scanner</span><span>Attendance</span><span>Analytics</span></nav>
+   <section class="r-roster" aria-label="Pre-registered students">
+    <div class="r-cohorts" aria-label="Registration groups"><button type="button" class="r-tab" data-cohort="active" aria-pressed="true">Pre-registered <span class="r-count" id="r-active-count"></span></button><button type="button" class="r-tab" data-cohort="cancelled" aria-pressed="false">Cancelled <span class="r-count" id="r-cancelled-count"></span></button></div>
+    <div id="r-toast" class="r-toast" role="status" hidden></div>
+    <div class="r-tools"><div class="r-search"><label for="r-search">Search students</label><input id="r-search" type="search" placeholder="Student ID or full name" /></div><div><label for="r-college">College</label><select id="r-college"><option value="">All colleges</option><option>College of Computer Studies</option><option>College of Engineering</option><option>College of Education</option></select></div><div><label for="r-program">Program</label><select id="r-program"><option value="">All programs</option><option>BSIT</option><option>BSIE</option><option>BECEd</option></select></div><div><label for="r-year">Year level</label><select id="r-year"><option value="">All year levels</option><option value="1">Year 1</option><option value="2">Year 2</option><option value="3">Year 3</option><option value="4">Year 4</option></select></div><button class="r-button r-reset" id="r-reset" type="button">Reset filters</button></div>
+    <div class="r-grid r-table-head" aria-hidden="true"><span>Student</span><span>College &amp; program</span><span>Year &amp; section</span><span>Status</span><span>Ticket reference</span><span>Action</span></div>
+    <div id="r-rows" role="list" aria-label="Attendees"></div>
+    <div id="r-results" class="r-footer" role="status" aria-live="polite"></div>
+   </section>
+   <p class="r-note">Sample data · Present students remain in Pre-registered. Changes affect this preview only.</p>
+  </main></div>
+ </div>
+ <dialog id="r-profile-dialog" aria-labelledby="r-dialog-title">
+  <div class="r-modal-heading"><h2 id="r-dialog-title">Attendee details</h2><button type="button" class="r-button" id="r-close">Close</button></div>
+  <div id="r-profile-content"><h3 id="r-name"></h3><span class="r-secondary r-reference" id="r-ticket"></span><dl id="r-profile-fields" class="r-profile"></dl><div class="r-modal-footer"><button class="r-button danger" id="r-void" type="button">Cancel pass</button><button class="r-button" id="r-dismiss" type="button">Done</button></div></div>
+  <div id="r-confirm-content" hidden><h3>Cancel this registration pass?</h3><p class="r-confirm-copy" id="r-confirm-text"></p><div class="r-modal-footer"><button class="r-button" id="r-keep" type="button">Keep pass</button><button class="r-button solid-danger" id="r-confirm" type="button">Confirm cancellation</button></div></div>
+ </dialog>
+</div>
+<script>
+(()=>{
+const root=document.getElementById('roster-preview');
+const students=[
+ {id:'2024-10437',name:'Mikaela Dizon',email:'mikaela.dizon@example.test',college:'College of Computer Studies',program:'BSIT',year:3,section:'SBIT-3A',campus:'San Bartolome',ticket:'TCK-0026-00104',status:'Reserved'},
+ {id:'2023-08716',name:'Rafael Mendoza',email:'rafael.mendoza@example.test',college:'College of Engineering',program:'BSIE',year:4,section:'SBIE-4B',campus:'San Bartolome',ticket:'TCK-0026-00105',status:'Present'},
+ {id:'2025-11284',name:'Andrea Villanueva',email:'andrea.villanueva@example.test',college:'College of Education',program:'BECEd',year:2,section:'BECEd-2A',campus:'Batasan',ticket:'TCK-0026-00106',status:'Reserved'},
+ {id:'2024-09652',name:'Paolo Macaraig',email:'paolo.macaraig@example.test',college:'College of Computer Studies',program:'BSIT',year:3,section:'SBIT-3B',campus:'San Francisco',ticket:'TCK-0026-00107',status:'Cancelled'}
+];
+const query=root.querySelector('#r-search'),college=root.querySelector('#r-college'),program=root.querySelector('#r-program'),year=root.querySelector('#r-year');
+const dialog=root.querySelector('#r-profile-dialog'),profile=root.querySelector('#r-profile-content'),confirmation=root.querySelector('#r-confirm-content');
+let cohort='active',selected=null,opener=null;
+const make=(parent,text,tag='span',cls='')=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;parent.append(el);return el;};
+const statusBadge=(parent,status)=>make(parent,status,'span','r-badge '+status.toLowerCase());
+function showProfile(student,button){
+ selected=student;opener=button;profile.hidden=false;confirmation.hidden=true;
+ root.querySelector('#r-dialog-title').textContent='Attendee details';root.querySelector('#r-name').textContent=student.name;root.querySelector('#r-ticket').textContent=student.ticket;
+ const fields=root.querySelector('#r-profile-fields');fields.replaceChildren();
+ [['Student ID',student.id],['Campus',student.campus],['Institutional email',student.email],['College',student.college],['Program',student.program],['Year & section',`Year ${student.year} · ${student.section}`],['Status',student.status]].forEach(([key,value])=>{const field=make(fields,'','div',['Institutional email','College'].includes(key)?'r-full':'');make(field,key,'dt');const dd=make(field,'','dd');if(key==='Status')statusBadge(dd,value);else dd.textContent=value;});
+ root.querySelector('#r-void').hidden=student.status==='Cancelled';dialog.showModal();
+}
+function render(){
+ const active=students.filter(s=>s.status!=='Cancelled').length;root.querySelector('#r-active-count').textContent=active;root.querySelector('#r-cancelled-count').textContent=students.length-active;
+ root.querySelector('#r-capacity').textContent=`${active} / 150`;make(root.querySelector('#r-capacity'),`${150-active} seats available`,'small');
+ root.querySelectorAll('[data-cohort]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.cohort===cohort)));
+ const q=query.value.trim().toLowerCase();const matches=students.filter(s=>(cohort==='cancelled'?s.status==='Cancelled':s.status!=='Cancelled')&&(!q||`${s.name} ${s.id}`.toLowerCase().includes(q))&&(!college.value||s.college===college.value)&&(!program.value||s.program===program.value)&&(!year.value||String(s.year)===year.value));
+ const rows=root.querySelector('#r-rows');rows.replaceChildren();
+ matches.forEach(s=>{const row=make(rows,'','article','r-grid r-row');row.setAttribute('role','listitem');
+  const student=make(row,'','div');make(student,s.name,'strong');make(student,s.id,'span','r-secondary');make(student,s.email,'span','r-secondary');
+  const academic=make(row,'','div');make(academic,s.program,'strong');make(academic,s.college,'span','r-secondary');
+  const level=make(row,'','div');make(level,`Year ${s.year}`);make(level,s.section,'span','r-secondary');
+  statusBadge(make(row,'','div'),s.status);
+  const ref=make(row,'','div');make(ref,'Ticket reference','span','r-field-label');make(ref,s.ticket,'span','r-reference');
+  const action=make(row,'','div');const view=make(action,'View','button','r-button');view.type='button';view.setAttribute('aria-label','View '+s.name);view.addEventListener('click',()=>showProfile(s,view));
+ });
+ if(!matches.length)make(rows,'No students match these filters. Reset filters to see this registration group.','p','r-empty');
+ root.querySelector('#r-results').textContent=`${matches.length} ${matches.length===1?'student':'students'} shown · ${cohort==='cancelled'?'Cancelled passes':'Active registrations, including Present'}`;
+}
+root.querySelectorAll('[data-cohort]').forEach(button=>button.addEventListener('click',()=>{cohort=button.dataset.cohort;render();}));
+query.addEventListener('input',render);[college,program,year].forEach(select=>select.addEventListener('change',render));
+root.querySelector('#r-reset').addEventListener('click',()=>{query.value='';college.value='';program.value='';year.value='';render();});
+root.querySelector('#r-close').addEventListener('click',()=>dialog.close());root.querySelector('#r-dismiss').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>{if(opener?.isConnected)opener.focus();else root.querySelector('[data-cohort="active"]').focus();});
+root.querySelector('#r-void').addEventListener('click',()=>{profile.hidden=true;confirmation.hidden=false;root.querySelector('#r-dialog-title').textContent='Cancel registration pass';root.querySelector('#r-confirm-text').textContent=`${selected.name}’s pass ${selected.ticket} will be cancelled. One seat will be released, and this registration will remain under Cancelled.${selected.status==='Present'?' Any recorded check-in will be retained as history.':''}`;root.querySelector('#r-keep').focus();});
+root.querySelector('#r-keep').addEventListener('click',()=>{profile.hidden=false;confirmation.hidden=true;root.querySelector('#r-dialog-title').textContent='Attendee details';root.querySelector('#r-void').focus();});
+root.querySelector('#r-confirm').addEventListener('click',()=>{if(!selected||selected.status==='Cancelled')return;selected.status='Cancelled';const toast=root.querySelector('#r-toast');toast.hidden=false;toast.textContent='Preview: pass cancelled and one seat released. The registration remains under Cancelled.';render();dialog.close();});
+render();
+if(globalThis.Tweak){const state={spacing:'Comfortable'};const tweak=new Tweak({container:root,onChange:()=>root.style.setProperty('--r-row-space',state.spacing==='Compact'?'12px':'18px')});tweak.addSelect(state,'spacing',{label:'Row spacing',options:['Comfortable','Compact']});}
+})();
+</script>

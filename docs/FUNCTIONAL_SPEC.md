@@ -202,7 +202,7 @@ Evidence: Dashboard/EventRegistration/EventPass/StudentProfile.aspx/.cs; EventRe
 
 ### ROSTER-01: Lists
 
-- [ ] Preregistered includes all non-Cancelled, including Present; revoked rows are separate. Preserve search, department/program/year filters/reset and attendee details/void action.
+- [ ] Preregistered includes all non-Cancelled, including Present; revoked rows are separate. Preserve student ID/name search, department/program/year filters/reset and attendee details/void action. Source row fields are ticket reference, student ID, full name/email, department/program, registered year/section and status. The profile additionally shows campus. The proposed layout groups student identity fields without omitting data; its approval/implementation status is tracked in DESIGN.md.
 - [ ] Attendance includes Present ordered by timestamp descending, search/department/program filters, latest check-in and turnout. Available booking seats use CurrentRegistrations; physical occupancy uses Present counts.
 
 Acceptance: check-in stays in preregistered and appears in attendance; void moves to revoked; counts and filter scope are correct, including empty lists.
