@@ -29,6 +29,8 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
+The original Web Forms EventDetails.aspx for event 26 was inspected on 2026-11-23. A standalone layout proposal is available through the Event Details entry in DESIGN.md; it is a review sample, not an implemented MVC page or an approved final design. Await user feedback before implementing details/editing/cancellation.
+
 Event Directory row content now follows the supplied field reference while retaining the shared QCU design. The View action is intentionally disabled until an Event Details reference is supplied; details/editing/cancellation remain the next M5 workflows.
 
 M0-M2 are complete. Source application/database are unchanged. The new MVC_EventsManagement application tables are empty, including after rolled-back integration tests. Skill installation state is owned by SKILLS.md, exact commands/limitations by SETUP.md, and page reference readiness by [DESIGN.md](../DESIGN.md). The user's new-database instruction supersedes old-data migration/adoption requirements.
