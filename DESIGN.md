@@ -112,3 +112,5 @@ Student dashboard proposal: Dashboard.aspx and its code-behind informed the Camp
 Student dashboard revision: use the Web Forms dashboard’s featured-event carousel, campus photography, segmented event views and image-led cards. The sample uses the existing campus photo and QCU emblem at reduced resolution. It retains category filtering and the pass and cancellation previews.
 
 The Student Dashboard preview starts in dark mode with a blue navbar. The Dark mode toggle compares dark and light versions in the same preview. Both use the blue navbar and preserve the selected events when switching themes.
+
+Student Directory toolbar spacing uses a common control height and consistent gaps. The search field fills the available width above three equal-width actions on small screens. The filter panel aligns its Reset and Apply filters buttons in two equal columns.

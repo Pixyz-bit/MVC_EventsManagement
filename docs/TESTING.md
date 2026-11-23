@@ -31,6 +31,8 @@ Detailed expected business outcomes have one owner: [functional specification](F
 
 ## Checks actually performed
 
+2026-11-23, Student Directory toolbar spacing: Tailwind compilation, Release publish and the focused Student Directory integration test passed. Browser layout remains unverified.
+
 2026-11-23, Student Directory filter panel: all 91 MVC tests passed. Client handler checks verified that college changes narrow the program options, clear incompatible selections, and keep the form open until submission. The shared styles compiled, and the local publish passed. Browser rendering remains unverified.
 
 2026-11-23, Student Dashboard theme preview: the static design detector and simulated checks for the initial dark state, switching both ways, carousel navigation and catalog rendering passed. Browser rendering remains unverified.

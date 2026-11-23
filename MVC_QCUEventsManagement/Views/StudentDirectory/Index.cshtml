@@ -16,14 +16,14 @@
     @if (TempData["StudentError"] is string error) { <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">@error</p> }
     @if (!ViewData.ModelState.IsValid) { <div asp-validation-summary="All" role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800"></div> }
     <section aria-label="Student directory" class="mt-6 rounded-xl border border-campus-line bg-white">
-        <form asp-route="AdminStudentDirectory" method="get" role="search" class="relative flex flex-wrap items-end gap-3 p-4">
-            <div class="min-w-0 flex-1 basis-52">
+        <form asp-route="AdminStudentDirectory" method="get" role="search" class="relative grid grid-cols-3 items-end gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+            <div class="col-span-3 min-w-0 sm:col-span-1">
                 <label for="student-search" class="event-label">Search students</label>
-                <input id="student-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="event-input" />
+                <input id="student-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="event-input h-12" />
             </div>
-            <button type="submit" class="event-secondary">Search</button>
-            <details class="directory-filter-menu">
-                <summary class="event-secondary cursor-pointer list-none">
+            <button type="submit" class="event-secondary h-12 px-2 whitespace-nowrap sm:px-3.5">Search</button>
+            <details class="directory-filter-menu min-w-0">
+                <summary class="event-secondary h-12 w-full cursor-pointer list-none gap-1 px-2 whitespace-nowrap sm:gap-2 sm:px-3.5">
                     Filters
                     @{ var filterCount = new[] { q.College, q.Program, q.Campus, q.Status }.Count(value => value is not null); }
                     @if (filterCount > 0) { <span class="rounded bg-blue-50 px-1.5 text-campus-action">@filterCount</span> }
@@ -59,13 +59,13 @@
                             <option value="">All statuses</option><option selected="@(q.Status == "Active")">Active</option><option selected="@(q.Status == "Inactive")">Inactive</option>
                         </select>
                     </div>
-                    <div class="flex flex-wrap gap-2">
+                    <div class="grid grid-cols-2 gap-2">
                         <a asp-route="AdminStudentDirectory" asp-route-q="@q.Q" class="event-secondary">Reset</a>
                         <button type="submit" class="event-primary">Apply filters</button>
                     </div>
                 </div>
             </details>
-            <a asp-action="Export" asp-all-route-data="@Routes(1)" class="event-secondary">Export CSV</a>
+            <a asp-action="Export" asp-all-route-data="@Routes(1)" class="event-secondary h-12 px-2 whitespace-nowrap sm:px-3.5">Export CSV</a>
         </form>
         <div aria-hidden="true" class="@columns hidden items-center gap-4 border-y border-campus-line bg-campus-input px-4 py-3 text-xs font-semibold text-campus-muted xl:grid"><span>Student ID</span><span>Student</span><span>College &amp; program</span><span>Campus</span><span>Status</span><span>Action</span></div>
         <ul role="list" class="divide-y divide-campus-line">
