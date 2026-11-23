@@ -597,6 +597,79 @@ public sealed class DatabaseFoundationTests : IAsyncLifetime
         Assert.Empty(empty!.Attendees); Assert.Equal(150, empty.Query.Q!.Length); Assert.Equal(1, empty.Query.Page); Assert.Equal(27, empty.CheckedIn);
     }
 
+    [Fact]
+    public async Task Analytics_counts_distributions_cohorts_and_filters_use_correct_denominators_without_writes()
+    {
+        var (ev, _) = await CreateGraphAsync(); ev.MaxCapacity = 60; ev.CurrentRegistrations = 30;
+        for (var i = 0; i < 33; i++)
+        {
+            var student = NewStudent(NewUser($"analytics-{Guid.NewGuid():N}@example.test"));
+            student.FirstName = $"Demo{i}"; student.MiddleName = null; student.LastName = "Researcher";
+            student.Department = i % 2 == 0 ? "College A" : "College B"; student.Program = "Program " + i % 8;
+            student.CampusBranch = "Campus " + i % 3;
+            var pass = NewRegistration(ev, student); pass.CurrentYearLvl = i % 4 + 1;
+            pass.Status = i < 18 ? "Present" : i < 30 ? "NoShow" : "Cancelled";
+            pass.CheckInTimestamp = pass.Status == "NoShow" ? null : ev.EventStart.AddMinutes(i * 3);
+            _db.EventRegistrations.Add(pass);
+        }
+        await _db.SaveChangesAsync(); var version = ev.RowVersion.ToArray();
+        var service = new AnalyticsService(_db, new AttendanceService(_db, new EventClock(TimeProvider.System)));
+        var all = await service.GetAsync(ev.EventId, new() { Cohort = "Reserved", Page = int.MaxValue }, default);
+        Assert.NotNull(all); Assert.Equal(30, all.Reserved); Assert.Equal(18, all.Attended); Assert.Equal(12, all.Unscanned); Assert.Equal(3, all.Cancelled);
+        Assert.Equal(60d, all.Turnout); Assert.Equal(30d, all.Occupancy); Assert.Equal(50d, all.BookingFill);
+        Assert.Equal(100d * 3 / 33, all.Attrition, 6);
+        Assert.Equal(6, all.Distributions["Program"].Count); Assert.Equal("Other Programs", all.Distributions["Program"][^1].Label);
+        foreach (var groups in all.Distributions.Values) Assert.Equal(30, groups.Sum(g => g.Reserved));
+        Assert.Equal(2, all.Query.Page); Assert.Equal(5, all.CohortRows.Count);
+        var filtered = await service.GetAsync(ev.EventId, new() { Cohort = "Present", Q = " demo0 RESEARCHER ", College = "College A", Program = "Program 0", Interval = 99, From = "history" }, default);
+        Assert.Single(filtered!.CohortRows); Assert.Equal(1, filtered.CohortRows[0].Year); Assert.Equal(15, filtered.Query.Interval);
+        Assert.Equal(all.Reserved, filtered.Reserved); Assert.Equal("history", filtered.Query.From);
+        var ticket = filtered.CohortRows[0].TicketReference(ev.EventId);
+        var exact = await service.GetAsync(ev.EventId, new() { Q = ticket.ToLowerInvariant() }, default); Assert.Single(exact!.CohortRows);
+        var cancelled = await service.GetAsync(ev.EventId, new() { Cohort = "Cancelled" }, default);
+        Assert.Equal(3, cancelled!.Total); Assert.Equal(all.Arrivals.PeakCount, cancelled.Arrivals.PeakCount);
+        var unscanned = await service.GetAsync(ev.EventId, new() { Cohort = "NoShow" }, default); Assert.Equal(12, unscanned!.Total);
+        Assert.Equal(version, await _db.Events.Where(e => e.EventId == ev.EventId).Select(e => e.RowVersion).SingleAsync());
+        Assert.Null(await service.GetAsync(int.MaxValue, new(), default));
+    }
+
+    [Fact]
+    public async Task Empty_analytics_has_zero_rates_and_no_invented_arrival_series()
+    {
+        var (ev, _) = await CreateGraphAsync();
+        var service = new AnalyticsService(_db, new AttendanceService(_db, new EventClock(TimeProvider.System)));
+        var empty = await service.GetAsync(ev.EventId, new() { Cohort = "invalid", Q = new string('q', 200), From = "invalid", Page = -1 }, default);
+        Assert.NotNull(empty); Assert.Equal(0d, empty.Turnout); Assert.Equal(0d, empty.Attrition); Assert.Equal(0d, empty.Occupancy); Assert.Equal(0d, empty.BookingFill);
+        Assert.Empty(empty.Arrivals.Buckets); Assert.All(empty.Distributions.Values, groups => Assert.Empty(groups));
+        Assert.Equal(150, empty.Query.Q!.Length); Assert.Equal("Present", empty.Query.Cohort); Assert.Null(empty.Query.From); Assert.Equal(1, empty.Query.Page);
+    }
+
+    [Fact]
+    public async Task Local_demo_data_is_additive_hashed_complete_and_idempotent()
+    {
+        var (original, _) = await CreateGraphAsync(); var version = original.RowVersion.ToArray();
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+        var service = new DevelopmentDemoData(_db, hasher, new EventClock(TimeProvider.System));
+        const string fixturePassword = "Fixture-only-preview-2030!";
+        var result = await service.CreateAsync(fixturePassword);
+        Assert.Equal(32, await _db.Students.CountAsync(s => s.StudentId.StartsWith("DEMO-")));
+        Assert.Equal(33, await _db.Users.CountAsync(u => u.Email == DevelopmentDemoData.AdminEmail || u.Email.StartsWith("demo.student")));
+        var demoEvents = await _db.Events.AsNoTracking().Where(e => e.EventId == result.LiveEventId || e.EventId == result.CompletedEventId || e.EventId == result.CancelledEventId).ToListAsync();
+        Assert.Equal(3, demoEvents.Count); Assert.Equal(76, await _db.EventRegistrations.CountAsync(r => demoEvents.Select(e => e.EventId).Contains(r.EventId)));
+        foreach (var ev in demoEvents)
+        {
+            Assert.StartsWith("Sample · ", ev.Title);
+            Assert.Equal(ev.CurrentRegistrations, await _db.EventRegistrations.CountAsync(r => r.EventId == ev.EventId && r.Status != "Cancelled"));
+        }
+        var admin = await _db.Users.AsNoTracking().SingleAsync(u => u.Email == DevelopmentDemoData.AdminEmail);
+        Assert.NotEqual(fixturePassword, admin.PasswordHash);
+        if (result.Created) Assert.NotEqual(Microsoft.AspNetCore.Identity.PasswordVerificationResult.Failed, hasher.VerifyHashedPassword(admin, admin.PasswordHash, fixturePassword));
+        var again = await service.CreateAsync("Different-fixture-password!");
+        Assert.False(again.Created); Assert.Equal(result.LiveEventId, again.LiveEventId); Assert.Equal(result.CompletedEventId, again.CompletedEventId); Assert.Equal(result.CancelledEventId, again.CancelledEventId);
+        Assert.Equal(admin.PasswordHash, await _db.Users.Where(u => u.Email == DevelopmentDemoData.AdminEmail).Select(u => u.PasswordHash).SingleAsync());
+        Assert.Equal(version, await _db.Events.Where(e => e.EventId == original.EventId).Select(e => e.RowVersion).SingleAsync());
+    }
+
     private async Task<(Event Event, Student Student)> CreateGraphAsync()
     {
         var admin = NewUser($"foundation-admin-{Guid.NewGuid():N}@example.test");

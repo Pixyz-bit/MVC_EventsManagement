@@ -434,7 +434,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.Contains("Open to all colleges", html);
         Assert.Contains("History Hall", html);
         Assert.Contains($"/admin/events/{id}?from=history", html);
-        Assert.Contains("Analytics is not implemented yet", html);
+        Assert.Contains($"/admin/events/{id}/analytics?from=history", html);
         var details = await admin.GetStringAsync($"/admin/events/{id}?from=history&edit=true");
         Assert.Contains("Back to history", details);
         Assert.DoesNotContain("id=\"event-edit-form\"", details);
@@ -576,6 +576,36 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var empty = await client.GetStringAsync(path + "?q=absent-name&college=unlisted&program=other");
         Assert.Contains("No matching students", empty); Assert.Contains("value=\"absent-name\"", empty);
         Assert.Contains("Reset filters", empty);
+    }
+
+    [Fact]
+    public async Task Analytics_is_admin_only_encoded_read_only_and_supports_history_and_cohort_filters()
+    {
+        int id;
+        await using (var db = CreateContext())
+        {
+            var day = new EventClock(TimeProvider.System).Now.AddDays(-3);
+            var ev = new Event { Title = "Analytics <verification>", VenueLocation = "Report Hall", MaxCapacity = 50, CurrentRegistrations = 1,
+                CreatedByUserId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync(),
+                EventStart = day, EventEnd = day.AddHours(2), RegStart = DateOnly.FromDateTime(day.AddDays(-3)), RegEnd = DateOnly.FromDateTime(day.AddDays(-1)) };
+            db.EventRegistrations.Add(new EventRegistration { Event = ev, StudentId = _studentId, CurrentYearLvl = 4, CurrentSection = "SBIT-4B", Status = "Present", CheckInTimestamp = day });
+            await db.SaveChangesAsync(); id = ev.EventId;
+        }
+        var path = $"/admin/events/{id}/analytics";
+        using var anonymous = NewClient(); using var redirect = await anonymous.GetAsync(path); Assert.StartsWith("/login?", RedirectPath(redirect));
+        using var student = NewClient(); using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var denied = await student.GetAsync(path); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        using var missing = await client.GetAsync("/admin/events/2147483647/analytics"); Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var page = await client.GetAsync(path + "?from=history&interval=5"); Assert.Equal(HttpStatusCode.OK, page.StatusCode);
+        var html = await page.Content.ReadAsStringAsync();
+        Assert.Contains("Analytics &lt;verification&gt;", html); Assert.DoesNotContain(_studentEmail, html);
+        Assert.Contains("Test Student", html); Assert.Contains("SBIT-4B", html); Assert.Contains("Back to history", html);
+        Assert.Contains("Confirmed arrivals per 5 minutes", html); Assert.Contains("Attendance by college", html);
+        Assert.DoesNotContain("open-cancel-event", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
+        var empty = await client.GetStringAsync(path + "?cohort=Cancelled&q=absent&interval=30&from=history");
+        Assert.Contains("No students in this cohort", empty); Assert.Contains("value=\"absent\"", empty);
+        Assert.Contains("Confirmed arrivals per 30 minutes", empty);
     }
 
     private ApplicationDbContext CreateContext()

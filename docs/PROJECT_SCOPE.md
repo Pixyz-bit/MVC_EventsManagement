@@ -16,3 +16,5 @@ Migrate the ASP.NET Web Forms application on .NET Framework 4.7.2 to the existin
 Observed source: administrator and student portals, session access helpers, PBKDF2 password helper, ADO.NET repositories, stored procedures, database scripts, local fonts/images/scripts, QR generation/scanning, and PNG ticket export. Repository/page logic and SQL procedures must both be inspected for rules.
 
 The destination targets net11.0; SDK 11.0.100 builds the original starter successfully with zero warnings/errors. Exact package/setup versions belong in [setup](SETUP.md). Existing starter Bootstrap references remain untouched until the Tailwind/layout milestone.
+
+On 2026-11-23 the user explicitly authorized fictional sample accounts/events/registrations for local visual previews. This is an additive development-only dataset in MVC_EventsManagement, not an import of source data; existing records are preserved. See SETUP.md and DATABASE_AND_SECURITY.md for the explicit command and restrictions.

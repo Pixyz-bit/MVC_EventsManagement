@@ -225,18 +225,18 @@ Acceptance: concurrent confirmations yield one success and stable timestamp; sel
 
 ### REPORT-01: Analytics
 
-- [ ] Reserved/preregistered = non-Cancelled (Present + NoShow), attended = Present, cancelled = Cancelled, unscanned = reserved - attended. No registration creation date exists; check-in time must not be used as ticket creation time.
-- [ ] Turnout = attended/reserved; occupancy/saturation = attended/capacity; booking fill = CurrentRegistrations/capacity; attrition = cancelled/(reserved+cancelled). Zero denominators yield zero.
-- [ ] Active-cohort department/program/campus/year distributions, cohort lists and demographic audit remain. Program chart groups top five plus Other Programs only if more than six groups; department audit ranks attendance rate then count.
-- [ ] Confirmed-arrival intervals support 5/15/30 minutes (default 15), floor to bucket start, fill empty buckets between first/last, handle multiple days, and choose first tied peak label. No arrivals means awaiting/empty state.
-- [ ] Retain useful chart inspection/filtering and history navigation. Do not invent registration-time series or persistent live push absent source/data support.
+- [x] Reserved/preregistered = non-Cancelled (Present + NoShow), attended = Present, cancelled = Cancelled, unscanned = reserved - attended. No registration creation date exists; check-in time must not be used as ticket creation time.
+- [x] Turnout = attended/reserved; occupancy/saturation = attended/capacity; booking fill = CurrentRegistrations/capacity; attrition = cancelled/(reserved+cancelled). Zero denominators yield zero.
+- [x] Active-cohort department/program/campus/year distributions, cohort lists and demographic audit remain. Program chart groups top five plus Other Programs only if more than six groups; department audit ranks attendance rate then count.
+- [x] Confirmed-arrival intervals support 5/15/30 minutes (default 15), floor to bucket start, fill empty buckets between first/last, handle multiple days, and choose first tied peak label. Sparse ranges fill zero windows and paginate 24 buckets per group without allocating an unbounded range. No arrivals means awaiting/empty state.
+- [x] Retain useful chart inspection/filtering and history navigation. Do not invent registration-time series or persistent live push absent source/data support.
 
 Acceptance: deterministic mixed-status/zero/multi-department/cross-midnight fixtures produce matching totals, denominators, cohorts and intervals.
 
 ### HISTORY-01: History
 
 - [x] `/admin/events/history` shows stored/effective Completed and Cancelled events, newest EventStart then EventId first. Rows show outcome, title/target college and venue/event date. Global total/completed/cancelled counts remain independent of filters. Search matches title, venue or college without case sensitivity; academic year and outcome filters combine, with reset and 25-row pagination. Titles open read-only details. Semester filtering remains outside the visible UI, matching the source.
-- [ ] The report View action stays disabled until analytics is implemented; it must eventually navigate to the event report with history return context.
+- [x] The report View action opens the event Analytics report with history return context.
 - [x] Academic year starts August: August–December use the event year; January–July use the preceding year. Tests cover July/August, January and June. History retains cancellation reasons and counts. Semester categories remain defined for future reporting (Aug–Dec first, Jan–May second, Jun–Jul summer).
 
 Acceptance: August/January/June fixtures and filters agree with reports and outcome totals.

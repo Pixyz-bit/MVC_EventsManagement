@@ -9,7 +9,8 @@ using MVC_QCUEventsManagement.Models;
 using System.Threading.RateLimiting;
 
 var createAdmin = args.Length > 0 && args[0] == "--create-admin";
-var builder = WebApplication.CreateBuilder(createAdmin ? [] : args);
+var seedDemo = args.Length == 1 && args[0] == "--seed-demo";
+var builder = WebApplication.CreateBuilder(createAdmin || seedDemo ? [] : args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
@@ -54,9 +55,23 @@ builder.Services.AddScoped<AccountCookieEvents>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<AttendanceService>();
+builder.Services.AddScoped<AnalyticsService>();
+builder.Services.AddScoped<DevelopmentDemoData>();
 builder.Services.AddSingleton<EventBannerStore>();
 
 await using var app = builder.Build();
+
+if (seedDemo)
+{
+    if (!app.Environment.IsDevelopment()) throw new InvalidOperationException("Sample data is available only in Development.");
+    await using var scope = app.Services.CreateAsyncScope();
+    var password = Environment.GetEnvironmentVariable("MVC_DEMO_PASSWORD") ?? "Preview!" + Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(12));
+    var result = await scope.ServiceProvider.GetRequiredService<DevelopmentDemoData>().CreateAsync(password);
+    Console.WriteLine(result.Created ? "Created 3 fictional events, 32 student accounts and 1 preview administrator." : "Demo data already exists; no records or passwords were changed.");
+    Console.WriteLine($"Events: {result.LiveEventId}, {result.CompletedEventId}, {result.CancelledEventId}");
+    if (result.Created) Console.WriteLine($"Admin: {DevelopmentDemoData.AdminEmail}\nStudent: demo.student01@example.test\nPassword for new demo accounts: {password}");
+    return;
+}
 
 if (createAdmin)
 {

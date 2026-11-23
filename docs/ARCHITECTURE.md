@@ -27,6 +27,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetailsController.cs
 |   |   |-- EventHistoryController.cs
 |   |   |-- EventPreRegisteredController.cs
+|   |   |-- EventAnalyticsController.cs
 |   |   |-- EventAttendanceController.cs
 |   |   |-- AttendanceScannerController.cs
 |   |   |-- PrivacyController.cs
@@ -70,6 +71,7 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 |   |   |-- EventDetails/
 |   |   |-- EventHistory/
 |   |   |-- EventPreRegistered/
+|   |   |-- EventAnalytics/
 |   |   |-- EventAttendance/
 |   |   |-- AttendanceScanner/
 |   |   |-- Student/
@@ -115,13 +117,14 @@ Use one page controller, a matching view folder, and a dedicated input/view mode
 | Pre-registered roster/void | EventPreRegisteredController | EventRosterViewModel, EventRosterQuery, EventRosterContext, RosterAttendee, VoidPassInput (each in ViewModels/Admin) | Views/EventPreRegistered/Index.cshtml |
 | Attendance Scanner | AttendanceScannerController | AttendanceScannerViewModel, ScanAttendee, ScanLookupResult, CheckInInput (each in ViewModels/Admin) | Views/AttendanceScanner/Index.cshtml |
 | Attendance list | EventAttendanceController | EventAttendanceViewModel, EventAttendanceQuery, AttendanceItem | Views/EventAttendance/Index.cshtml |
+| Analytics | EventAnalyticsController | EventAnalyticsViewModel, EventAnalyticsQuery and separate report result records | Views/EventAnalytics/Index.cshtml |
 | Student landing | StudentController | ViewModels/Student/StudentLandingViewModel.cs | Views/Student/Index.cshtml |
 | Error | ErrorController | Models/ErrorViewModel.cs | Views/Error/Index.cshtml |
 | Static starter privacy | PrivacyController | None | Views/Privacy/Index.cshtml |
 
 Existing route paths and named routes are retained. EventListItem and RegistrationStatus each have a separate file under ViewModels/Admin. The unused starter Home/Index view is removed. Future pages follow this page-level convention.
 
-M2 configuration: Program registers a request-scoped ApplicationDbContext, singleton TimeProvider.System and singleton EventClock. The EventsDatabase connection must explicitly target MVC_EventsManagement; startup rejects any other catalog, including the old database. Development uses local Windows authentication; deployment must supply its connection through configuration. Migrations are explicit CLI operations, not application-startup side effects. No user/event seeding exists. The five feature services in the target tree will be implemented with their workflows; no empty placeholder service implementations were added.
+M2 configuration: Program registers a request-scoped ApplicationDbContext, singleton TimeProvider.System and singleton EventClock. The EventsDatabase connection must explicitly target MVC_EventsManagement; startup rejects any other catalog, including the old database. Development uses local Windows authentication; deployment must supply its connection through configuration. Migrations are explicit CLI operations, not application-startup side effects. No automatic user/event seeding runs; the explicit Development-only preview command is documented below. The five feature services in the target tree will be implemented with their workflows; no empty placeholder service implementations were added.
 
 Event Details uses GET `/admin/events/{id}` (AdminEventDetails), optional `?edit=true`, and antiforgery-protected POST edit/cancel endpoints under the same route. EventService owns the no-tracking projection and tracked concurrency-checked mutations. `wwwroot/js/admin/event-details.js` handles sponsors, audience filtering, banner preview and the cancellation disclosure.
 
@@ -132,3 +135,5 @@ EventHistoryController serves the Admin-only named route AdminEventHistory at GE
 RegistrationService is request-scoped and owns no-tracking roster projections, normalized filters, metadata/counts, 25-row pagination and atomic administrator pass voiding. EventPreRegisteredController serves GET `/admin/events/{id}/preregistered` (AdminEventPreRegistered) and POST `/admin/events/{id}/preregistered/{registrationId}/void`. `_EventWorkflowNavigation.cshtml` with EventWorkflowViewModel is shared by Details and Pre-registered. `wwwroot/js/admin/event-roster.js` manages native attendee dialogs, confirmation and focus only; persistence uses antiforgery-protected MVC forms. No email is loaded by the roster projection.
 
 AttendanceService is request-scoped. GET `/admin/events/{id}/scanner` (AdminAttendanceScanner) renders the scanner. Antiforgery-protected POST `/lookup` and `/confirm` under that route return JSON. The service projects pass/event/student data without email output and uses one conditional EF ExecuteUpdateAsync for admission. `wwwroot/js/admin/attendance-scanner.js` owns staging, asynchronous request ordering, confirmation and camera lifecycle; `wwwroot/js/vendor/html5-qrcode-2.3.8.min.js` and its Apache-2.0 license are reused unchanged from the source. EventAttendanceController serves Admin-only GET `/admin/events/{id}/attendance` (AdminEventAttendance). AttendanceService owns its no-tracking Present-only projection, event-wide count/options, combined filters and 25-row timestamp/ID ordering. `_EventHeader.cshtml` with EventHeaderViewModel shares title/status, schedule, venue and registered capacity across Details, Pre-registered, Scanner and Attendance; management actions appear only on eligible Details pages.
+
+AnalyticsService projects the selected event’s registrations without email, computes active/present/cancelled summaries and audience/audit groups, and bounds cohort lists to 25 rows. ArrivalSeries pages sparse 5/15/30-minute windows in groups of 24. Charts use native server-rendered SVG/CSS with exact values in an expandable list; GET filters require no client chart library. History report links and the shared workflow navigation use AdminEventAnalytics. DevelopmentDemoData is an explicit CLI-only transaction, never an HTTP endpoint or startup seed; its local catalog and environment restrictions are documented in DATABASE_AND_SECURITY.md.
