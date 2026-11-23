@@ -688,6 +688,66 @@ public sealed class AuthenticationTests : IAsyncLifetime
         await using var db = CreateContext(); Assert.True(await db.Students.AnyAsync(s => s.StudentId == "CSV-" + marker)); Assert.False(await db.Users.AnyAsync(u => u.Email == "bad-" + marker + "@example.test"));
     }
 
+    [Fact]
+    public async Task Account_management_protects_access_and_saves_current_account_snapshots()
+    {
+        using var anonymous = NewClient();
+        using var anonymousPage = await anonymous.GetAsync("/admin/accounts");
+        Assert.StartsWith("/login?", RedirectPath(anonymousPage));
+        using var student = NewClient();
+        using var studentLogin = await SignInAsync(student, _studentEmail, _password);
+        using var studentPage = await student.GetAsync("/admin/accounts");
+        Assert.StartsWith("/access-denied?", RedirectPath(studentPage));
+        using var client = NewClient();
+        using var login = await SignInAsync(client, _adminEmail, _password);
+        await using var db = CreateContext();
+        var studentId = await db.Users.Where(u => u.Email == _studentEmail).Select(u => u.UserId).SingleAsync();
+        var adminId = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync();
+        using var page = await client.GetAsync($"/admin/accounts?id={studentId}&q={_studentId}");
+        Assert.Equal(HttpStatusCode.OK, page.StatusCode);
+        var html = await page.Content.ReadAsStringAsync();
+        Assert.Contains("Student Information", html);
+        Assert.Contains("Account Information", html);
+        Assert.Contains("open=create", html);
+        Assert.Contains("open=import", html);
+        Assert.Contains("aria-label=\"View ", html);
+        Assert.DoesNotContain("Deactivate account", html);
+        Assert.DoesNotContain(_password, html);
+        var csrf = await TokenAsync(page);
+        string ReadVersion(string markup)
+        {
+            var match = Regex.Match(markup, "name=\"Editor.Version\"[^>]*value=\"([^\"]+)\"");
+            Assert.True(match.Success, "Account details should contain a protected version.");
+            return WebUtility.HtmlDecode(match.Groups[1].Value);
+        }
+        var version = ReadVersion(html);
+        var updatedEmail = $"updated-{Guid.NewGuid():N}@example.test";
+        FormUrlEncodedContent EditStudent(string email) => Form(
+            ("Editor.Id", studentId.ToString()), ("Editor.Email", email), ("Editor.Role", "Student"),
+            ("Editor.Active", "false"), ("Editor.Version", version), ("Editor.StudentId", "forged"),
+            ("Editor.FirstName", "Test"), ("Editor.LastName", "Student"), ("Editor.Gender", "Not specified"),
+            ("Editor.Campus", "Main"), ("Editor.College", "Computing"), ("Editor.Program", "Information Technology"),
+            ("__RequestVerificationToken", csrf));
+        using var noCsrf = await client.PostAsync("/admin/accounts/save", Form());
+        Assert.Equal(HttpStatusCode.BadRequest, noCsrf.StatusCode);
+        using var saved = await client.PostAsync("/admin/accounts/save", EditStudent(updatedEmail));
+        Assert.StartsWith("/admin/accounts", RedirectPath(saved));
+        Assert.True(await db.Users.AnyAsync(a => a.UserId == studentId && a.Email == updatedEmail && !a.IsActive));
+        Assert.True(await db.Students.AnyAsync(s => s.UserId == studentId && s.StudentId == _studentId));
+        using var stale = await client.PostAsync("/admin/accounts/save", EditStudent(_studentEmail));
+        Assert.Contains("The account changed", await stale.Content.ReadAsStringAsync());
+        using var ownPage = await client.GetAsync($"/admin/accounts?id={adminId}");
+        using var deactivateSelf = await client.PostAsync("/admin/accounts/save", Form(
+            ("Editor.Id", adminId.ToString()), ("Editor.Email", _adminEmail), ("Editor.Role", "Admin"),
+            ("Editor.Active", "false"), ("Editor.Version", ReadVersion(await ownPage.Content.ReadAsStringAsync())),
+            ("__RequestVerificationToken", csrf)));
+        Assert.Contains("Your account must remain an active administrator", await deactivateSelf.Content.ReadAsStringAsync());
+        var csv = await client.GetStringAsync($"/admin/accounts/export?q={updatedEmail}&status=Inactive");
+        Assert.Contains(updatedEmail, csv);
+        Assert.DoesNotContain(_adminEmail, csv);
+        Assert.DoesNotContain("Password", csv);
+    }
+
     private ApplicationDbContext CreateContext()
     {
         var db = new ApplicationDbContext(_options);

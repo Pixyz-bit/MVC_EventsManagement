@@ -57,16 +57,16 @@ Acceptance: verify new-account hashes, incorrect passwords, malformed hashes, sa
 
 ### ACCOUNT-01: Account maintenance
 
-- [ ] List/search/filter/reset by role and Active/Locked status; show total accounts, active admins, students, locked accounts. Per the latest approved UI direction, header actions are Add new student and Batch CSV import rather than Create administrator; reuse STUDENT-01/CSV-01 and their password/duplicate validation. Administrator provisioning through the setup command remains separate.
-- [ ] Manage email, role, active state, optional new password and student demographics when Student is selected. Validate email shape, supported role, lengths and required profile fields.
-- [ ] Save managed user/profile/password changes atomically. Acting admin must remain active; block self-demotion/self-deactivation and leaving no active administrator. Recheck guards inside the transaction to protect concurrent changes.
-- [ ] Preserve existing StudentId and BirthDate through account management. Create an absent student profile when converting to Student; reject duplicate profiles. Promotion to Admin does not automatically delete a linked profile/history.
+- [x] List/search/filter/reset by role and Active/Inactive status; show total accounts, active admins, students, locked accounts. Per the latest approved UI direction, header actions are Add new student and Batch CSV import rather than Create administrator; reuse STUDENT-01/CSV-01 and their password/duplicate validation. Administrator provisioning through the setup command remains separate.
+- [x] Manage email, role, active state, optional new password and student demographics when Student is selected. Validate email shape, supported role, lengths and required profile fields.
+- [x] Save managed user/profile/password changes atomically. Acting admin must remain active; block self-demotion/self-deactivation and leaving no active administrator. Recheck guards inside the transaction to protect concurrent changes.
+- [x] Preserve existing StudentId and BirthDate through account management. Create an absent student profile when converting to Student; reject duplicate profiles. Promotion to Admin does not automatically delete a linked profile/history.
 
 Acceptance: invalid email/profile causes full rollback; forged IDs cannot bypass guards; concurrent changes cannot remove the last active admin. No persisted account-photo field/write was found in the five-table schema/current account save handler; an unused upload control is not a completed feature.
 
 ### ACCOUNT-02: Account CSV export
 
-- [ ] Export current filtered accounts with columns UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program. Never export passwords.
+- [x] Export current filtered accounts with columns UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program. Never export passwords.
 
 Acceptance: filtered counts match, quoted/Unicode fields round-trip, and spreadsheet formula payload handling is deliberate.
 

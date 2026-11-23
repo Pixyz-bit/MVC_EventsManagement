@@ -45,7 +45,7 @@ public sealed class StudentService(ApplicationDbContext db, IPasswordHasher<User
     {
         if (string.IsNullOrWhiteSpace(password) || password.Length is < 15 or > 128) throw new ValidationException("Set a password of 15 to 128 characters.");
     }
-    private void Validate(StudentProfileInput input, bool requireBirth)
+    internal void Validate(StudentProfileInput input, bool requireBirth)
     {
         input.StudentId = input.StudentId.Trim(); input.Email = input.Email.Trim(); input.FirstName = input.FirstName.Trim(); input.LastName = input.LastName.Trim(); input.MiddleName = Limit(input.MiddleName);
         Validator.ValidateObject(input, new ValidationContext(input), true);
@@ -92,9 +92,10 @@ public sealed class StudentService(ApplicationDbContext db, IPasswordHasher<User
     {
         var rows = await Filter(query).Include(s => s.User).OrderBy(s => s.StudentId).Take(10001).ToListAsync(ct);
         if (rows.Count > 10000) throw new ValidationException("Narrow the filters to export at most 10,000 students.");
-        static string Cell(string? value) { value ??= ""; if (value.TrimStart().FirstOrDefault() is '=' or '+' or '-' or '@' || value.StartsWith('\t') || value.StartsWith('\r')) value = "'" + value; return "\"" + value.Replace("\"", "\"\"") + "\""; }
         var csv = new StringBuilder("StudentId,FullName,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate(MM/dd/yyyy),AccountStatus\r\n");
-        foreach (var s in rows) csv.AppendLine(string.Join(",", new[] { s.StudentId, string.Join(" ", new[] { s.FirstName, s.MiddleName, s.LastName }.Where(v => !string.IsNullOrWhiteSpace(v))), s.FirstName, s.MiddleName, s.LastName, s.Gender, s.CampusBranch, s.Department, s.Program, s.User.Email, s.BirthDate?.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture), s.User.IsActive ? "Active" : "Inactive" }.Select(Cell)));
+        foreach (var s in rows) csv.AppendLine(string.Join(",", new[] { s.StudentId, string.Join(" ", new[] { s.FirstName, s.MiddleName, s.LastName }.Where(v => !string.IsNullOrWhiteSpace(v))), s.FirstName, s.MiddleName, s.LastName, s.Gender, s.CampusBranch, s.Department, s.Program, s.User.Email, s.BirthDate?.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture), s.User.IsActive ? "Active" : "Inactive" }.Select(CsvCell)));
         return Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
     }
+
+    internal static string CsvCell(string? value) { value ??= ""; if (value.TrimStart().FirstOrDefault() is '=' or '+' or '-' or '@' || value.StartsWith('\t') || value.StartsWith('\r')) value = "'" + value; return "\"" + value.Replace("\"", "\"\"") + "\""; }
 }

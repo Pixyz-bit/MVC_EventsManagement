@@ -12,7 +12,12 @@ namespace MVC_QCUEventsManagement.Controllers;
 public sealed class StudentDirectoryController(StudentService students, StudentCsvService csv, ILogger<StudentDirectoryController> logger) : Controller
 {
     [HttpGet("admin/students", Name = "AdminStudentDirectory")]
-    public async Task<IActionResult> Index([FromQuery] StudentDirectoryQuery query, CancellationToken ct) => View(await students.GetAsync(query, ct));
+    public async Task<IActionResult> Index([FromQuery] StudentDirectoryQuery query, string? open, CancellationToken ct)
+    {
+        var model = await students.GetAsync(query, ct);
+        model.Reopen = open is "create" or "import" ? open : null;
+        return View(model);
+    }
     [HttpPost("admin/students/create")]
     public async Task<IActionResult> Create([Bind(Prefix = "Input")] StudentProfileInput input, StudentDirectoryQuery query, CancellationToken ct) => await SaveAsync(null, input, query, "create", ct);
     [HttpPost("admin/students/edit")]
