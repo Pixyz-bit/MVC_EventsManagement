@@ -19,6 +19,7 @@
     }
     function toggleStudentTab() {
         studentTab.hidden = role.value !== 'Student';
+        tabList.hidden = studentTab.hidden;
         if (studentTab.hidden) showTab(accountTab);
     }
     function filterPrograms() {
@@ -45,7 +46,6 @@
     }, true);
     role.addEventListener('change', toggleStudentTab);
     college.addEventListener('change', filterPrograms);
-    tabList.hidden = false;
     showTab(dialog.dataset.student === 'true' ? studentTab : accountTab);
     toggleStudentTab();
     filterPrograms();

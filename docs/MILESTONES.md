@@ -29,6 +29,8 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
+The redundant Account Information tab is hidden for administrator profiles; student profile tabs remain available. Syntax, role-switch handler checks and Release publish passed. The next requested refinement removes the filter helper note and orders Role/Status, Campus/College, then a full-width Program field.
+
 User Directory Filters now use a compact two-column layout with a full-width Reset/Apply footer, retaining the current design. Tailwind, two focused HTTP/SQL cases and publish passed; the in-app browser verified the approximately 341px-high panel at 606px viewport width. See DESIGN.md and TESTING.md for the reference and verification limits.
 
 User Directory integration is implemented using the current production design. A single `/admin/users` list and sidebar entry combine roles, academic/access filters, profile updates and CSV. Add account switches Student/Administrator fields from its leading dropdown. All 155 Release .NET tests and 13 scanner client checks pass, including the concurrent account and last-administrator guards. Tailwind, handler checks and Release publish pass. In-app browser checks confirm the current design, role-dependent fields, filters/profile tabs and responsive bounds; canonical link fixes and their verification are recorded in TESTING.md.
