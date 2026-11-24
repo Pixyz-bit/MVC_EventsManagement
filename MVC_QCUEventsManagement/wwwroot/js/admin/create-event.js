@@ -185,25 +185,39 @@
         const text = name => field(name).value.trim();
         const programs = [...form.querySelectorAll("input[name='Programs']:checked")].map(input => input.value);
         const sponsors = [...sponsorList.querySelectorAll("input")].map(input => input.value);
-        const entries = [
-            ["Event", text("Title")], ["Venue & capacity", `${text("VenueLocation")} · ${text("MaxCapacity")} seats`],
-            ["Event schedule · Philippine time", `${text("EventDate")} · ${text("StartTime")}–${text("EndTime")}`],
-            ["Registration dates · inclusive", `${text("RegStart")} to ${text("RegEnd")}`],
-            ["Audience", [text("TargetBranch") || "All campuses", text("TargetDepartment") || "All colleges", text("TargetYearLevel") ? `Year ${text("TargetYearLevel")}` : "All year levels", programs.length ? programs.join(", ") : "All programs"].join(" · ")],
-            ["Sponsors", sponsors.join(", ") || "No sponsors"], ["Description", text("Description") || "No description"],
-            ["Promotional banner", banner.files[0]?.name || "No image selected"]
-        ];
-        const summary = document.getElementById("event-summary");
-        summary.replaceChildren();
-        entries.forEach(([label, value]) => {
-            const row = document.createElement("div");
-            const dt = document.createElement("dt");
-            const dd = document.createElement("dd");
-            dt.textContent = label;
-            dd.textContent = value;
-            row.append(dt, dd);
-            summary.append(row);
-        });
+        const date = value => {
+            if (!value) return "Not set";
+            const [year, month, day] = value.split("-").map(Number);
+            return new Intl.DateTimeFormat("en-PH", { month: "long", day: "numeric", year: "numeric" }).format(new Date(year, month - 1, day, 12));
+        };
+        const time = value => {
+            if (!value) return "Not set";
+            const [hour, minute] = value.split(":").map(Number);
+            return new Intl.DateTimeFormat("en-PH", { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date(2000, 0, 1, hour, minute));
+        };
+        const rows = (id, entries) => {
+            const list = document.getElementById(id);
+            list.replaceChildren();
+            for (const [label, value] of entries) {
+                const row = document.createElement("div"), term = document.createElement("dt"), detail = document.createElement("dd");
+                term.textContent = label; detail.textContent = value; row.append(term, detail); list.append(row);
+            }
+        };
+        document.getElementById("review-title").textContent = text("Title");
+        document.getElementById("review-description").textContent = text("Description") || "No description";
+        rows("review-venue", [["Location", text("VenueLocation")], ["Maximum capacity", `${Number(text("MaxCapacity")).toLocaleString("en-PH")} seats`]]);
+        rows("review-schedule", [["Event date", date(text("EventDate"))], ["Philippine time", `${time(text("StartTime"))} – ${time(text("EndTime"))}`]]);
+        rows("review-registration", [["Opens", date(text("RegStart"))], ["Deadline (inclusive)", date(text("RegEnd"))]]);
+        rows("review-audience", [["Campus", text("TargetBranch") || "All campuses"], ["College", text("TargetDepartment") || "All colleges"],
+            ["Year level", text("TargetYearLevel") ? `Year ${text("TargetYearLevel")}` : "All year levels"], ["Programs", programs.length ? programs.join(", ") : "All programs"]]);
+        const sponsorSummary = document.getElementById("review-sponsors");
+        sponsorSummary.replaceChildren();
+        for (const name of sponsors.length ? sponsors : ["No sponsors"]) { const item = document.createElement("li"); item.textContent = name; sponsorSummary.append(item); }
+        const image = document.getElementById("review-banner");
+        image.hidden = !previewUrl;
+        if (previewUrl) image.src = previewUrl; else image.removeAttribute("src");
+        document.getElementById("review-banner-empty").hidden = !!previewUrl;
+        document.getElementById("review-banner-name").textContent = banner.files[0]?.name || "";
     }
 
     form.addEventListener("input", event => {

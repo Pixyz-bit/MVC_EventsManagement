@@ -97,10 +97,12 @@
   .event-sponsor span { overflow-wrap: anywhere; }
   .event-sponsor-remove { display: grid; place-items: center; flex-shrink: 0; width: 2.75rem; height: 2.75rem; border-radius: .5rem; font-size: 1.25rem; }
   .event-sponsor-remove:hover { background: #dbeafe; }
-  .event-summary { display: grid; gap: 0 2rem; }
-  .event-summary > div { padding: .75rem 0; border-bottom: 1px solid var(--color-campus-line); }
-  .event-summary dt { margin-bottom: .25rem; font-size: .75rem; color: var(--color-campus-muted); }
-  .event-summary dd { font-size: .875rem; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .event-review-layout { display: grid; gap: 1.5rem; }
+  .event-review-facts { display: grid; gap: 1.5rem; padding-block: 1.25rem; }
+  .event-review-facts h4 { margin-bottom: .875rem; font-size: .875rem; font-weight: 700; color: var(--color-campus-navy); }
+  .event-review-facts dl { display: grid; gap: .875rem; }
+  .event-review-facts dt { margin-bottom: .25rem; font-size: .75rem; color: var(--color-campus-muted); }
+  .event-review-facts dd { font-size: .875rem; line-height: 1.65; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; }
   .event-workspace :is(button, a, input, textarea, select):focus-visible { outline: 2px solid var(--color-campus-focus); outline-offset: 3px; }
   @media (min-width: 40rem) {
     .event-stepper { gap: 1rem; }
@@ -109,9 +111,9 @@
     .event-step-copy { display: block; }
     .event-input { font-size: .8125rem; }
     .event-editor-footer { padding-inline: 1.5rem; }
-    .event-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .event-review-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
-  @media (min-width: 64rem) { .event-workspace { height: 100dvh; } }
+  @media (min-width: 64rem) { .event-workspace { height: 100dvh; } .event-review-layout { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); gap: 1.5rem; } }
   @media (min-width: 80rem) { .event-step-name { font-size: .8125rem; } .event-step { padding-inline: .875rem; } }
   @media (max-height: 36rem) { .event-workspace { gap: .5rem; } .event-step { min-height: 2.75rem; } .event-stepper-wrap { padding: .375rem; } .event-editor-body { padding: .5rem 1rem; } .event-editor-footer { padding-block: .5rem; } }
 }

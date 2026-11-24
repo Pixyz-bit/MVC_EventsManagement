@@ -2,6 +2,8 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
+Event creation refinements retain the current QCU styling: Sponsors uses the available width with entry/selected organizations beside responsive Quick add options; Review groups readable schedule, venue, audience, sponsors and the actual banner preview. Pre-registered uses the Account Management Filters disclosure; Reset preserves search/cohort/history while clearing academic filters. References: `DesignReferences/Admin/create-sponsors-spacing-before.png`, `create-review-readability-before.png`, and `preregistered-filter-toolbar-before.png` under the web project. Handler/static checks and focused HTTP checks are recorded in TESTING.md; rendered verification remains pending.
+
 The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. The user selected the original Web Forms UI as the design reference for all four student pages and confirmed on 2026-11-24 that the current student design is final. Keep that implemented design; do not pursue the alternative dashboard previews. Other pages retain their selected references.
 
 For each page:

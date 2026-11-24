@@ -122,10 +122,12 @@
 
             <section id="event-panel-3" class="event-panel" role="tabpanel" aria-labelledby="event-tab-3" data-panel="3">
                 <div class="event-section-intro"><h2>Sponsors & partners</h2><p>Add supporting organizations, or continue without sponsors.</p></div>
-                <div class="max-w-2xl">
+                <div class="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-8">
+                    <div class="min-w-0">
                     <label for="sponsor-name" class="event-label">Organization name</label>
-                    <div class="flex gap-2"><input id="sponsor-name" class="event-input" maxlength="150" placeholder="Enter a sponsor or partner name" /><button type="button" id="add-sponsor" class="event-secondary shrink-0">Add sponsor</button></div>
+                    <div class="flex flex-col gap-2 sm:flex-row"><input id="sponsor-name" class="event-input" maxlength="150" placeholder="Enter a sponsor or partner name" /><button type="button" id="add-sponsor" class="event-primary shrink-0">Add sponsor</button></div>
                     <p id="sponsor-feedback" class="event-error" aria-live="polite"></p>
+                    <h3 class="mt-6 text-sm font-bold text-campus-navy">Selected sponsors</h3>
                     <ul id="sponsor-list" class="mt-4 flex flex-wrap gap-2" aria-label="Selected sponsors">
                         @for (var i = 0; i < Model.Sponsors.Count; i++)
                         {
@@ -134,15 +136,35 @@
                     </ul>
                     <p id="no-sponsors" class="event-hint">No sponsors added.</p>
                     <span asp-validation-for="Sponsors" class="event-error"></span>
-                    <h3 class="mt-7 mb-3 text-sm font-bold text-campus-navy">Quick add</h3>
-                    <div class="flex flex-wrap gap-2">@foreach (var preset in CreateEventInput.SponsorPresets) { <button type="button" class="event-preset" data-sponsor="@preset">+ @preset</button> }</div>
+                    </div>
+                    <div class="min-w-0 border-t border-campus-line pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8">
+                        <h3 class="mb-3 text-sm font-bold text-campus-navy">Quick add</h3>
+                        <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">@foreach (var preset in CreateEventInput.SponsorPresets) { <button type="button" class="event-preset text-left wrap-anywhere" data-sponsor="@preset">+ @preset</button> }</div>
+                    </div>
                 </div>
             </section>
 
             <section id="event-panel-4" class="event-panel" role="tabpanel" aria-labelledby="event-tab-4" data-panel="4">
                 <div class="event-section-intro"><h2>Review & publish</h2><p>Check the details before making this event available in the directory.</p></div>
-                <dl id="event-summary" class="event-summary"></dl>
-                <label class="mt-6 flex min-h-11 items-start gap-3 text-sm"><input asp-for="Confirm" class="mt-1 size-4 accent-campus-action" required /><span>I’ve reviewed the details and am ready to publish this event.</span></label>
+                <div id="event-summary" class="event-review-layout">
+                    <article class="min-w-0">
+                        <header class="border-b border-campus-line pb-5"><h3 id="review-title" class="text-xl leading-snug font-bold wrap-anywhere text-campus-navy sm:text-2xl"></h3><p id="review-description" class="mt-3 max-w-prose text-sm leading-7 whitespace-pre-wrap wrap-anywhere text-campus-muted"></p></header>
+                        <div class="event-review-facts">
+                            <section><h4>Venue & capacity</h4><dl id="review-venue"></dl></section>
+                            <section><h4>Event schedule</h4><dl id="review-schedule"></dl></section>
+                            <section><h4>Registration dates</h4><dl id="review-registration"></dl></section>
+                            <section><h4>Target audience</h4><dl id="review-audience"></dl></section>
+                        </div>
+                        <section class="border-t border-campus-line pt-5"><h4 class="text-sm font-bold text-campus-navy">Sponsors & partners</h4><ul id="review-sponsors" class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm leading-6 wrap-anywhere"></ul></section>
+                    </article>
+                    <aside class="min-w-0 border-t border-campus-line pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6" aria-labelledby="review-banner-heading">
+                        <h3 id="review-banner-heading" class="text-sm font-bold text-campus-navy">Promotional banner</h3>
+                        <img id="review-banner" hidden alt="Selected promotional banner" class="mt-3 max-h-80 w-full rounded-lg border border-campus-line object-contain" />
+                        <p id="review-banner-empty" class="mt-3 rounded-lg bg-campus-input p-5 text-sm text-campus-muted">No image selected</p>
+                        <p id="review-banner-name" class="mt-3 text-xs leading-6 wrap-anywhere text-campus-muted"></p>
+                    </aside>
+                </div>
+                <label class="mt-6 flex min-h-11 items-start gap-3 rounded-lg border border-campus-line bg-campus-input p-4 text-sm leading-6"><input asp-for="Confirm" class="mt-1 size-4 shrink-0 accent-campus-action" required /><span>I’ve reviewed the details and am ready to publish this event.</span></label>
                 <span asp-validation-for="Confirm" class="event-error"></span>
             </section>
         </div>

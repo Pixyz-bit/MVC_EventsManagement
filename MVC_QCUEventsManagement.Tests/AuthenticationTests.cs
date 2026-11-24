@@ -490,6 +490,16 @@ public sealed class AuthenticationTests : IAsyncLifetime
         Assert.StartsWith(path, RedirectPath(success));
         var cancelled = await client.GetStringAsync($"{path}?cohort=Cancelled");
         Assert.Contains(_studentId, cancelled); Assert.DoesNotContain("data-prepare-void", cancelled);
+        var filtered = await client.GetStringAsync($"{path}?cohort=Cancelled&from=history&q=Test&college=Computing&program=Information%20Technology&year=3");
+        Assert.Contains(_studentId, filtered);
+        Assert.Contains("aria-label=\"3 active filters\"", filtered);
+        var reset = Regex.Match(filtered, "href=\"([^\"]+)\"[^>]*>Reset</a>");
+        Assert.True(reset.Success);
+        var resetQuery = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(new Uri(client.BaseAddress!, WebUtility.HtmlDecode(reset.Groups[1].Value)).Query);
+        Assert.Equal("Test", resetQuery["q"].ToString());
+        Assert.Equal("Cancelled", resetQuery["cohort"].ToString());
+        Assert.Equal("history", resetQuery["from"].ToString());
+        Assert.False(resetQuery.ContainsKey("college") || resetQuery.ContainsKey("program") || resetQuery.ContainsKey("year") || resetQuery.ContainsKey("page"));
         await using var verification = CreateContext();
         Assert.Equal(0, await verification.Events.Where(e => e.EventId == id).Select(e => e.CurrentRegistrations).SingleAsync());
         Assert.Equal("Cancelled", await verification.EventRegistrations.Where(r => r.EventRegistrationId == registrationId).Select(r => r.Status).SingleAsync());

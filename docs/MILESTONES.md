@@ -29,6 +29,8 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
+Requested event-layout refinements are implemented: full-width Sponsors, grouped Review with banner preview, and Pre-registered Filters matching Account Management. Rendered verification remains pending. The next authorized increment merges the administrative Student Directory and Account Management into User Directory using the current production design, with one role-dependent Add account form; the conversation mockup is not the implementation reference.
+
 The complete HTTP/SQL workflow and 25 additional cancellation races pass (26 targeted cases). Scanner and administrator-void handlers now recover safely from EF-wrapped SQL deadlocks. Production CSS restore/build passed; clean release and browser-download verification are in progress. The student design remains final.
 
 The latest verification on 2026-11-24 passed 123 applicable Release regression tests, including 30 synchronized concurrent-request cases, plus 13 scanner client regressions. Concurrent bookings, check-ins and account updates/last-admin guards are verified on disposable SQL Server LocalDB instances. Account Management now handles EF-wrapped SQL deadlocks with safe retry feedback. The localhost-only demo-seed test was excluded from this run because the development SQL Server service is stopped and could not be started with the available Windows permissions; its guard remains unchanged. Disposable SQL instances were cleaned up. See [testing](TESTING.md) for evidence and limitations.

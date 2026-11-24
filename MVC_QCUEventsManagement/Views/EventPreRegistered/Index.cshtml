@@ -14,6 +14,7 @@
     var reopen = TempData["RosterAttendee"] as int?;
     var cohortCancelled = q.Cohort == "Cancelled";
     var filters = q.Q is not null || q.College is not null || q.Program is not null || q.Year is not null;
+    var filterCount = (q.College is null ? 0 : 1) + (q.Program is null ? 0 : 1) + (q.Year is null ? 0 : 1);
     string Badge(string status) => status == "Present" ? "bg-emerald-50 text-emerald-800" : status == "Cancelled" ? "bg-red-50 text-red-800" : "bg-blue-50 text-blue-800";
     Dictionary<string, string> Routes(int page, string? cohort = null) => new() { ["id"] = ev.Id.ToString(CultureInfo.InvariantCulture), ["q"] = q.Q ?? "", ["college"] = q.College ?? "", ["program"] = q.Program ?? "", ["year"] = q.Year?.ToString(CultureInfo.InvariantCulture) ?? "", ["cohort"] = cohort ?? q.Cohort ?? "", ["page"] = page.ToString(CultureInfo.InvariantCulture), ["from"] = q.From ?? "" };
 }
@@ -23,7 +24,7 @@
     <partial name="_EventWorkflowNavigation" model="@(new EventWorkflowViewModel(ev.Id, "Pre-registered", fromHistory))" />
     @if (TempData["RosterMessage"] is string message) { <p role="status" class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">@message</p> }
     @if (error is not null) { <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">@error</p> }
-    <section aria-label="Pre-registered students" class="mt-6 overflow-hidden rounded-xl border border-campus-line bg-white">
+    <section aria-label="Pre-registered students" class="mt-6 rounded-xl border border-campus-line bg-white">
         <nav aria-label="Registration groups" class="flex flex-wrap gap-x-6 border-b border-campus-line px-4">
             @foreach (var cancelled in new[] { false, true })
             {
@@ -31,13 +32,19 @@
                 <a asp-route="AdminEventPreRegistered" asp-all-route-data="@Routes(1, cancelled ? "Cancelled" : "")" aria-current="@(selected ? "page" : null)" class="@focus -mb-px inline-flex min-h-12 items-center gap-2 border-b-2 text-sm font-semibold @(selected ? "border-campus-action text-campus-action" : "border-transparent text-campus-muted hover:text-campus-action")">@(cancelled ? "Cancelled" : "Pre-registered")<span class="rounded-md bg-campus-input px-1.5 py-0.5 text-xs tabular-nums">@(cancelled ? Model.Cancelled : Model.Active)</span></a>
             }
         </nav>
-        <form asp-route="AdminEventPreRegistered" asp-route-id="@ev.Id" method="get" role="search" class="grid items-end gap-3 p-4 sm:grid-cols-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_8rem_auto]">
+        <form asp-route="AdminEventPreRegistered" asp-route-id="@ev.Id" method="get" role="search" id="roster-filter-form" class="relative grid grid-cols-2 items-end gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
             <input type="hidden" name="cohort" value="@q.Cohort" /><input type="hidden" name="from" value="@q.From" />
-            <div class="min-w-0 sm:col-span-3 xl:col-span-4"><label for="roster-search" class="event-label">Search students</label><input id="roster-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="@focus event-input" /></div>
+            <div class="col-span-2 min-w-0 sm:col-span-1"><label for="roster-search" class="event-label">Search students</label><input id="roster-search" type="search" name="q" value="@q.Q" maxlength="150" placeholder="Student ID or full name" class="@focus event-input h-12" /></div>
+            <button type="submit" class="@focus event-secondary h-12">Search</button>
+            <details id="roster-filter-menu" class="directory-filter-menu min-w-0">
+                <summary class="@focus event-secondary h-12 w-full cursor-pointer list-none" aria-controls="roster-filter-panel">Filters @if (filterCount > 0) { <span class="rounded bg-blue-50 px-1.5 text-campus-action" aria-label="@filterCount active filters">@filterCount</span> }</summary>
+                <div id="roster-filter-panel" class="directory-filter-panel">
             <div class="min-w-0"><label for="roster-college" class="event-label">College</label><select id="roster-college" name="college" class="@focus event-input"><option value="">All colleges</option>@if (q.College is not null && !Model.Colleges.Contains(q.College)) { <option selected>@q.College</option> }@foreach (var college in Model.Colleges) { <option selected="@(q.College == college)">@college</option> }</select></div>
             <div class="min-w-0"><label for="roster-program" class="event-label">Program</label><select id="roster-program" name="program" class="@focus event-input"><option value="">All programs</option>@if (q.Program is not null && !Model.Programs.Contains(q.Program)) { <option selected>@q.Program</option> }@foreach (var program in Model.Programs) { <option selected="@(q.Program == program)">@program</option> }</select></div>
             <div class="min-w-0"><label for="roster-year" class="event-label">Year level</label><select id="roster-year" name="year" class="@focus event-input"><option value="">All year levels</option>@foreach (var year in Model.Years.Union(q.Year is { } selectedYear ? new[] { selectedYear } : Array.Empty<int>()).Order()) { <option value="@year" selected="@(q.Year == year)">Year @year</option> }</select></div>
-            <div class="flex flex-wrap gap-2 sm:col-span-3 xl:col-span-1"><button type="submit" class="@focus event-primary">Search</button><a asp-route="AdminEventPreRegistered" asp-route-id="@ev.Id" asp-route-cohort="@q.Cohort" asp-route-from="@q.From" class="@focus event-secondary">Reset filters</a></div>
+                    <div class="grid grid-cols-2 gap-2"><a asp-route="AdminEventPreRegistered" asp-route-id="@ev.Id" asp-route-q="@q.Q" asp-route-cohort="@q.Cohort" asp-route-from="@q.From" class="@focus event-secondary">Reset</a><button type="submit" id="roster-apply-filters" class="@focus event-primary">Apply filters</button></div>
+                </div>
+            </details>
         </form>
         @if (Model.Attendees.Count == 0)
         {
