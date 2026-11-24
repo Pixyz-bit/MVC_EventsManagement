@@ -1,6 +1,6 @@
 # Database and security rules
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 The temporary no-login preview routes have been removed. Administrator pages require the normal authenticated session; no preview identity, preview configuration, or publish-disabled variant remains.
 
@@ -122,6 +122,8 @@ Scanner page and JSON actions require Admin authorization/account revalidation; 
 Explicit confirmation requires selected event ID, positive registration ID, pass/event rowversions and Confirmed=true. A single conditional EF SQL UPDATE matches these IDs/tokens, NoShow state, Upcoming event and EventEnd greater than the captured Philippine EventClock instant, then writes Present and CheckInTimestamp. An update affecting zero rows cannot overwrite a timestamp: current state is returned as duplicate/cancelled/wrong-event/not-found or Changed requiring another lookup. Booking count is unchanged; returned timestamp is reread from SQL to preserve actual stored precision. No EventStart lower bound was added. Verification-method/admin display metadata is not stored or represented as an audit log. No schema migration was needed. QR codes are lookup references, not authentication secrets.
 
 Account Management requires an active administrator and antiforgery validation on saves. A protected account snapshot prevents stale writes. A serializable transaction checks actor access, self-demotion/deactivation and active administrator count, and saves linked profile changes with account changes. Existing student IDs, birthdates and booking history are retained. Password changes reuse the established hasher. Filtered CSV exports exclude credentials and escape formula-like cells.
+
+Concurrent account saves can cause SQL Server to abort one Serializable transaction as a deadlock victim. Account Management handles SQL exceptions even when EF wraps them in InvalidOperationException/DbUpdateException: the losing request shows the existing safe reopen-and-retry message, clears the submitted password and does not automatically replay the stale edit. The transaction is disposed before recovery reads. Concurrency verification runs on a disposable, uniquely named LocalDB instance, never by removing/deactivating retained development administrators; see [testing](TESTING.md) and [setup](SETUP.md).
 
 Student dashboard reads are restricted to authenticated Student accounts. The service uses the student profile linked to the authenticated user ID for eligibility and ownership. Non-cancelled owned registrations can expose their event banners and ticket references after the event ends. Other banners require an eligible upcoming event. The image route resolves validated stored references through the existing banner store. No database migration is required.
 

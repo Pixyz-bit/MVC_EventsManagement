@@ -62,6 +62,16 @@ The last command is the verified HTTP-only startup smoke configuration; `/` and 
 
 Integration tests require the migrated database and default to the same localhost catalog. They roll back test records. `MVC_EVENTS_TEST_CONNECTION` may override the server and authentication for tests while retaining the exact `MVC_EventsManagement` catalog. Rolled-back inserts can consume identity numbers.
 
+`ConcurrencyTests` instead requires Windows and `SqlLocalDB.exe` on PATH (installed SQL Server LocalDB; no Docker/package dependency). It automatically creates a unique `QcuConcurrency_<GUID>` instance and an empty `MVC_EventsManagement` database, applies the EF migrations, and uses independent connections for authenticated concurrent HTTP requests. It ignores `MVC_EVENTS_TEST_CONNECTION` and does not use `localhost` or the existing `MSSQLLocalDB` instance. Its reset/drop operations validate the exact newly created instance/catalog; teardown drops only that disposable database and stops/deletes only its own instance. Data files are under ignored test build output. Run only these checks with:
+
+```powershell
+dotnet test MVC_QCUEventsManagement.slnx --no-restore -c Release --filter FullyQualifiedName~ConcurrencyTests
+```
+
+The ordinary full test command includes these checks. If a test process is forcibly terminated, its uniquely named LocalDB instance may remain; inspect the exact `QcuConcurrency_` instance and generated file location before any manual cleanup. Never reset/drop the retained development catalog to run last-admin cases.
+
+The existing demo-seeding test accepts only the production command's supported local server targets (`localhost`, `.`, `(local)`). When `MVC_EVENTS_TEST_CONNECTION` selects a migrated disposable LocalDB catalog, exclude that test with `--filter FullyQualifiedName!~Local_demo_data_is_additive_hashed_complete_and_idempotent` and report it as not rerun. The remaining rollback fixtures run serially through their shared xUnit collection; the dedicated concurrency cases still run competing requests on separate connections. LocalDB 2025 version 17.0.4025.3 was used for the 2026-11-24 isolated checks.
+
 ```powershell
 dotnet publish MVC_QCUEventsManagement/MVC_QCUEventsManagement.csproj -c Release --no-restore --output MVC_QCUEventsManagement/obj/publish-smoke
 ```

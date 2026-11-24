@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace MVC_QCUEventsManagement.Tests;
 
+[Collection("Shared SQL rollback fixtures")]
 public sealed class AuthenticationTests : IAsyncLifetime
 {
     private readonly string _password = Guid.NewGuid().ToString("N");

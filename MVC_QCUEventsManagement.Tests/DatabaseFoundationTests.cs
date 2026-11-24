@@ -9,6 +9,7 @@ using MVC_QCUEventsManagement.ViewModels.Admin;
 namespace MVC_QCUEventsManagement.Tests;
 
 // Every SQL test is rolled back, even on assertion failure. No seed/test rows remain.
+[Collection("Shared SQL rollback fixtures")]
 public sealed class DatabaseFoundationTests : IAsyncLifetime
 {
     private SqlConnection _connection = null!;

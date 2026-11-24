@@ -1,6 +1,6 @@
 # Architecture and folder structure
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 Event creation uses `CreateEventController.Create` (GET/POST `/admin/events/create`), `CreateEventInput`, `Views/CreateEvent/Create.cshtml`, and `wwwroot/js/admin/create-event.js`. `EventService.CreateAsync` validates and saves the event/sponsor graph in one EF SaveChanges transaction. `EventBannerStore` decodes and re-encodes uploaded images outside the public web root; the protected `/admin/events/{id}/banner` action serves them. Existing shared admin layouts/navigation support the active creation entry and an overlay mobile menu for the viewport form. Registration opening/deadline are DateOnly values mapped to SQL date by RegistrationDatesOnly; event start/end remain timestamps. See [database and security](DATABASE_AND_SECURITY.md) for date semantics.
 
@@ -106,6 +106,8 @@ MVC_QCUEventsManagement/                  # Solution/repository root
 ```
 
 EF configuration files define table/column mappings, constraints, keys, indexes, and relationships. EF migration files describe versioned schema changes and the snapshot; generate their actual names through EF tooling. Proposed entities must be verified against the schema; display-only or operation-result models do not automatically imply additional tables.
+
+`MVC_QCUEventsManagement.Tests/ConcurrencyTests.cs` covers concurrent authenticated MVC requests. `IsolatedSqlServerFixture.cs` owns their disposable LocalDB instance and migrated schema; it is separate from the existing rollback fixtures against the development catalog. Verification and setup instructions are owned by [testing](TESTING.md) and [setup](SETUP.md).
 
 Use one page controller, a matching view folder, and a dedicated input/view model per application page. GET and POST for the same page stay together. Keep each application C# type in a separate file; EF-generated migration pairs and the Program test hook follow tooling conventions. Share entities, services, layouts, partials and assets across pages. AccountController contains the viewless logout operation; HomeController contains only the entry redirect. The static starter Privacy page has no input/display model because it has no data.
 

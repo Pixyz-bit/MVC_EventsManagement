@@ -38,7 +38,8 @@ public sealed class AccountManagementController(AccountManagementService account
             return RedirectToRoute("AdminAccounts", new { q, role, status, page });
         }
         catch (KeyNotFoundException) { return NotFound(); }
-        catch (Exception ex) when (ex is ValidationException or DbUpdateException or Microsoft.Data.SqlClient.SqlException)
+        catch (Exception ex) when (ex is ValidationException or DbUpdateException or Microsoft.Data.SqlClient.SqlException
+            || ex is InvalidOperationException && ex.GetBaseException() is Microsoft.Data.SqlClient.SqlException)
         {
             if (ex is not ValidationException) logger.LogWarning(ex, "Account {AccountId} could not be saved", input.Id);
             ModelState.Remove("Editor.Password");
