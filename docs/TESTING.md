@@ -2,7 +2,9 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
-Administrator single-tab removal: JavaScript syntax and a local role-switch handler check pass (Admin hides the tab strip and retains account fields; Student restores both tabs). Release build/publish passed. Rendered confirmation follows with the requested filter-order refinement.
+Administrator single-tab removal: JavaScript syntax and a local role-switch handler check pass (Admin hides the tab strip and retains account fields; Student restores both tabs). Release build/publish passed. The in-app browser confirmed that an administrator profile hides the tab strip while the account panel remains visible; no account save was performed.
+
+Filter-order revision: Tailwind and Release build/publish passed. In-app browser inspection confirmed Role, Account status, Campus, College, Program in that order, no student-filter helper note, and a full-width Program control (approximately 478px within the 512px panel). Existing filter business behavior is unchanged.
 
 Compact User Directory Filters: two focused Release HTTP/SQL tests passed after the layout change; Tailwind and Release publish passed. In-app rendered verification at a 606px viewport showed two 233px field columns, a 512px-wide panel entirely within the viewport, and a panel height of approximately 341px. Existing role/status/academic inputs and reset/apply behavior are retained; no schema or business-rule change. The CSS stacks fields below 480px; that narrow variant was not separately rendered in this increment.
 

@@ -29,7 +29,7 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
-The redundant Account Information tab is hidden for administrator profiles; student profile tabs remain available. Syntax, role-switch handler checks and Release publish passed. The next requested refinement removes the filter helper note and orders Role/Status, Campus/College, then a full-width Program field.
+The redundant Account Information tab is hidden for administrator profiles; student profile tabs remain available. Syntax, role-switch handler checks, Release publish and in-app confirmation passed. The filter helper note is removed, with Role/Status, Campus/College and a full-width Program field; Tailwind/build/publish and rendered checks passed.
 
 User Directory Filters now use a compact two-column layout with a full-width Reset/Apply footer, retaining the current design. Tailwind, two focused HTTP/SQL cases and publish passed; the in-app browser verified the approximately 341px-high panel at 606px viewport width. See DESIGN.md and TESTING.md for the reference and verification limits.
 

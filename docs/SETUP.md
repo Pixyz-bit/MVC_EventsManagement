@@ -2,6 +2,8 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
+Original Web Forms app (user-requested local run on 2026-11-24): IIS Express uses the existing source `.vs/241611JalopEventsManagement/config/applicationhost.config`, site `241611JalopEventsManagement`, HTTP port 51717. Its login at `http://localhost:51717/Frontend/Login/Login.aspx` returned HTTP 200 and rendered in the ChatGPT in-app browser. The source project and database were not edited; this startup check does not verify sign-in or other legacy workflows. MVC remains separate on port 5314.
+
 Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); progress belongs in [milestones](MILESTONES.md). Original starter baseline commit: 8e785e5. Source application/database are unchanged. Commands below run in PowerShell from the solution root.
 
 ## Verified toolchain
