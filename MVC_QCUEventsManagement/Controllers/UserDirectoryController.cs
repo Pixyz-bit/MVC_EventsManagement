@@ -33,7 +33,7 @@ public sealed class UserDirectoryController(AccountManagementService accounts, S
         catch (KeyNotFoundException) { return NotFound(); }
     }
 
-    [HttpPost("admin/users/create")]
+    [HttpPost("admin/users/create", Name = "AdminUserCreate")]
     public async Task<IActionResult> Create([Bind(Prefix = "NewAccount")] CreateAccountInput input, UserDirectoryQuery query, CancellationToken ct)
     {
         try
@@ -53,7 +53,7 @@ public sealed class UserDirectoryController(AccountManagementService accounts, S
         }
     }
 
-    [HttpPost("admin/users/save")]
+    [HttpPost("admin/users/save", Name = "AdminUserSave")]
     [HttpPost("admin/accounts/save")]
     public async Task<IActionResult> Save([Bind(Prefix = "Editor")] ManagedAccountInput input, UserDirectoryQuery query, CancellationToken ct)
     {
@@ -86,7 +86,7 @@ public sealed class UserDirectoryController(AccountManagementService accounts, S
         }
     }
 
-    [HttpGet("admin/users/export")]
+    [HttpGet("admin/users/export", Name = "AdminUserExport")]
     [HttpGet("admin/accounts/export")]
     [HttpGet("admin/students/export")]
     public async Task<IActionResult> Export([FromQuery] UserDirectoryQuery query, CancellationToken ct)
@@ -96,11 +96,11 @@ public sealed class UserDirectoryController(AccountManagementService accounts, S
         catch (ValidationException ex) { return BadRequest(ex.Message); }
     }
 
-    [HttpGet("admin/users/template")]
+    [HttpGet("admin/users/template", Name = "AdminUserTemplate")]
     [HttpGet("admin/students/template")]
     public IActionResult Template() => File(System.Text.Encoding.UTF8.GetBytes(StudentCsvService.Header + "\r\n"), "text/csv; charset=utf-8", "student-import-template.csv");
 
-    [HttpPost("admin/users/import"), RequestSizeLimit(2_300_000)]
+    [HttpPost("admin/users/import", Name = "AdminUserImport"), RequestSizeLimit(2_300_000)]
     [HttpPost("admin/students/import")]
     public async Task<IActionResult> Import(IFormFile? roster, string? password, UserDirectoryQuery query, CancellationToken ct)
     {

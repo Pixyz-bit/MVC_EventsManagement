@@ -2,7 +2,7 @@
 @using MVC_QCUEventsManagement.ViewModels.Admin
 @model UserDirectoryViewModel
 <dialog id="create-account-dialog" open="@(Model.Open == "create")" class="student-directory-dialog" aria-labelledby="create-account-title">
-    <form asp-action="Create" method="post" id="create-account-form">
+    <form asp-route="AdminUserCreate" method="post" id="create-account-form">
         <partial name="_QueryFields" model="Model.Query" />
         <header class="flex items-start justify-between gap-4 border-b border-campus-line pb-4">
             <div><h2 id="create-account-title" class="text-xl font-bold">Add account</h2><p class="mt-1 text-sm text-campus-muted">Choose an account type to see the required fields.</p></div>

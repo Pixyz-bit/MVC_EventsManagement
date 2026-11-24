@@ -668,6 +668,9 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var html = await page.Content.ReadAsStringAsync(); Assert.Contains("user-directory.js", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
         Assert.Contains("User Directory</h1>", html); Assert.DoesNotContain(">Account Management</a>", html); Assert.DoesNotContain(">Student Directory</a>", html);
         Assert.Contains("Add account</a>", html); Assert.Contains("name=\"NewAccount.Role\"", html);
+        Assert.Contains("action=\"/admin/users/create\"", html);
+        Assert.Contains("action=\"/admin/users/import\"", html);
+        Assert.Contains("href=\"/admin/users/template\"", html);
         var csrf = await TokenAsync(page); var id = "HTTP-" + Guid.NewGuid().ToString("N"); var email = $"http-{Guid.NewGuid():N}@example.test";
         Dictionary<string,string> Fields() => new() { ["NewAccount.Role"] = "Student", ["NewAccount.StudentId"] = id, ["NewAccount.Email"] = email, ["NewAccount.FirstName"] = "Mikaela <test>", ["NewAccount.LastName"] = "Dizon", ["NewAccount.BirthDate"] = "2005-04-14", ["NewAccount.Gender"] = "Female", ["NewAccount.Campus"] = "San Bartolome", ["NewAccount.College"] = "College of Computer Studies", ["NewAccount.Program"] = "BSIT", ["NewAccount.Active"] = "true", ["NewAccount.Password"] = _password, ["__RequestVerificationToken"] = csrf };
         using var missingCsrf = await client.PostAsync("/admin/users/create", Form()); Assert.Equal(HttpStatusCode.BadRequest, missingCsrf.StatusCode);
@@ -675,6 +678,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         await using var db = CreateContext();
         var userId = await db.Users.Where(u => u.Email == email).Select(u => u.UserId).SingleAsync();
         var result = await client.GetStringAsync($"/admin/users?q={id}&id={userId}");
+        Assert.Contains("action=\"/admin/users/save\"", result);
         Assert.DoesNotContain("Mikaela <test>", result); Assert.Contains("Mikaela &lt;test&gt;", result); Assert.DoesNotContain(_password, result);
         var version = WebUtility.HtmlDecode(Regex.Match(result, "name=\"Editor.Version\"[^>]*value=\"([^\"]+)\"").Groups[1].Value); Assert.NotEmpty(version);
         var edit = new Dictionary<string,string> { ["Editor.Id"] = userId.ToString(), ["Editor.Version"] = version, ["Editor.Email"] = email, ["Editor.Role"] = "Student", ["Editor.StudentId"] = "forged", ["Editor.FirstName"] = "Mikaela", ["Editor.LastName"] = "Dizon", ["Editor.BirthDate"] = "2005-05-15", ["Editor.Gender"] = "Female", ["Editor.Campus"] = "San Bartolome", ["Editor.College"] = "College of Computer Studies", ["Editor.Program"] = "BSIT", ["Editor.Active"] = "false", ["Editor.Password"] = _password + "new", ["__RequestVerificationToken"] = csrf };
@@ -712,6 +716,9 @@ public sealed class AuthenticationTests : IAsyncLifetime
         var html = await client.GetStringAsync("/admin/users?" + filters);
         Assert.Contains(_studentEmail, html); Assert.Contains("Information Technology", html); Assert.Contains("1 users", html);
         var link = WebUtility.HtmlDecode(Regex.Match(html, "href=\"([^\"]+)\"[^>]*>View</a>").Groups[1].Value); Assert.Contains("college=Computing", link); Assert.Contains("campus=Main", link);
+        var exportLink = WebUtility.HtmlDecode(Regex.Match(html, "href=\"([^\"]+)\"[^>]*>Export CSV</a>").Groups[1].Value);
+        Assert.StartsWith("/admin/users/export?", exportLink); Assert.DoesNotContain("open=", exportLink);
+        Assert.Contains("college=Computing", exportLink); Assert.Contains("campus=Main", exportLink);
         var csv = await client.GetStringAsync("/admin/users/export?" + filters); Assert.Contains(_studentEmail, csv); Assert.DoesNotContain(_adminEmail, csv); Assert.DoesNotContain("Password", csv);
         var conflicting = await client.GetStringAsync("/admin/users/export?role=Admin&college=Computing"); Assert.DoesNotContain(_studentEmail, conflicting); Assert.DoesNotContain(_adminEmail, conflicting);
         foreach (var path in new[] { "/admin/accounts", "/admin/students" }) { var alias = await client.GetStringAsync(path); Assert.Contains("User Directory</h1>", alias); Assert.Contains("user-directory.js", alias); }
