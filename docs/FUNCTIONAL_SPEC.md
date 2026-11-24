@@ -1,6 +1,6 @@
 # Functional specification and parity checklist
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 ## Evidence and status
 
@@ -213,6 +213,7 @@ Acceptance: check-in stays in preregistered and appears in attendance; void move
 - [x] Admin selects a real event; the scanner provides operator-started QR camera capture and manual lookup by ticket reference, numeric registration ID, student ID or email. Search selected event first, then other events to identify wrong-event passes. Physical camera validation remains pending in TESTING.md.
 - [x] Lookup is read-only and stages attendee details without email. Authentication protects both actions; NotFound/WrongEventWarning/CancelledWarning(inactive)/DuplicateWarning/ValidPending outcomes are represented. The operator reviews the university ID and explicitly clicks Confirm check-in; the proposed ID checkbox was removed per user instruction.
 - [x] Validate encoded ticket event as well as registration ID, correcting the source parser gap. Legacy pipe/space suffixes remain accepted; malformed/mismatched references cannot authorize admission.
+- [x] Serialize camera startup/shutdown/device switching, release tracks on shutdown or failure, and invalidate pending capture when the page hides. Clear/new lookup prevents an obsolete request from being sent after camera shutdown; stale responses and old-camera callbacks cannot replace the current attendee. Camera failures preserve manual lookup. Client regression evidence and physical-camera status are recorded in TESTING.md.
 
 Acceptance: lookup never changes status/time; warnings block confirmation; manual/camera paths agree; expired auth blocks both endpoints; wrong-event matches are distinguishable.
 

@@ -6,14 +6,15 @@
     const form = byId("lookup"), query = byId("query"), confirm = byId("confirm"), clear = byId("clear");
     const cameraButton = byId("camera-toggle"), devices = byId("camera-device");
     let selected = null, epoch = 0, request = null, committing = false, looking = false;
-    let scanner = null, active = false, cameraBusy = false, cameraEpoch = 0;
+    let scanner = null, active = false, cameraBusy = false, cameraEpoch = 0, cameraStopping = 0;
+    let cameraQueue = Promise.resolve();
     const controls = () => {
         confirm.disabled = !selected || committing || looking;
         query.disabled = committing;
         byId("lookup-submit").disabled = committing;
         clear.disabled = committing;
-        cameraButton.disabled = cameraBusy || committing || looking;
-        devices.disabled = cameraBusy || committing || looking;
+        cameraButton.disabled = cameraBusy || cameraStopping > 0 || committing || looking;
+        devices.disabled = cameraBusy || cameraStopping > 0 || committing || looking;
     };
     function notice(message, tone = "idle", state = "Awaiting lookup") {
         byId("notice").textContent = message; byId("notice").dataset.tone = tone; byId("state").textContent = state;
@@ -46,22 +47,44 @@
         notice(data.message, tone, data.canConfirm ? "Ready for review" : data.state === "CheckedIn" ? "Checked in" : "Check-in blocked");
         controls();
     }
-    async function stopCamera(message = "Camera off") {
+    function cameraOperation(operation) {
+        const pending = cameraQueue.then(operation);
+        cameraQueue = pending.catch(() => {});
+        return pending;
+    }
+    async function releaseCamera() {
+        const current = scanner;
+        scanner = null;
+        const tracks = [...root.querySelectorAll("video")].flatMap(video => video.srcObject?.getTracks() || []);
+        try {
+            if (current?.isScanning) await current.stop();
+            current?.clear();
+        } catch {
+            // A disconnected device must not prevent another camera attempt.
+        } finally {
+            tracks.forEach(track => track.stop());
+            byId("reader").replaceChildren();
+        }
+    }
+    function stopCamera(message = "Camera off") {
         ++cameraEpoch;
-        if (scanner && active) { active = false; try { await scanner.stop(); scanner.clear(); } catch { root.querySelectorAll("video").forEach(video => video.srcObject?.getTracks().forEach(track => track.stop())); scanner = null; byId("reader").replaceChildren(); } }
+        active = false;
         cameraButton.textContent = "Start camera"; cameraButton.setAttribute("aria-pressed", "false");
         byId("camera-placeholder").hidden = false; byId("camera-title").textContent = message;
         byId("camera-message").textContent = "Start the camera to scan a student’s QR pass.";
+        ++cameraStopping; controls();
+        return cameraOperation(releaseCamera).finally(() => { --cameraStopping; controls(); });
     }
     async function lookup(value) {
         if (committing) return;
         const generation = ++epoch;
-        request?.abort(); request = new AbortController();
+        request?.abort(); const lookupRequest = request = new AbortController();
         selected = null; looking = true; profile(null); controls();
         notice("Looking up attendee…", "idle", "Looking up");
         await stopCamera("Paused for attendee review");
+        if (generation !== epoch) return;
         const data = new FormData(form); data.set("query", value);
-        try { const found = await post(form.action, data, request.signal); if (generation === epoch) result(found); }
+        try { const found = await post(form.action, data, lookupRequest.signal); if (generation === epoch) result(found); }
         catch (error) { if (generation === epoch && error.name !== "AbortError") notice(error.message || "Lookup failed. Reload and try again.", "error", "Lookup unavailable"); }
         finally { if (generation === epoch) { looking = false; controls(); } }
     }
@@ -81,18 +104,21 @@
         catch (error) { notice(error.message || "Check-in could not be confirmed. Look up the pass again.", "error", "Confirmation unavailable"); }
         finally { committing = false; controls(); }
     });
-    async function startCamera(deviceId, generation = cameraEpoch) {
+    function startCamera(deviceId, generation) {
         if (!window.isSecureContext) throw new Error("Camera access requires HTTPS or localhost. Use manual lookup instead.");
         if (!window.Html5Qrcode) throw new Error("The QR scanner could not load. Use manual lookup instead.");
-        if (!scanner) scanner = new Html5Qrcode("scanner-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false });
-        await scanner.start(deviceId, { fps: 8, qrbox: (width, height) => { const side = Math.floor(Math.min(width, height) * 0.7); return { width: side, height: side }; } }, value => {
-            if (!looking && !committing && active) { query.value = value.slice(0, 150); void lookup(value); }
-        }, () => {});
-        if (generation !== cameraEpoch) { try { await scanner.stop(); scanner.clear(); } catch {} return; }
-        active = true; byId("camera-placeholder").hidden = true; cameraButton.textContent = "Stop camera"; cameraButton.setAttribute("aria-pressed", "true");
+        return cameraOperation(async () => {
+            if (generation !== cameraEpoch || document.hidden) return;
+            scanner = new Html5Qrcode("scanner-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false });
+            await scanner.start(deviceId, { fps: 8, qrbox: (width, height) => { const side = Math.floor(Math.min(width, height) * 0.7); return { width: side, height: side }; } }, value => {
+                if (generation === cameraEpoch && !document.hidden && !looking && !committing && active) { query.value = value.slice(0, 150); void lookup(value); }
+            }, () => {});
+            if (generation !== cameraEpoch || document.hidden) { await releaseCamera(); return; }
+            active = true; byId("camera-placeholder").hidden = true; cameraButton.textContent = "Stop camera"; cameraButton.setAttribute("aria-pressed", "true");
+        });
     }
     cameraButton.addEventListener("click", async () => {
-        if (cameraBusy || committing || looking) return;
+        if (cameraBusy || cameraStopping > 0 || committing || looking) return;
         cameraBusy = true; controls();
         try {
             if (active) { await stopCamera(); return; }
@@ -100,13 +126,14 @@
             if (!window.isSecureContext) throw new Error("Camera access requires HTTPS or localhost. Use manual lookup instead.");
             selected = null; profile(null); controls(); notice("Scan a QR pass to review an attendee.");
             if (!window.Html5Qrcode) throw new Error("The QR scanner could not load. Use manual lookup instead.");
-            if (!devices.options.length) {
-                const cameras = await Html5Qrcode.getCameras();
-                if (!cameras.length) throw new Error("No camera was found. Use manual lookup instead.");
-                for (const [index, camera] of cameras.entries()) { const option = document.createElement("option"); option.value = camera.id; option.textContent = camera.label || `Camera ${index + 1}`; devices.append(option); }
-                const rear = cameras.find(camera => /back|rear|environment/i.test(camera.label));
-                if (rear) devices.value = rear.id;
-            }
+            const cameras = await Html5Qrcode.getCameras();
+            if (generation !== cameraEpoch || document.hidden) return;
+            if (!cameras.length) throw new Error("No camera was found. Use manual lookup instead.");
+            const previous = devices.value;
+            devices.replaceChildren();
+            for (const [index, camera] of cameras.entries()) { const option = document.createElement("option"); option.value = camera.id; option.textContent = camera.label || `Camera ${index + 1}`; devices.append(option); }
+            const preferred = cameras.find(camera => camera.id === previous) || cameras.find(camera => /back|rear|environment/i.test(camera.label)) || cameras[0];
+            devices.value = preferred.id;
             byId("camera-settings").hidden = devices.options.length < 2;
             if (generation !== cameraEpoch) return;
             await startCamera(devices.value, generation);
@@ -116,9 +143,10 @@
         } finally { cameraBusy = false; controls(); }
     });
     devices.addEventListener("change", async () => {
-        if (!active || cameraBusy || committing) return;
+        if (!active || cameraBusy || cameraStopping > 0 || committing || looking) return;
         cameraBusy = true; controls();
-        try { await stopCamera(); await startCamera(devices.value); }
+        const stopping = stopCamera(), generation = cameraEpoch;
+        try { await stopping; await startCamera(devices.value, generation); }
         catch { await stopCamera("Camera unavailable"); byId("camera-message").textContent = "Could not switch cameras. Use manual lookup instead."; }
         finally { cameraBusy = false; controls(); }
     });

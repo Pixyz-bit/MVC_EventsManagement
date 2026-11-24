@@ -1,8 +1,8 @@
 # UI design, Tailwind, and page references
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
-The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. The user selected the original Web Forms UI as the design reference for all four student pages. Other pages retain their selected references.
+The user will supply a design reference for each page. Reproduce the supplied visual direction while retaining the source system's required functionality. The user selected the original Web Forms UI as the design reference for all four student pages and confirmed on 2026-11-24 that the current student design is final. Keep that implemented design; do not pursue the alternative dashboard previews. Other pages retain their selected references.
 
 For each page:
 1. Record the supplied reference identifier/link/local asset and intended scope in the register below. If the user supplies a local-copyable asset, place it in DesignReferences under its portal; this folder is outside wwwroot and is not served publicly. Do not copy private reference data into public assets.
@@ -117,4 +117,4 @@ Student Directory toolbar spacing uses a common control height and consistent ga
 
 The earlier campus-photo proposal in `work/student-dashboard-campus-preview.html` is a historical sample. The MVC student portal now uses the source Web Forms styles and fonts in its own layout. The Dashboard restores the dark, full-viewport carousel, transparent-to-solid navbar, gold actions, segmented catalog and pass views, event cards, and event-details and cancellation dialogs. Registration uses the source summary card and enrollment form. The Pass uses the source ivory ticket and dark QR stub. Account Settings uses the source academic and security panels. The MVC stylesheet adds dialog and focus behavior and enrollment feedback. New passwords follow the existing MVC policy. See [testing](docs/TESTING.md) for verification.
 
-The [shorter Dashboard proposal](work/student-dashboard-deadlines-preview.html) reduces the hero height to bring Campus Events into the first desktop viewport and puts registration deadlines or availability next to the corresponding event action. Its palette control offers Web Forms, Admin light, and Admin dark. The Admin variants share Plus Jakarta Sans, blue actions, and the same layout. Admin light uses Login’s light photo fade. Admin dark uses a navy fade, deep navy panels, and pale blue accents. The standalone preview uses fictional data and awaits review.
+The [shorter Dashboard proposal](work/student-dashboard-deadlines-preview.html) is a historical, fictional-data sample. Its shorter hero, registration-deadline placement and Web Forms/Admin light/Admin dark palette alternatives are not pending implementation or review. On 2026-11-24 the user chose to retain the current implemented student design.

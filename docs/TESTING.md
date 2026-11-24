@@ -1,6 +1,6 @@
 # Verification and definition of done
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 Use business-rule tests for dates/eligibility/lifecycle/authorization; SQL Server integration tests for mapping, transactions, constraints, concurrency and migrations; browser tests for complete workflows, redesigned pages, downloads, console errors and responsiveness. In-memory EF tests alone cannot establish SQL Server correctness. Verify camera scanning with a real device/browser where available and identify it as unverified until performed.
 
@@ -30,6 +30,8 @@ Detailed expected business outcomes have one owner: [functional specification](F
 | Clean restore/build/publish with generated Tailwind CSS; fresh empty database setup | Setup and database specifications | Reviewed migration SQL and startup checks; old-database adoption is out of scope |
 
 ## Checks actually performed
+
+2026-11-24, QR scanner lifecycle: all 94 SQL/HTTP tests and all 13 Node client regressions passed; Release publish and JavaScript syntax checks passed. The client tests reproduced four failures before the fix: camera controls re-enabled during unfinished shutdown, a cleared lookup still being sent, overlapping lookups sending obsolete queries, and camera switching reactivating capture after the page hid. Camera operations are now serialized; lookup cancellation keeps its own request controller and checks freshness after shutdown; device switching retains its original generation. Additional simulated-adapter checks cover QR staging without automatic admission, explicit confirmation, repeat callbacks, startup/stop failures with track cleanup, stale HTTP/old-camera callbacks, blocked pass states, permission denial/retry and manual fallback. These are Node VM tests with camera/DOM/HTTP doubles, not browser or hardware acceptance. The design detector reported no findings on the changed script. Windows reports a USB2.0 HD UVC WebCam with OK status, but physical camera decoding and switching between real devices remain unverified. No student styles/views, database schema or existing records changed. Current student design is retained by user decision; alternative previews are historical.
 
 2026-11-23, MVC Student Dashboard: all 92 tests passed. The dashboard HTTP test covers independent campus, college and program restrictions, exact program aliases, rediscovery after a cancelled booking, completed owned registrations, isolation of another student's ticket reference and protected banner access. Tailwind compilation, JavaScript syntax, Release publish and local startup passed. Browser rendering remains unverified.
 

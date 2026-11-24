@@ -1,6 +1,6 @@
 # Milestone plan and progress
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 Related specifications: [scope](PROJECT_SCOPE.md), [architecture](ARCHITECTURE.md), [database and security](DATABASE_AND_SECURITY.md), [design and page references](../DESIGN.md), [skills](SKILLS.md), [functionality](FUNCTIONAL_SPEC.md), [testing](TESTING.md), and [setup](SETUP.md). Documentation ownership and commit rules are in [AGENTS.md](../AGENTS.md).
 
@@ -15,9 +15,9 @@ Status vocabulary: Not started, In progress, Blocked, Complete. A blocker identi
 | M4 | Authentication and authorization | Complete | Live login, protected role entry pages, logout, antiforgery and account revalidation verified. First-admin setup command is available. Ownership checks for specific records follow their feature milestones. |
 | M5 | Administrator event management | In progress | Reference-led directory and creation workflow are implemented with validated sponsor/audience/banner saving. Registration dates use SQL date/DateOnly with full-day Philippine boundaries; the relevant tests pass. Temporary preview routes are removed; use normal administrator sign-in. Creation includes requested copy cleanup and STEP 01–05 tabs. Event details, editing, cancellation and history are implemented. History derives completion at EventEnd without a status-writing job; remaining cross-workflow verification follows M8-M11. |
 | M6 | Students and account management | In progress | Student Directory implemented with profile/account controls, protected snapshots, CSV template/import/export and SQL/HTTP checks. Account Management includes role/access changes, protected account updates and filtered export. Broader cross-workflow verification remains. |
-| M7 | Student discovery and profile | In progress | Original Web Forms Dashboard and Account Settings ported to MVC, including owned registration summaries, protected banners and password change. See [verification](TESTING.md). |
+| M7 | Student discovery and profile | In progress | Original Web Forms Dashboard and Account Settings ported to MVC, including owned registration summaries, protected banners and password change. Current student design is final per the 2026-11-24 user decision; alternative previews are historical. Broader workflow verification remains. See [verification](TESTING.md). |
 | M8 | Registration and event passes | In progress | Original Web Forms registration and pass layouts ported. Booking, cancellation and owned-pass rendering have SQL/HTTP coverage. Physical QR scanning and simultaneous multi-connection stress testing remain. |
-| M9 | Attendance workflows | In progress | Pre-registered implemented with approved column order, email removed, filters, modal and atomic pass cancellation. Scanner lookup/review/explicit confirmation, wrong-event/cancelled/duplicate rejection and atomic timestamps are implemented. Attendance listing and shared headers are implemented; live camera/browser and broader concurrent integration checks remain. |
+| M9 | Attendance workflows | In progress | Pre-registered implemented with approved column order, email removed, filters, modal and atomic pass cancellation. Scanner lookup/review/explicit confirmation, wrong-event/cancelled/duplicate rejection and atomic timestamps are implemented. Camera lifecycle/lookup race fixes pass 13 client regressions; all 94 SQL/HTTP tests pass. Attendance listing and shared headers are implemented; physical-camera/browser and broader concurrent integration checks remain. |
 | M10 | Analytics, history, supporting pages | In progress | Approved Event History implemented with effective outcomes, academic-year/search/outcome filters and read-only details navigation. Analytics metrics, arrivals, distributions/audit, cohorts and history report navigation are implemented with SQL/HTTP coverage. Development-only diagnostics, live report-layout checks and remaining error states are pending. |
 | M11 | Complete workflow verification and publish readiness | Not started | All docs/TESTING.md acceptance checks, clean build/test/publish, CSS included, fresh database setup validated, docs/SETUP.md commands current, final documentation reconciliation and Git checkpoint. |
 
@@ -29,7 +29,9 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
-The user approved the Event Details proposal on 2026-11-23 with header/copy refinements. Details, directory View navigation, editing and confirmed cancellation are implemented. All 61 tests pass. History now uses its approved layout and SQL query; its sidebar entry is enabled, titles open read-only details, and report View remains disabled pending analytics. The editor uses a balanced bento grid with shared row heights. Live desktop/mobile history/filter states and editor responsiveness were checked; populated history was verified through HTTP/SQL integration tests.
+The latest verification on 2026-11-24 passed all 94 SQL/HTTP tests and 13 scanner client regressions, with a successful Release publish. Camera startup/shutdown/device switching and stale lookup races are fixed; physical-webcam decoding remains pending. The connected USB webcam is detected by Windows. The current student design is final and alternative dashboard previews are historical. See [testing](TESTING.md) for evidence and limitations.
+
+The user approved the Event Details proposal on 2026-11-23 with header/copy refinements. Details, directory View navigation, editing and confirmed cancellation are implemented. History uses its approved layout and SQL query; its sidebar entry is enabled, titles open read-only details, and report View opens Analytics. The editor uses a balanced bento grid with shared row heights. Live desktop/mobile history/filter states and editor responsiveness were checked; populated history was verified through HTTP/SQL integration tests.
 
 Event Directory row content now follows the supplied field reference while retaining the shared QCU design. View opens the implemented Event Details page.
 
@@ -43,4 +45,4 @@ Directory row spacing and typography were refined on 2026-11-23 and verified on 
 
 The standalone directory count/time strip was removed and the three main data columns were equalized on 2026-11-23. Event Details/editing/cancellation now use the approved layout and refinements.
 
-Student Directory and Account Management use the approved filter-panel UI and real MVC data. Analytics is deferred at the user’s request. The four MVC student pages now use the original Web Forms presentation. See [testing](TESTING.md) for the workflow and visual verification record.
+Student Directory and Account Management use the approved filter-panel UI and real MVC data. Analytics is implemented with SQL/HTTP coverage; live report-layout verification remains. The four MVC student pages retain the original Web Forms presentation, confirmed final on 2026-11-24. See [testing](TESTING.md) for the workflow and visual verification record.

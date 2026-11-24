@@ -1,6 +1,6 @@
 # Setup and deployment
 
-Last updated: 2026-11-23 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); progress belongs in [milestones](MILESTONES.md). Original starter baseline commit: 8e785e5. Source application/database are unchanged. Commands below run in PowerShell from the solution root.
 
@@ -53,6 +53,7 @@ The script output belongs under ignored obj; committed migration classes/snapsho
 ```powershell
 dotnet build MVC_QCUEventsManagement.slnx --no-restore -c Release
 dotnet test MVC_QCUEventsManagement.slnx --no-restore
+node --test MVC_QCUEventsManagement.Tests/Client/attendance-scanner.test.cjs
 $env:ASPNETCORE_ENVIRONMENT = 'Development'
 dotnet run --project MVC_QCUEventsManagement --no-build --no-launch-profile --urls http://127.0.0.1:5293
 ```
@@ -112,7 +113,7 @@ Authentication, Event Directory, creation, Event Details/editing/cancellation, E
 
 For optional roster visual QA, set `MVC_EVENTS_ROSTER_CAPTURE` to an absolute path under the ignored `MVC_QCUEventsManagement/obj` folder before running the authentication tests. The populated-roster test writes its rendered HTML there while all SQL fixtures roll back. Clear the variable afterward; never commit captured HTML, antiforgery tokens or fixture output. This does not create a public preview route.
 
-The scanner self-hosts the source-compatible html5-qrcode 2.3.8 bundle and Apache-2.0 license under wwwroot/js/vendor; no CDN runtime or additional npm dependency is required. Camera access requires HTTPS or localhost and begins only after Start camera. Permission denial, missing cameras or scanner-load failure retain manual lookup. Hidden/closed pages stop capture; operators restart capture explicitly. Real-device QR decoding and multi-camera behavior remain unverified. Optional `MVC_EVENTS_SCANNER_CAPTURE` may point to an ignored obj HTML file for the SQL-rolled-back scanner rendering fixture.
+The scanner self-hosts the source-compatible html5-qrcode 2.3.8 bundle and Apache-2.0 license under wwwroot/js/vendor; no CDN runtime or additional npm dependency is required. Camera access requires HTTPS or localhost and begins only after Start camera. Permission denial, missing cameras or scanner-load failure retain manual lookup. Hidden/closed pages stop capture; operators restart capture explicitly. Camera operations run sequentially, and each new start refreshes the device list while retaining an available selected device. The Node command above checks lifecycle and lookup races using simulated camera/HTTP adapters; it does not establish physical-camera acceptance. Real-device QR decoding and multi-camera behavior remain unverified. Optional `MVC_EVENTS_SCANNER_CAPTURE` may point to an ignored obj HTML file for the SQL-rolled-back scanner rendering fixture.
 
 Student Directory is available at /admin/students through the enabled sidebar. Admins can create/edit profiles and linked student accounts, change access or reset passwords, download the 10-column template, upload UTF-8 CSV (2 MB/200 rows maximum), and export up to 10,000 filtered profiles. The legacy 12-column import header is supported; the export schema is different and is not a re-import template. Creation/import/reset require an explicitly supplied 15–128 character password. No new package, schema migration or source-data import is required. Account Management is available at /admin/accounts. The Add new student and Batch CSV import actions use the Student Directory dialogs.
 
