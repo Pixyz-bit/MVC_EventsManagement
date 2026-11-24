@@ -82,7 +82,7 @@
     {
         <div class="mt-6 grid items-start gap-8 xl:grid-cols-[minmax(0,1.7fr)_minmax(16rem,1fr)]">
             <div class="min-w-0 divide-y divide-campus-line">
-                <section class="pb-6"><h2 class="text-base font-bold text-campus-navy">Event overview</h2><p class="mt-3 max-w-prose text-sm leading-7 whitespace-pre-wrap wrap-break-word text-campus-muted">@(string.IsNullOrWhiteSpace(ev.Description) ? "No description provided." : ev.Description)</p></section>
+                <section class="pb-6"><h2 class="text-base font-bold text-campus-navy">Event Description</h2><p class="mt-3 max-w-prose text-sm leading-7 whitespace-pre-wrap wrap-break-word text-campus-muted">@(string.IsNullOrWhiteSpace(ev.Description) ? "No description provided." : ev.Description)</p></section>
                 <section class="py-6"><h2 class="text-base font-bold text-campus-navy">Schedule & registration</h2><dl class="mt-4 grid gap-x-8 gap-y-5 text-sm sm:grid-cols-2">
                     <div><dt class="mb-1 text-xs text-campus-muted">Event date</dt><dd class="font-semibold">@Date(DateOnly.FromDateTime(ev.Start))</dd></div>
                     <div><dt class="mb-1 text-xs text-campus-muted">Event time</dt><dd class="font-semibold tabular-nums">@ev.Start.ToString("h:mm tt", CultureInfo.InvariantCulture) – @ev.End.ToString("h:mm tt", CultureInfo.InvariantCulture)</dd></div>
