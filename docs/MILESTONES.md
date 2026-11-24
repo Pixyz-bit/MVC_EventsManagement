@@ -29,6 +29,8 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
+The User Directory merge is in progress. Its role-dependent creation service passed three Release SQL-backed cases covering both roles, hashed credentials, duplicates, actor authorization and invalid-profile rollback. Directory/form integration follows as a separate checkpoint.
+
 Requested event-layout refinements are implemented: full-width Sponsors, grouped Review with banner preview, and Pre-registered Filters matching Account Management. Rendered verification remains pending. The next authorized increment merges the administrative Student Directory and Account Management into User Directory using the current production design, with one role-dependent Add account form; the conversation mockup is not the implementation reference.
 
 The complete HTTP/SQL workflow and 25 additional cancellation races pass (26 targeted cases). Scanner and administrator-void handlers now recover safely from EF-wrapped SQL deadlocks. Production CSS restore/build passed; clean release and browser-download verification are in progress. The student design remains final.

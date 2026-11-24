@@ -2,6 +2,8 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
+Role-dependent account creation reuses the existing five-table schema. AccountManagementService validates an active administrator within a serializable transaction, hashes the supplied password, and creates either an Admin user alone or a Student user/profile together through StudentService. Unsupported roles, duplicate identity/email and invalid student profiles fail without orphan writes. No migration is required.
+
 The temporary no-login preview routes have been removed. Administrator pages require the normal authenticated session; no preview identity, preview configuration, or publish-disabled variant remains.
 
 Event creation is administrator-only and antiforgery-protected. A dedicated input model excludes creator, counters, lifecycle and image paths; the service derives these and rechecks the active administrator. Server validation enforces lengths, positive capacity, ordered same-day event times, supported date bounds, registration dates strictly before the event day, supported audience combinations, target year 1-5 and at most 20 sponsor names of 150 characters. Event and sponsor insertion uses one EF SaveChanges transaction.

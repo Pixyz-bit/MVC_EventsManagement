@@ -2,6 +2,8 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
+Role-dependent account-creation service coverage verifies Student versus Admin profile creation, password hash verification, duplicate rejection, unsupported roles, nonadministrator rejection and invalid-student no-orphan behavior. The page integration and browser checks are tracked separately.
+
 Event-layout refinement checkpoint: JavaScript syntax and local handler checks cover safe text, human-readable dates/times, separate audience fields, sponsors/banner states, and filter Apply/Search/Escape/outside behavior. Focused Release HTTP/SQL checks cover roster filter reset context, event creation persistence and the complete workflow. These checks do not establish desktop/mobile visual verification.
 
 Use business-rule tests for dates/eligibility/lifecycle/authorization; SQL Server integration tests for mapping, transactions, constraints, concurrency and migrations; browser tests for complete workflows, redesigned pages, downloads, console errors and responsiveness. In-memory EF tests alone cannot establish SQL Server correctness. Verify camera scanning with a real device/browser where available and identify it as unverified until performed.

@@ -18,6 +18,30 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
     private const int PageSize = 25;
     private readonly IDataProtector _versions = protection.CreateProtector("Qcu.AccountManagement.v1");
 
+    public async Task CreateAsync(CreateAccountInput input, int actorId, CancellationToken ct)
+    {
+        input.Email = input.Email.Trim();
+        Validator.ValidateObject(input, new ValidationContext(input), true);
+        if (input.Role is not ("Admin" or "Student")) throw new ValidationException("Choose Student or Administrator.");
+        StudentService.ValidatePassword(input.Password);
+        await using var transaction = db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
+        if (!await db.Users.AnyAsync(u => u.UserId == actorId && u.Role == "Admin" && u.IsActive, ct))
+            throw new ValidationException("Your administrator access changed. Sign in again.");
+        if (input.Role == "Student")
+            await students.CreateAsync(input.StudentProfile(), ct);
+        else
+        {
+            if (await db.Users.AnyAsync(u => u.Email == input.Email, ct))
+                throw new ValidationException("Email already belongs to another account.");
+            var user = new User { Email = input.Email, Role = "Admin", IsActive = input.Active, PasswordHash = "", PasswordSalt = "" };
+            user.PasswordHash = hasher.HashPassword(user, input.Password!);
+            db.Users.Add(user);
+            await db.SaveChangesAsync(ct);
+        }
+        if (transaction is not null) await transaction.CommitAsync(ct);
+    }
+
     private static IQueryable<User> Filter(IQueryable<User> rows, string q, string role, string status)
     {
         if (q.Length > 0)

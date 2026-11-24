@@ -50,6 +50,8 @@ Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, Se
 
 ### AUTH-02: New-account credentials
 
+- [x] User Directory account creation supports Student and Admin. An active administrator chooses the role; Student requires the existing validated profile and birthdate, while Admin requires email, password and status without a student profile. The creation service rechecks the actor and commits account/profile together; the role-dependent page form follows in the directory integration increment.
+
 - [x] The first administrator uses ASP.NET Core Identity password hashing and a password of 15 to 128 characters. The setup command prompts for confirmation and preserves password whitespace. The new database starts without imported or seeded accounts.
 - [x] Apply the new-account hashing and password policy to account creation, password change and reset flows. Verification is recorded in TESTING.md.
 

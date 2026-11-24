@@ -686,6 +686,45 @@ public sealed class AuthenticationTests : IAsyncLifetime
         using var export = await client.GetAsync("/admin/students/export?q=" + id); var csv = await export.Content.ReadAsStringAsync(); Assert.Contains(email, csv); Assert.DoesNotContain(_password, csv); Assert.Contains("Inactive", csv);
     }
 
+    [Theory]
+    [InlineData("Student")]
+    [InlineData("Admin")]
+    public async Task Account_creation_uses_selected_role_hashes_password_and_creates_only_required_profile(string role)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<AccountManagementService>();
+        await using var db = CreateContext();
+        var actor = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync();
+        var input = new CreateAccountInput { Role = role, Email = $"create-{Guid.NewGuid():N}@example.test", Password = _password,
+            StudentId = $"NEW-{Guid.NewGuid():N}", FirstName = "Mikaela", LastName = "Dizon", BirthDate = new DateOnly(2005, 4, 14) };
+        await service.CreateAsync(input, actor, default);
+        var account = await db.Users.AsNoTracking().Include(u => u.Student).SingleAsync(u => u.Email == input.Email);
+        Assert.Equal(role, account.Role);
+        Assert.NotEqual(_password, account.PasswordHash);
+        Assert.Equal(PasswordVerificationResult.Success, new PasswordHasher<User>().VerifyHashedPassword(account, account.PasswordHash, _password));
+        Assert.Equal(role == "Student", account.Student is not null);
+        if (account.Student is { } profile) Assert.Equal(input.StudentId, profile.StudentId);
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(input, actor, default));
+        Assert.Equal(1, await db.Users.CountAsync(u => u.Email == input.Email));
+    }
+
+    [Fact]
+    public async Task Account_creation_rejects_invalid_student_role_and_nonadministrator_without_orphans()
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<AccountManagementService>();
+        await using var db = CreateContext();
+        var actor = await db.Users.Where(u => u.Email == _adminEmail).Select(u => u.UserId).SingleAsync();
+        var studentActor = await db.Users.Where(u => u.Email == _studentEmail).Select(u => u.UserId).SingleAsync();
+        var input = new CreateAccountInput { Role = "Student", Email = $"invalid-{Guid.NewGuid():N}@example.test", Password = _password };
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(input, actor, default));
+        input.Role = "SuperAdmin";
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(input, actor, default));
+        input.Role = "Admin";
+        await Assert.ThrowsAsync<System.ComponentModel.DataAnnotations.ValidationException>(() => service.CreateAsync(input, studentActor, default));
+        Assert.False(await db.Users.AnyAsync(u => u.Email == input.Email));
+    }
+
     [Fact]
     public async Task Student_csv_endpoint_enforces_csrf_and_reports_real_partial_results_without_echoing_passwords()
     {
