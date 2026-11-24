@@ -1,0 +1,36 @@
+@using MVC_QCUEventsManagement.Services
+@using MVC_QCUEventsManagement.ViewModels.Admin
+@model UserDirectoryViewModel
+<dialog id="create-account-dialog" open="@(Model.Open == "create")" class="student-directory-dialog" aria-labelledby="create-account-title">
+    <form asp-action="Create" method="post" id="create-account-form">
+        <partial name="_QueryFields" model="Model.Query" />
+        <header class="flex items-start justify-between gap-4 border-b border-campus-line pb-4">
+            <div><h2 id="create-account-title" class="text-xl font-bold">Add account</h2><p class="mt-1 text-sm text-campus-muted">Choose an account type to see the required fields.</p></div>
+            <button type="button" data-close-user-dialog class="event-secondary">Close</button>
+        </header>
+        @if (!ViewData.ModelState.IsValid && Model.Open == "create") { <div asp-validation-summary="All" role="alert" class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800"></div> }
+        <div class="mt-5"><label asp-for="NewAccount.Role" class="event-label">Account type *</label><select asp-for="NewAccount.Role" class="event-input" aria-controls="create-student-fields" required><option value="Student">Student</option><option value="Admin">Administrator</option></select></div>
+        <p id="create-account-description" class="mt-2 text-xs text-campus-muted" aria-live="polite">@(Model.NewAccount.Role == "Admin" ? "Administrator accounts manage events, attendance and user access." : "Student accounts include a student profile and access to event registration.")</p>
+        <fieldset id="create-student-fields" hidden="@(Model.NewAccount.Role == "Admin")" disabled="@(Model.NewAccount.Role == "Admin")" class="mt-5 grid gap-4 sm:grid-cols-2">
+            <legend class="mb-4 text-sm font-bold">Student information</legend>
+            <div><label asp-for="NewAccount.StudentId" class="event-label">Student ID *</label><input asp-for="NewAccount.StudentId" required maxlength="50" class="event-input" /></div>
+            <div><label asp-for="NewAccount.BirthDate" class="event-label">Birthdate *</label><input asp-for="NewAccount.BirthDate" type="date" min="1900-01-01" required class="event-input" /></div>
+            <div><label asp-for="NewAccount.FirstName" class="event-label">First name *</label><input asp-for="NewAccount.FirstName" required maxlength="100" class="event-input" /></div>
+            <div><label asp-for="NewAccount.LastName" class="event-label">Last name *</label><input asp-for="NewAccount.LastName" required maxlength="100" class="event-input" /></div>
+            <div><label asp-for="NewAccount.MiddleName" class="event-label">Middle name (Optional)</label><input asp-for="NewAccount.MiddleName" maxlength="100" class="event-input" /></div>
+            <div><label asp-for="NewAccount.Gender" class="event-label">Gender *</label><select asp-for="NewAccount.Gender" class="event-input" required>@foreach (var gender in StudentService.Genders) { <option>@gender</option> }</select></div>
+            <div><label asp-for="NewAccount.Campus" class="event-label">Campus *</label><select asp-for="NewAccount.Campus" class="event-input" required>@foreach (var campus in CreateEventInput.Branches) { <option>@campus</option> }</select></div>
+            <div><label asp-for="NewAccount.College" class="event-label">College *</label><select asp-for="NewAccount.College" class="event-input" required>@foreach (var college in CreateEventInput.ProgramOptions.Select(p => p.Department).Distinct()) { <option>@college</option> }</select></div>
+            <div class="sm:col-span-2"><label asp-for="NewAccount.Program" class="event-label">Academic program *</label><select asp-for="NewAccount.Program" class="event-input" required>@foreach (var program in CreateEventInput.ProgramOptions) { <option value="@program.Code" data-college="@program.Department">@program.Code</option> }</select></div>
+        </fieldset>
+        <section aria-labelledby="create-access-title" class="mt-6 border-t border-campus-line pt-4">
+            <h3 id="create-access-title" class="text-sm font-bold">Account access</h3>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2"><label asp-for="NewAccount.Email" class="event-label">Email address *</label><input asp-for="NewAccount.Email" type="email" required maxlength="150" autocomplete="off" class="event-input" /></div>
+                <div><label asp-for="NewAccount.Active" class="event-label">Account status</label><select asp-for="NewAccount.Active" class="event-input"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+                <div><label for="create-account-password" class="event-label">Password *</label><input id="create-account-password" name="NewAccount.Password" type="password" required minlength="15" maxlength="128" autocomplete="new-password" class="event-input" /><p class="mt-1 text-xs text-campus-muted">15–128 characters. Share it privately with the account holder.</p></div>
+            </div>
+        </section>
+        <footer class="mt-6 flex flex-wrap justify-end gap-2 border-t border-campus-line pt-4"><button type="button" data-close-user-dialog class="event-secondary">Cancel</button><button type="submit" class="event-primary">Create account</button></footer>
+    </form>
+</dialog>

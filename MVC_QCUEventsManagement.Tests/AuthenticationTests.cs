@@ -655,35 +655,66 @@ public sealed class AuthenticationTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Student_directory_is_admin_only_creates_edits_and_protects_account_actions_and_exports()
+    public async Task User_directory_combines_roles_creates_edits_and_exports_students_with_snapshot_protection()
     {
         using var anonymous = NewClient();
-        foreach (var path in new[] { "/admin/students", "/admin/students/template", "/admin/students/export" }) { using var response = await anonymous.GetAsync(path); Assert.StartsWith("/login?", RedirectPath(response)); }
+        foreach (var path in new[] { "/admin/users", "/admin/users/template", "/admin/users/export" })
+        { using var response = await anonymous.GetAsync(path); Assert.StartsWith("/login?", RedirectPath(response)); }
         using var student = NewClient(); using var studentLogin = await SignInAsync(student, _studentEmail, _password);
-        using var denied = await student.GetAsync("/admin/students"); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var denied = await student.GetAsync("/admin/users"); Assert.StartsWith("/access-denied?", RedirectPath(denied));
+        using var deniedCreation = await student.PostAsync("/admin/users/create", Form()); Assert.StartsWith("/access-denied?", RedirectPath(deniedCreation));
         using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
-        using var page = await client.GetAsync("/admin/students"); Assert.Equal(HttpStatusCode.OK, page.StatusCode);
-        var html = await page.Content.ReadAsStringAsync(); Assert.Contains("student-directory.js", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
+        using var page = await client.GetAsync("/admin/users"); Assert.Equal(HttpStatusCode.OK, page.StatusCode);
+        var html = await page.Content.ReadAsStringAsync(); Assert.Contains("user-directory.js", html); Assert.Contains("no-store", page.Headers.CacheControl!.ToString());
+        Assert.Contains("User Directory</h1>", html); Assert.DoesNotContain(">Account Management</a>", html); Assert.DoesNotContain(">Student Directory</a>", html);
+        Assert.Contains("Add account</a>", html); Assert.Contains("name=\"NewAccount.Role\"", html);
         var csrf = await TokenAsync(page); var id = "HTTP-" + Guid.NewGuid().ToString("N"); var email = $"http-{Guid.NewGuid():N}@example.test";
-        Dictionary<string,string> Fields(string first = "Mikaela <test>") => new() { ["Input.StudentId"] = id, ["Input.Email"] = email, ["Input.FirstName"] = first, ["Input.LastName"] = "Dizon", ["Input.BirthDate"] = "2005-04-14", ["Input.Gender"] = "Female", ["Input.Campus"] = "San Bartolome", ["Input.College"] = "College of Computer Studies", ["Input.Program"] = "BSIT", ["Input.Active"] = "true", ["Input.Password"] = _password, ["__RequestVerificationToken"] = csrf };
-        using var missingCsrf = await client.PostAsync("/admin/students/create", Form()); Assert.Equal(HttpStatusCode.BadRequest, missingCsrf.StatusCode);
-        using var created = await client.PostAsync("/admin/students/create", new FormUrlEncodedContent(Fields())); Assert.StartsWith("/admin/students", RedirectPath(created));
-        var result = await client.GetStringAsync("/admin/students?q=" + id);
+        Dictionary<string,string> Fields() => new() { ["NewAccount.Role"] = "Student", ["NewAccount.StudentId"] = id, ["NewAccount.Email"] = email, ["NewAccount.FirstName"] = "Mikaela <test>", ["NewAccount.LastName"] = "Dizon", ["NewAccount.BirthDate"] = "2005-04-14", ["NewAccount.Gender"] = "Female", ["NewAccount.Campus"] = "San Bartolome", ["NewAccount.College"] = "College of Computer Studies", ["NewAccount.Program"] = "BSIT", ["NewAccount.Active"] = "true", ["NewAccount.Password"] = _password, ["__RequestVerificationToken"] = csrf };
+        using var missingCsrf = await client.PostAsync("/admin/users/create", Form()); Assert.Equal(HttpStatusCode.BadRequest, missingCsrf.StatusCode);
+        using var created = await client.PostAsync("/admin/users/create", new FormUrlEncodedContent(Fields())); Assert.StartsWith("/admin/users", RedirectPath(created));
+        await using var db = CreateContext();
+        var userId = await db.Users.Where(u => u.Email == email).Select(u => u.UserId).SingleAsync();
+        var result = await client.GetStringAsync($"/admin/users?q={id}&id={userId}");
         Assert.DoesNotContain("Mikaela <test>", result); Assert.Contains("Mikaela &lt;test&gt;", result); Assert.DoesNotContain(_password, result);
-        var rowHtml = Regex.Match(result, "<ul role=\"list\"[\\s\\S]*?</ul>").Value; Assert.DoesNotContain(email, rowHtml);
-        string ReadToken(string content) { var raw = Regex.Match(content, "id=\"student-directory-data\">([\\s\\S]*?)</script>").Groups[1].Value; using var doc = System.Text.Json.JsonDocument.Parse(raw); return doc.RootElement.EnumerateArray().Single(s => s.GetProperty("studentId").GetString() == id).GetProperty("token").GetString()!; }
-        var token = ReadToken(result); var edit = Fields("Updated name"); edit["Input.Token"] = token;
-        using var saved = await client.PostAsync("/admin/students/edit", new FormUrlEncodedContent(edit)); Assert.StartsWith("/admin/students", RedirectPath(saved));
-        using var stale = await client.PostAsync("/admin/students/access", Form(("id", id), ("token", token), ("active", "false"), ("confirmed", "true"), ("__RequestVerificationToken", csrf))); Assert.StartsWith("/admin/students", RedirectPath(stale));
-        result = await client.GetStringAsync("/admin/students?q=" + id); Assert.Contains("This student changed", result);
-        token = ReadToken(result);
-        using var noConfirmation = await client.PostAsync("/admin/students/password", Form(("id", id), ("token", token), ("password", _password), ("__RequestVerificationToken", csrf))); Assert.StartsWith("/admin/students", RedirectPath(noConfirmation));
-        using var reset = await client.PostAsync("/admin/students/password", Form(("id", id), ("token", token), ("password", _password + "new"), ("confirmed", "true"), ("__RequestVerificationToken", csrf))); Assert.StartsWith("/admin/students", RedirectPath(reset));
-        result = await client.GetStringAsync("/admin/students?q=" + id); Assert.DoesNotContain(_password, result); token = ReadToken(result);
-        using var access = await client.PostAsync("/admin/students/access", Form(("id", id), ("token", token), ("active", "false"), ("confirmed", "true"), ("__RequestVerificationToken", csrf))); Assert.StartsWith("/admin/students", RedirectPath(access));
-        await using (var db = CreateContext()) Assert.False(await db.Users.Where(u => u.Email == email).Select(u => u.IsActive).SingleAsync());
-        using var template = await client.GetAsync("/admin/students/template"); Assert.Contains(StudentCsvService.Header, await template.Content.ReadAsStringAsync());
-        using var export = await client.GetAsync("/admin/students/export?q=" + id); var csv = await export.Content.ReadAsStringAsync(); Assert.Contains(email, csv); Assert.DoesNotContain(_password, csv); Assert.Contains("Inactive", csv);
+        var version = WebUtility.HtmlDecode(Regex.Match(result, "name=\"Editor.Version\"[^>]*value=\"([^\"]+)\"").Groups[1].Value); Assert.NotEmpty(version);
+        var edit = new Dictionary<string,string> { ["Editor.Id"] = userId.ToString(), ["Editor.Version"] = version, ["Editor.Email"] = email, ["Editor.Role"] = "Student", ["Editor.StudentId"] = "forged", ["Editor.FirstName"] = "Mikaela", ["Editor.LastName"] = "Dizon", ["Editor.BirthDate"] = "2005-05-15", ["Editor.Gender"] = "Female", ["Editor.Campus"] = "San Bartolome", ["Editor.College"] = "College of Computer Studies", ["Editor.Program"] = "BSIT", ["Editor.Active"] = "false", ["Editor.Password"] = _password + "new", ["__RequestVerificationToken"] = csrf };
+        using var saved = await client.PostAsync("/admin/users/save", new FormUrlEncodedContent(edit)); Assert.StartsWith("/admin/users", RedirectPath(saved));
+        using var stale = await client.PostAsync("/admin/users/save", new FormUrlEncodedContent(edit)); var staleHtml = await stale.Content.ReadAsStringAsync(); Assert.Contains("The account changed", staleHtml); Assert.DoesNotContain(_password, staleHtml);
+        var profile = await db.Students.AsNoTracking().Include(s => s.User).SingleAsync(s => s.StudentId == id);
+        Assert.False(profile.User.IsActive); Assert.Equal(new DateOnly(2005, 5, 15), profile.BirthDate);
+        Assert.Equal(PasswordVerificationResult.Success, new PasswordHasher<User>().VerifyHashedPassword(profile.User, profile.User.PasswordHash, _password + "new"));
+        using var template = await client.GetAsync("/admin/users/template"); Assert.Contains(StudentCsvService.Header, await template.Content.ReadAsStringAsync());
+        var csv = await client.GetStringAsync("/admin/users/export?q=" + id); Assert.Contains(email, csv); Assert.DoesNotContain(_password, csv); Assert.Contains("Inactive", csv); Assert.Contains("05/15/2005", csv);
+    }
+
+    [Fact]
+    public async Task User_directory_creates_admin_without_student_fields_and_clears_password_on_validation_errors()
+    {
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        using var page = await client.GetAsync("/admin/users?open=create"); var csrf = await TokenAsync(page);
+        var email = $"admin-create-{Guid.NewGuid():N}@example.test";
+        FormUrlEncodedContent Input(string role, string targetEmail) => Form(("NewAccount.Role", role), ("NewAccount.Email", targetEmail), ("NewAccount.Password", _password), ("NewAccount.Active", "true"), ("__RequestVerificationToken", csrf));
+        using var created = await client.PostAsync("/admin/users/create", Input("Admin", email)); Assert.StartsWith("/admin/users", RedirectPath(created));
+        await using var db = CreateContext();
+        var user = await db.Users.AsNoTracking().Include(u => u.Student).SingleAsync(u => u.Email == email); Assert.Equal("Admin", user.Role); Assert.Null(user.Student);
+        using var duplicate = await client.PostAsync("/admin/users/create", Input("Admin", email)); var html = await duplicate.Content.ReadAsStringAsync(); Assert.Contains("already belongs", html); Assert.DoesNotContain(_password, html);
+        Assert.Contains("id=\"create-account-dialog\" open", html); Assert.Contains("id=\"create-student-fields\" hidden", html);
+        var invalidEmail = $"incomplete-{Guid.NewGuid():N}@example.test";
+        using var incomplete = await client.PostAsync("/admin/users/create", Input("Student", invalidEmail)); Assert.DoesNotContain(_password, await incomplete.Content.ReadAsStringAsync()); Assert.False(await db.Users.AnyAsync(u => u.Email == invalidEmail));
+        using var unsupported = await client.PostAsync("/admin/users/create", Input("SuperAdmin", invalidEmail)); Assert.Contains("Choose Student or Administrator", await unsupported.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task User_directory_filters_and_export_match_and_legacy_urls_use_the_same_page()
+    {
+        using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
+        var filters = $"q={_studentId}&role=Student&status=Active&college=Computing&program=Information%20Technology&campus=Main";
+        var html = await client.GetStringAsync("/admin/users?" + filters);
+        Assert.Contains(_studentEmail, html); Assert.Contains("Information Technology", html); Assert.Contains("1 users", html);
+        var link = WebUtility.HtmlDecode(Regex.Match(html, "href=\"([^\"]+)\"[^>]*>View</a>").Groups[1].Value); Assert.Contains("college=Computing", link); Assert.Contains("campus=Main", link);
+        var csv = await client.GetStringAsync("/admin/users/export?" + filters); Assert.Contains(_studentEmail, csv); Assert.DoesNotContain(_adminEmail, csv); Assert.DoesNotContain("Password", csv);
+        var conflicting = await client.GetStringAsync("/admin/users/export?role=Admin&college=Computing"); Assert.DoesNotContain(_studentEmail, conflicting); Assert.DoesNotContain(_adminEmail, conflicting);
+        foreach (var path in new[] { "/admin/accounts", "/admin/students" }) { var alias = await client.GetStringAsync(path); Assert.Contains("User Directory</h1>", alias); Assert.Contains("user-directory.js", alias); }
     }
 
     [Theory]
@@ -729,11 +760,11 @@ public sealed class AuthenticationTests : IAsyncLifetime
     public async Task Student_csv_endpoint_enforces_csrf_and_reports_real_partial_results_without_echoing_passwords()
     {
         using var client = NewClient(); using var login = await SignInAsync(client, _adminEmail, _password);
-        using var page = await client.GetAsync("/admin/students"); var csrf = await TokenAsync(page);
-        using var denied = await client.PostAsync("/admin/students/import", Form()); Assert.Equal(HttpStatusCode.BadRequest, denied.StatusCode);
+        using var page = await client.GetAsync("/admin/users"); var csrf = await TokenAsync(page);
+        using var denied = await client.PostAsync("/admin/users/import", Form()); Assert.Equal(HttpStatusCode.BadRequest, denied.StatusCode);
         var marker = Guid.NewGuid().ToString("N"); var csv = StudentCsvService.Header + $"\r\nCSV-{marker},Althea,,Navarro,Female,San Bartolome,College of Computer Studies,BSIT,{marker}@example.test,2005-04-14\r\nBAD-{marker},Lara,,Reyes,Female,San Bartolome,College of Computer Studies,BSIT,bad-{marker}@example.test,invalid-date\r\n";
         using var upload = new MultipartFormDataContent(); upload.Add(new StringContent(csrf), "__RequestVerificationToken"); upload.Add(new StringContent(_password), "password"); upload.Add(new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(csv)), "roster", "students.csv");
-        using var response = await client.PostAsync("/admin/students/import", upload); Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        using var response = await client.PostAsync("/admin/users/import", upload); Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var html = await response.Content.ReadAsStringAsync(); Assert.Contains("1 created", html); Assert.Contains("1 errors", html); Assert.DoesNotContain(_password, html);
         await using var db = CreateContext(); Assert.True(await db.Students.AnyAsync(s => s.StudentId == "CSV-" + marker)); Assert.False(await db.Users.AnyAsync(u => u.Email == "bad-" + marker + "@example.test"));
     }
@@ -781,7 +812,7 @@ public sealed class AuthenticationTests : IAsyncLifetime
         using var noCsrf = await client.PostAsync("/admin/accounts/save", Form());
         Assert.Equal(HttpStatusCode.BadRequest, noCsrf.StatusCode);
         using var saved = await client.PostAsync("/admin/accounts/save", EditStudent(updatedEmail));
-        Assert.StartsWith("/admin/accounts", RedirectPath(saved));
+        Assert.StartsWith("/admin/users", RedirectPath(saved));
         Assert.True(await db.Users.AnyAsync(a => a.UserId == studentId && a.Email == updatedEmail && !a.IsActive));
         Assert.True(await db.Students.AnyAsync(s => s.UserId == studentId && s.StudentId == _studentId));
         using var stale = await client.PostAsync("/admin/accounts/save", EditStudent(_studentEmail));

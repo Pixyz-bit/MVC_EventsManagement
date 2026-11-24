@@ -50,7 +50,7 @@ Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, Se
 
 ### AUTH-02: New-account credentials
 
-- [x] User Directory account creation supports Student and Admin. An active administrator chooses the role; Student requires the existing validated profile and birthdate, while Admin requires email, password and status without a student profile. The creation service rechecks the actor and commits account/profile together; the role-dependent page form follows in the directory integration increment.
+- [x] User Directory account creation supports Student and Admin. An active administrator chooses the role; Student requires the existing validated profile and birthdate, while Admin requires email, password and status without a student profile. The creation service rechecks the actor and commits account/profile together; the role-dependent Add account form is integrated into User Directory.
 
 - [x] The first administrator uses ASP.NET Core Identity password hashing and a password of 15 to 128 characters. The setup command prompts for confirmation and preserves password whitespace. The new database starts without imported or seeded accounts.
 - [x] Apply the new-account hashing and password policy to account creation, password change and reset flows. Verification is recorded in TESTING.md.
@@ -59,17 +59,17 @@ Acceptance: verify new-account hashes, incorrect passwords, malformed hashes, sa
 
 ### ACCOUNT-01: Account maintenance
 
-- [x] List/search/filter/reset by role and Active/Inactive status; show total accounts, active admins, students, locked accounts. Per the latest approved UI direction, header actions are Add new student and Batch CSV import rather than Create administrator; reuse STUDENT-01/CSV-01 and their password/duplicate validation. Administrator provisioning through the setup command remains separate.
+- [x] List/search/filter/reset by role, Active/Inactive status and student college/program/campus; show total accounts, active admins, students, locked accounts. User Directory at `/admin/users` combines both roles in one list without page tabs. Header actions are Add account and Import CSV. Add account starts with Student/Administrator selection and shows only the applicable fields; reuse STUDENT-01/CSV-01 validation. The first-admin setup command remains available.
 - [x] Manage email, role, active state, optional new password and student demographics when Student is selected. Validate email shape, supported role, lengths and required profile fields.
 - [x] Save managed user/profile/password changes atomically. Acting admin must remain active; block self-demotion/self-deactivation and leaving no active administrator. Recheck guards inside the transaction to protect concurrent changes.
 - [x] Reject stale account snapshots and handle losing concurrent/deadlocked saves with a safe reopen-and-retry message rather than an HTTP 500. Clear submitted passwords from the rendered error form; do not automatically replay a stale edit.
-- [x] Preserve existing StudentId and BirthDate through account management. Create an absent student profile when converting to Student; reject duplicate profiles. Promotion to Admin does not automatically delete a linked profile/history.
+- [x] Preserve existing StudentId and registration history. User Directory permits validated birthdate edits, matching the former student editor; the legacy account-save alias retains its birthdate-preserving behavior. Create an absent student profile when converting to Student; reject duplicate profiles. Promotion to Admin does not automatically delete a linked profile/history.
 
 Acceptance: invalid email/profile causes full rollback; forged IDs cannot bypass guards; concurrent changes cannot remove the last active admin. No persisted account-photo field/write was found in the five-table schema/current account save handler; an unused upload control is not a completed feature.
 
 ### ACCOUNT-02: Account CSV export
 
-- [x] Export current filtered accounts with columns UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program. Never export passwords.
+- [x] Export current filtered accounts with columns UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program,FirstName,MiddleName,LastName,BirthDate(MM/dd/yyyy). Apply the same filters as the list and never export passwords.
 
 Acceptance: filtered counts match, quoted/Unicode fields round-trip, and spreadsheet formula payload handling is deliberate.
 
@@ -121,7 +121,7 @@ Evidence: AdminEvents/CreateEvent/EventDetails.aspx/.cs; EventModel; EventCancel
 
 ### STUDENT-01: Student directory
 
-- [x] /admin/students supports ID/full-name search, college/program/campus/status filters, reset and 25-row paging; create/edit, linked student-account activate/deactivate and explicit password reset. College selection controls program choices. Profile dialogs expose email/birthdate/gender rather than putting them in rows.
+- [x] `/admin/users?role=Student` provides student ID/full-name/email search, college/program/campus/status filters, reset and 25-row paging within User Directory; the shared View dialog edits profiles, account state/role and an optional replacement password in one protected save. `/admin/students` remains an alias to the same page. College selection controls program choices. Rows include account email, student identity, academic placement, role and access status; birthdate and gender remain in the profile dialog.
 - [x] Add requires student ID, institutional email, first/last names and valid birthdate in the page flow; middle name is optional. Preserve gender/campus/department/program/state. Reject duplicate IDs/emails. Edit preserves the student identity and registration history. Birthdate may remain absent when editing an existing profile; supplied dates must be from 1900 through yesterday in Philippine time.
 - [x] Year and section belong to event registrations, not current StudentTable. Student profile explains year is selected during event registration.
 - [x] Approved credential change: Admin explicitly supplies a 15–128 character password for creation/import/reset. Birthdate-derived passwords and success-feedback credential display are removed. Import uses the supplied initial password with a fresh salted hash per account. Passwords are never selected into profile/CSV output.
@@ -136,7 +136,7 @@ Acceptance: no orphan account/profile on failure; duplicate prevention survives 
 - [x] CSV skips header/blank lines, requires ID/first/last/email, rejects existing IDs/emails, and processes rows independently. Preserve valid rows when others fail; report accurate success/failure counts and row errors.
 - [x] Imported blank gender/campus defaults to Not Specified/San Bartolome. Blank imported birthdate remains null; malformed dates fail that row. Dates never determine credentials.
 - [x] Replace line.Split(',') with proper CSV parsing and header/schema validation; support accepted formats and quoted/Unicode content. Count success only when persistence succeeds.
-- [x] Filtered student export columns are StudentId,FullName,FirstName,MiddleName,LastName,Gender,CampusBranch,Department,Program,Email,BirthDate(MM/dd/yyyy),AccountStatus. This export differs from the import format and is not directly re-importable. Formula-like CSV cell prefixes are escaped for spreadsheet safety. Uploads are limited to 2 MB/200 rows and exports to 10,000 filtered records; over-limit files are rejected before import writes.
+- [x] User Directory uses the combined account export defined in ACCOUNT-02, including separate student names and birthdate to retain the former student export information. This export differs from the student import template and is not directly re-importable. Formula-like CSV cell prefixes are escaped for spreadsheet safety. Uploads are limited to 2 MB/200 rows and exports to 10,000 filtered records; over-limit files are rejected before import writes.
 
 Acceptance: template and both roster formats work; quotes/commas/Unicode, blank/malformed/duplicate rows and partial success are accurate; failed rows leave no orphan accounts.
 

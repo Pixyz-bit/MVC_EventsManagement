@@ -11,8 +11,7 @@
         ]),
         ("Attendance & Users",
         [
-            ("Student Directory", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z", "AdminStudentDirectory"),
-            ("Account Management", "M12 22s7-4 7-10V6l-7-3-7 3v6c0 6 7 10 7 10Z", "AdminAccounts")
+            ("User Directory", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z", "AdminUserDirectory")
         ])
     ];
     const string row = "flex min-h-11 items-center rounded-lg border-l-2 pr-2.5 pl-10";
@@ -29,8 +28,7 @@
                     var isCurrent = link.Route == "AdminEvents" && currentSection == "Events"
                         || link.Route == "AdminCreateEvent" && currentSection == "Create"
                         || link.Route == "AdminEventHistory" && currentSection == "History"
-                        || link.Route == "AdminStudentDirectory" && currentSection == "Students"
-                        || link.Route == "AdminAccounts" && currentSection == "Accounts";
+                        || link.Route == "AdminUserDirectory" && currentSection == "Users";
                     <li class="relative">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                              class="pointer-events-none absolute top-1/2 left-3 size-4.5 -translate-y-1/2 @(isCurrent ? "text-blue-700" : "text-slate-500")">

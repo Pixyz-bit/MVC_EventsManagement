@@ -94,6 +94,8 @@ Enter and confirm a password of 15 to 128 characters at the prompts. Input is hi
 
 The temporary preview URLs have been removed. Open `http://localhost:5314/login`, then use `/admin/events` for the directory or `/admin/events/create` for creation. Credentials are supplied locally and are not stored in project documentation.
 
+User Directory is at `http://localhost:5314/admin/users`. The former `/admin/accounts` and `/admin/students` URLs render that same page; the latter defaults to Student role. MSSQLSERVER is running for the local app. The 2026-11-24 directory increment passed all 155 Release .NET tests, 13 scanner client checks, frontend compilation and local Release publish; see [testing](TESTING.md) for limits.
+
 The app starts at `/login`. Administrators can use email and land on the upcoming events list at `/admin`. The same list is available at `/admin/events`. Students can use their email or student ID once their account and profile exist.
 
 Run these commands in `MVC_QCUEventsManagement` when changing Razor styles. Node.js 24.14.0 and npm 11.9.0 were used with Tailwind and its CLI pinned to 4.3.5.

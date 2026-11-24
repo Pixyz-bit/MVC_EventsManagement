@@ -42,17 +42,22 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
         if (transaction is not null) await transaction.CommitAsync(ct);
     }
 
-    private static IQueryable<User> Filter(IQueryable<User> rows, string q, string role, string status)
+    private static IQueryable<User> Filter(IQueryable<User> rows, string q, string role, string status,
+        string college = "", string program = "", string campus = "")
     {
         if (q.Length > 0)
             rows = rows.Where(u => u.Email.Contains(q) || u.Student != null &&
                 (u.Student.StudentId.Contains(q) || (u.Student.FirstName + " " + (u.Student.MiddleName == null || u.Student.MiddleName == "" ? "" : u.Student.MiddleName + " ") + u.Student.LastName).Contains(q)));
         if (role is "Admin" or "Student") rows = rows.Where(u => u.Role == role);
         if (status is "Active" or "Inactive") rows = rows.Where(u => u.IsActive == (status == "Active"));
+        if (college.Length > 0) rows = rows.Where(u => u.Role == "Student" && u.Student != null && u.Student.Department == college);
+        if (program.Length > 0) rows = rows.Where(u => u.Role == "Student" && u.Student != null && u.Student.Program == program);
+        if (campus.Length > 0) rows = rows.Where(u => u.Role == "Student" && u.Student != null && u.Student.CampusBranch == campus);
         return rows;
     }
 
-    public async Task<AccountManagementViewModel> ListAsync(string? q, string? role, string? status, int page, int actorId, CancellationToken ct)
+    public async Task<UserDirectoryViewModel> ListAsync(string? q, string? role, string? status, int page, int actorId, CancellationToken ct,
+        string? college = null, string? program = null, string? campus = null)
     {
         var query = Normalize(q);
         role = role is "Admin" or "Student" ? role : "";
@@ -63,14 +68,25 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
             Total = g.Count(), Admins = g.Count(u => u.IsActive && u.Role == "Admin"),
             Students = g.Count(u => u.IsActive && u.Role == "Student"), Inactive = g.Count(u => !u.IsActive)
         }).SingleOrDefaultAsync(ct);
-        var matching = Filter(users, query, role, status);
+        college = Normalize(college); program = Normalize(program); campus = Normalize(campus);
+        var matching = Filter(users, query, role, status, college, program, campus);
         var count = await matching.CountAsync(ct);
         var pages = Math.Max(1, (int)Math.Ceiling(count / (double)PageSize));
         page = Math.Clamp(page, 1, pages);
         var rows = await matching.OrderBy(u => u.Email).ThenBy(u => u.UserId).Skip((page - 1) * PageSize).Take(PageSize)
             .Select(u => new ManagedAccountRow(u.UserId, u.Email, u.Role, u.IsActive, u.Student == null ? null : u.Student.StudentId,
-                u.Student == null ? null : u.Student.FirstName + " " + u.Student.LastName)).ToListAsync(ct);
-        return new(rows, summary?.Total ?? 0, summary?.Admins ?? 0, summary?.Students ?? 0, summary?.Inactive ?? 0, count, page, pages, query, role, status, actorId);
+                u.Student == null ? null : u.Student.FirstName + " " + (u.Student.MiddleName == null || u.Student.MiddleName == "" ? "" : u.Student.MiddleName + " ") + u.Student.LastName,
+                u.Role != "Student" || u.Student == null ? null : u.Student.Department,
+                u.Role != "Student" || u.Student == null ? null : u.Student.Program,
+                u.Role != "Student" || u.Student == null ? null : u.Student.CampusBranch)).ToListAsync(ct);
+        var placements = await db.Students.AsNoTracking().Where(s => s.User.Role == "Student")
+            .Select(s => new { s.Department, s.Program }).Distinct().ToListAsync(ct);
+        return new(rows, summary?.Total ?? 0, summary?.Admins ?? 0, summary?.Students ?? 0, summary?.Inactive ?? 0, count, page, pages, query, role, status, actorId)
+        {
+            College = college, Program = program, Campus = campus,
+            Colleges = placements.Select(s => s.Department).Distinct().Order().ToList(),
+            ProgramColleges = placements.GroupBy(s => s.Program).ToDictionary(g => g.Key, g => g.Select(s => s.Department).ToArray())
+        };
     }
 
     private static string Normalize(string? value)
@@ -101,7 +117,7 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
         };
     }
 
-    public async Task SaveAsync(ManagedAccountInput input, int actorId, CancellationToken ct)
+    public async Task SaveAsync(ManagedAccountInput input, int actorId, CancellationToken ct, bool editBirthDate = false)
     {
         input.Email = input.Email.Trim();
         Validator.ValidateObject(input, new ValidationContext(input), true);
@@ -123,13 +139,23 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
         if (await db.Users.AnyAsync(a => a.UserId != u.UserId && a.Email == input.Email, ct))
             throw new ValidationException("Email already belongs to another account.");
 
+        if (editBirthDate && input.Role == "Student" && u.Student is { } existingProfile && existingProfile.BirthDate != input.BirthDate)
+        {
+            // Validate only the birthdate here so unchanged legacy academic values remain editable.
+            var validation = new StudentProfileInput { StudentId = existingProfile.StudentId, Email = input.Email,
+                FirstName = existingProfile.FirstName, LastName = existingProfile.LastName, BirthDate = input.BirthDate };
+            students.Validate(validation, requireBirth: false);
+            existingProfile.BirthDate = input.BirthDate;
+        }
+
         if (input.Role == "Student" && StudentFieldsChanged(u.Student, input))
         {
             var profile = new StudentProfileInput
             {
                 StudentId = u.Student?.StudentId ?? input.StudentId ?? "", Email = input.Email,
                 FirstName = input.FirstName ?? "", MiddleName = input.MiddleName, LastName = input.LastName ?? "",
-                Campus = input.Campus ?? "", College = input.College ?? "", Program = input.Program ?? "", Gender = input.Gender ?? ""
+                Campus = input.Campus ?? "", College = input.College ?? "", Program = input.Program ?? "", Gender = input.Gender ?? "",
+                BirthDate = editBirthDate ? input.BirthDate : u.Student?.BirthDate
             };
             students.Validate(profile, requireBirth: false);
             if (u.Student is null)
@@ -137,7 +163,8 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
                 if (await db.Students.AnyAsync(s => s.StudentId == profile.StudentId, ct))
                     throw new ValidationException("Student ID already belongs to another profile.");
                 u.Student = new Student { StudentId = profile.StudentId, FirstName = profile.FirstName, LastName = profile.LastName,
-                    Gender = profile.Gender, CampusBranch = profile.Campus, Department = profile.College, Program = profile.Program, User = u };
+                    Gender = profile.Gender, CampusBranch = profile.Campus, Department = profile.College, Program = profile.Program,
+                    BirthDate = profile.BirthDate, User = u };
             }
             u.Student.FirstName = profile.FirstName;
             u.Student.MiddleName = profile.MiddleName;
@@ -164,18 +191,20 @@ public sealed class AccountManagementService(ApplicationDbContext db, StudentSer
         s.LastName != input.LastName || s.Gender != input.Gender || s.CampusBranch != input.Campus ||
         s.Department != input.College || s.Program != input.Program;
 
-    public async Task<byte[]> ExportAsync(string? q, string? role, string? status, CancellationToken ct)
+    public async Task<byte[]> ExportAsync(string? q, string? role, string? status, CancellationToken ct,
+        string? college = null, string? program = null, string? campus = null)
     {
-        var rows = await Filter(db.Users.AsNoTracking(), Normalize(q), role ?? "", status ?? "").Include(u => u.Student)
+        var rows = await Filter(db.Users.AsNoTracking(), Normalize(q), role ?? "", status ?? "", Normalize(college), Normalize(program), Normalize(campus)).Include(u => u.Student)
             .OrderBy(u => u.UserId).Take(10001).ToListAsync(ct);
         if (rows.Count > 10000) throw new ValidationException("Narrow the filters to export at most 10,000 accounts.");
-        var csv = new StringBuilder("UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program\r\n");
+        var csv = new StringBuilder("UserId,Email,Role,AccountStatus,StudentId,FullName,Gender,CampusBranch,Department,Program,FirstName,MiddleName,LastName,BirthDate(MM/dd/yyyy)\r\n");
         foreach (var u in rows)
         {
             var s = u.Student;
             var name = s is null ? null : string.Join(" ", new[] { s.FirstName, s.MiddleName, s.LastName }.Where(n => !string.IsNullOrWhiteSpace(n)));
             csv.AppendJoin(',', new[] {u.UserId.ToString(CultureInfo.InvariantCulture), u.Email, u.Role, u.IsActive ? "Active" : "Inactive", s?.StudentId,
-                name, s?.Gender, s?.CampusBranch, s?.Department, s?.Program }.Select(StudentService.CsvCell)).Append("\r\n");
+                name, s?.Gender, s?.CampusBranch, s?.Department, s?.Program, s?.FirstName, s?.MiddleName, s?.LastName,
+                s?.BirthDate?.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture) }.Select(StudentService.CsvCell)).Append("\r\n");
         }
         return Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
     }
