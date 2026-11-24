@@ -1,6 +1,6 @@
 # Project scope and source application
 
-Last updated: 2026-11-21 (Asia/Manila).
+Last updated: 2026-11-24 (Asia/Manila).
 
 Source application (reference; preserve unchanged):
 `C:\Martin Archive\Programming\ASP NET\241611JalopEventsManagement\241611JalopEventsManagement`
@@ -18,3 +18,5 @@ Observed source: administrator and student portals, session access helpers, PBKD
 The destination targets net11.0; SDK 11.0.100 builds the original starter successfully with zero warnings/errors. Exact package/setup versions belong in [setup](SETUP.md). Existing starter Bootstrap references remain untouched until the Tailwind/layout milestone.
 
 On 2026-11-23 the user explicitly authorized fictional sample accounts/events/registrations for local visual previews. This is an additive development-only dataset in MVC_EventsManagement, not an import of source data; existing records are preserved. See SETUP.md and DATABASE_AND_SECURITY.md for the explicit command and restrictions.
+
+On 2026-11-24 the user explicitly requested preview population and unscanned QR passes for BOTH local applications. This authorizes additive, marked fictional records in localhost MVC_EventsManagement and UniversityEventDB, without copying real data between them, changing their schemas or editing the Web Forms source. The dedicated LocalAdminPreview utility is outside the application runtime; operational credentials, manifests and QR images remain private and untracked. This narrow authorization supersedes the earlier prohibition on source-database access only for the requested local preview work.

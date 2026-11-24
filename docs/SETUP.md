@@ -2,6 +2,20 @@
 
 Last updated: 2026-11-24 (Asia/Manila).
 
+For the explicitly authorized dual-app local admin preview, run from the MVC repository root (both local apps/SQL catalogs must already exist):
+
+```powershell
+dotnet restore tools/LocalAdminPreview/LocalAdminPreview.csproj --locked-mode
+dotnet build tools/LocalAdminPreview/LocalAdminPreview.csproj --no-restore -c Release
+$env:ASPNETCORE_ENVIRONMENT = 'Development'
+dotnet tools/LocalAdminPreview/bin/Release/net11.0/LocalAdminPreview.dll --apply nov24-preview
+node tools/LocalAdminPreview/render-qr.cjs nov24-preview
+```
+
+The verified `nov24-preview` batch adds 38 accounts (36 students, one active admin, one inactive admin), 9 events, 18 sponsors and 160 registrations per database. Events cover Open, Soon, Closed, ongoing, Completed, Cancelled, full capacity, restricted audience and scanner practice. Existing records are preserved. Repeating the same batch validates/reuses it without changing credentials, dates or consumed QR passes; a new explicitly authorized batch is needed for fresh dates/passes after expiry/use. The 8 unscanned practice passes per app currently belong to the 2026-11-25 event ending at 17:00 Philippine time.
+
+Private output lives at `PrivateData/AdminPreview/nov24-preview`: `access.txt` provides local-only credentials; `manifest.json` provides event/pass IDs; `mvc/qr-passes.html` and `webforms/qr-passes.html` are printable sheets beside individual PNGs. These files are excluded from Git and not served by the MVC app. Open the matching event scanner before scanning its app-specific QR. A lookup stages review only; Confirm check-in changes that pass once. QR generation uses the existing bundled encoder and Node built-ins, with a four-module quiet zone and integer-scaled modules; independent decoding is recorded in TESTING.md.
+
 Original Web Forms app (user-requested local run on 2026-11-24): IIS Express uses the existing source `.vs/241611JalopEventsManagement/config/applicationhost.config`, site `241611JalopEventsManagement`, HTTP port 51717. Its login at `http://localhost:51717/Frontend/Login/Login.aspx` returned HTTP 200 and rendered in the ChatGPT in-app browser. The source project and database were not edited; this startup check does not verify sign-in or other legacy workflows. MVC remains separate on port 5314.
 
 Documentation ownership/navigation is defined in [AGENTS.md](../AGENTS.md); progress belongs in [milestones](MILESTONES.md). Original starter baseline commit: 8e785e5. Source application/database are unchanged. Commands below run in PowerShell from the solution root.

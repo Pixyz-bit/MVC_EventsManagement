@@ -29,6 +29,8 @@ Create Event now shares Event Directory's responsive page padding and heading/su
 
 ## Current handoff
 
+Both local apps now have the authorized `nov24-preview` batch: 9 admin-preview events and 36 students per app, with mixed reservations/attendance and 8 unscanned scanner-practice passes each. Both batches passed preservation/integrity/idempotency checks; 20 authenticated admin-page checks, 16 ValidPending lookups and 16 independent PNG QR decodes passed without confirming admission. Credentials/QR files are private and untracked; see SETUP.md. The broader student full-pass browser download check remains separate.
+
 The redundant Account Information tab is hidden for administrator profiles; student profile tabs remain available. Syntax, role-switch handler checks, Release publish and in-app confirmation passed. The filter helper note is removed, with Role/Status, Campus/College and a full-width Program field; Tailwind/build/publish and rendered checks passed.
 
 User Directory Filters now use a compact two-column layout with a full-width Reset/Apply footer, retaining the current design. Tailwind, two focused HTTP/SQL cases and publish passed; the in-app browser verified the approximately 341px-high panel at 606px viewport width. See DESIGN.md and TESTING.md for the reference and verification limits.
