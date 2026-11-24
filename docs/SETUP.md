@@ -66,6 +66,7 @@ Integration tests require the migrated database and default to the same localhos
 
 ```powershell
 dotnet test MVC_QCUEventsManagement.slnx --no-restore -c Release --filter FullyQualifiedName~ConcurrencyTests
+dotnet test MVC_QCUEventsManagement.slnx --no-restore -c Release --filter FullyQualifiedName~WorkflowTests
 ```
 
 The ordinary full test command includes these checks. If a test process is forcibly terminated, its uniquely named LocalDB instance may remain; inspect the exact `QcuConcurrency_` instance and generated file location before any manual cleanup. Never reset/drop the retained development catalog to run last-admin cases.

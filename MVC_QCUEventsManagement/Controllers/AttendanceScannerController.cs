@@ -23,7 +23,8 @@ public sealed class AttendanceScannerController(AttendanceService attendance, IL
     {
         try { return Json(await attendance.LookupAsync(id, query, cancellationToken)); }
         catch (KeyNotFoundException) { return NotFound(new { message = "The selected event no longer exists." }); }
-        catch (Exception ex) when (ex is DbUpdateException or System.Data.Common.DbException)
+        catch (Exception ex) when (ex is DbUpdateException or System.Data.Common.DbException
+            || ex is InvalidOperationException && ex.GetBaseException() is System.Data.Common.DbException)
         { logger.LogError(ex, "Could not look up an attendee for event {EventId}", id); return StatusCode(503, new { message = "Lookup is unavailable. Please try again." }); }
     }
 
@@ -34,7 +35,8 @@ public sealed class AttendanceScannerController(AttendanceService attendance, IL
         try { return Json(await attendance.ConfirmAsync(id, input, cancellationToken)); }
         catch (KeyNotFoundException) { return NotFound(new { message = "The selected event no longer exists." }); }
         catch (ValidationException ex) { return BadRequest(new { message = ex.Message }); }
-        catch (Exception ex) when (ex is DbUpdateException or System.Data.Common.DbException)
+        catch (Exception ex) when (ex is DbUpdateException or System.Data.Common.DbException
+            || ex is InvalidOperationException && ex.GetBaseException() is System.Data.Common.DbException)
         { logger.LogError(ex, "Could not check in attendee for event {EventId}", id); return StatusCode(503, new { message = "Check-in could not be confirmed. Look up the pass again before retrying." }); }
     }
 }

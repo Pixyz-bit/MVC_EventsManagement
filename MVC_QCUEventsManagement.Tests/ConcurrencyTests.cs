@@ -181,6 +181,123 @@ public sealed class ConcurrencyTests(IsolatedSqlServerFixture database) : IClass
         Assert.Contains("ReturnUrl=", destination.Query);
     }
 
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)]
+    public async Task Cancelling_a_pass_while_another_student_books_preserves_seat_counts(int iteration)
+    {
+        var fixture = await SeedAsync(2, reserved: true, iteration: iteration);
+        var gate = new RaceGate(); using var factory = Factory(new SaveGate(gate));
+        using var owner = Client(factory); using var other = Client(factory);
+        await LoginAsync(owner, fixture.Student1.User); await LoginAsync(other, fixture.Student2.User);
+        var cancelPath = $"/student/passes/{fixture.PassId}/cancel"; var bookPath = $"/student/events/{fixture.EventId}/register";
+        var ownerToken = await TokenAsync(owner, "/student"); var otherToken = await TokenAsync(other, bookPath);
+        var results = await TogetherAsync(() => owner.PostAsync(cancelPath, Form(("__RequestVerificationToken", ownerToken))),
+            () => other.PostAsync(bookPath, Form(("Year", "3"), ("Section", "RACE-3B"), ("Terms", "true"), ("__RequestVerificationToken", otherToken))));
+        await AssertHandledAsync(results); gate.AssertContended();
+        await using var verify = database.CreateContext();
+        var original = await verify.EventRegistrations.AsNoTracking().SingleAsync(r => r.EventRegistrationId == fixture.PassId);
+        var newPass = await verify.EventRegistrations.AsNoTracking().SingleOrDefaultAsync(r => r.StudentId == fixture.Student2.StudentId);
+        Assert.True(original.Status == "Cancelled" && newPass is null || original.Status == "NoShow" && newPass?.Status == "NoShow");
+        await AssertSeatsAsync(verify, fixture.EventId);
+        // Retry only the rolled-back operation with current state; both actions should then be represented.
+        using var retry = original.Status == "Cancelled"
+            ? await other.PostAsync(bookPath, Form(("Year", "3"), ("Section", "RACE-3B"), ("Terms", "true"), ("__RequestVerificationToken", otherToken)))
+            : await owner.PostAsync(cancelPath, Form(("__RequestVerificationToken", ownerToken)));
+        Assert.Equal(HttpStatusCode.Redirect, retry.StatusCode);
+        Assert.Equal("Cancelled", await verify.EventRegistrations.Where(r => r.EventRegistrationId == fixture.PassId).Select(r => r.Status).SingleAsync());
+        Assert.Equal(1, await verify.EventRegistrations.CountAsync(r => r.Status == "NoShow" && r.StudentId == fixture.Student2.StudentId));
+        Assert.Equal(1, await verify.Events.Select(e => e.CurrentRegistrations).SingleAsync());
+        await AssertSeatsAsync(verify, fixture.EventId);
+        foreach (var response in results) response.Dispose();
+    }
+
+    [Theory]
+    [InlineData(false, 0)] [InlineData(false, 1)] [InlineData(false, 2)] [InlineData(false, 3)] [InlineData(false, 4)]
+    [InlineData(true, 0)] [InlineData(true, 1)] [InlineData(true, 2)] [InlineData(true, 3)] [InlineData(true, 4)]
+    public async Task Pass_cancellation_racing_checkin_commits_one_consistent_outcome(bool administratorVoid, int iteration)
+    {
+        var fixture = await SeedAsync(2, reserved: true, iteration: iteration);
+        var gate = new RaceGate(); using var factory = Factory(new CommandGate(gate,
+            command => command.CommandText.Contains("UPDATE") && command.CommandText.Contains("EventRegistrationTable")));
+        using var operatorClient = Client(factory); using var cancelling = Client(factory);
+        await LoginAsync(operatorClient, fixture.Admin1); await LoginAsync(cancelling, administratorVoid ? fixture.Admin2 : fixture.Student1.User);
+        var scan = $"/admin/events/{fixture.EventId}/scanner";
+        var scanToken = await TokenAsync(operatorClient, scan);
+        var cancelToken = await TokenAsync(cancelling, administratorVoid ? $"/admin/events/{fixture.EventId}/preregistered" : "/student");
+        await using var before = database.CreateContext();
+        var original = await before.EventRegistrations.AsNoTracking().SingleAsync(); var ev = await before.Events.AsNoTracking().SingleAsync();
+        FormUrlEncodedContent Tokens(string csrf) => Form(("RegistrationId", fixture.PassId.ToString()), ("Version", Convert.ToBase64String(original.RowVersion)),
+            ("EventVersion", Convert.ToBase64String(ev.RowVersion)), ("Confirmed", "true"), ("__RequestVerificationToken", csrf));
+        var cancelPath = administratorVoid ? $"/admin/events/{fixture.EventId}/preregistered/{fixture.PassId}/void" : $"/student/passes/{fixture.PassId}/cancel";
+        var results = await TogetherAsync(() => cancelling.PostAsync(cancelPath, Tokens(cancelToken)), () => operatorClient.PostAsync(scan + "/confirm", Tokens(scanToken)));
+        await AssertHandledAsync(results, allowUnavailable: true); gate.AssertContended();
+        await using var verify = database.CreateContext();
+        var stored = await verify.EventRegistrations.AsNoTracking().SingleAsync();
+        Assert.Contains(stored.Status, new[] { "Present", "Cancelled" });
+        Assert.Equal(stored.Status == "Present", stored.CheckInTimestamp.HasValue);
+        await AssertSeatsAsync(verify, fixture.EventId);
+        var version = stored.RowVersion.ToArray(); var timestamp = stored.CheckInTimestamp;
+        using var repeat = await operatorClient.PostAsync(scan + "/confirm", Tokens(scanToken));
+        Assert.Equal(HttpStatusCode.OK, repeat.StatusCode);
+        Assert.Contains(stored.Status == "Present" ? "DuplicateWarning" : "CancelledWarning", await repeat.Content.ReadAsStringAsync());
+        stored = await verify.EventRegistrations.AsNoTracking().SingleAsync();
+        Assert.Equal(version, stored.RowVersion); Assert.Equal(timestamp, stored.CheckInTimestamp);
+        foreach (var response in results) response.Dispose();
+    }
+
+    [Theory]
+    [InlineData(false, 0)] [InlineData(false, 1)] [InlineData(false, 2)] [InlineData(false, 3)] [InlineData(false, 4)]
+    [InlineData(true, 0)] [InlineData(true, 1)] [InlineData(true, 2)] [InlineData(true, 3)] [InlineData(true, 4)]
+    public async Task Event_cancellation_racing_booking_or_checkin_blocks_future_admission(bool checkIn, int iteration)
+    {
+        var fixture = await SeedAsync(2, reserved: checkIn, iteration: iteration);
+        var gate = new RaceGate();
+        using var factory = Factory(checkIn
+            ? new CommandGate(gate, command => command.CommandText.Contains("UPDATE") && (command.CommandText.Contains("EventRegistrationTable") || command.CommandText.Contains("EventsTable")))
+            : new SaveGate(gate));
+        using var admin = Client(factory); using var other = Client(factory);
+        await LoginAsync(admin, fixture.Admin1); await LoginAsync(other, checkIn ? fixture.Admin2 : fixture.Student1.User);
+        var eventPath = $"/admin/events/{fixture.EventId}"; var actionPath = checkIn ? eventPath + "/scanner" : $"/student/events/{fixture.EventId}/register";
+        var adminToken = await TokenAsync(admin, eventPath); var otherToken = await TokenAsync(other, actionPath);
+        await using var before = database.CreateContext(); var ev = await before.Events.AsNoTracking().SingleAsync();
+        var pass = checkIn ? await before.EventRegistrations.AsNoTracking().SingleAsync() : null;
+        FormUrlEncodedContent Cancel(byte[] version) => Form(("reason", "Isolated cancellation conflict"), ("version", Convert.ToBase64String(version)), ("confirmed", "true"), ("__RequestVerificationToken", adminToken));
+        var results = await TogetherAsync(() => admin.PostAsync(eventPath + "/cancel", Cancel(ev.RowVersion)), () => checkIn
+            ? other.PostAsync(actionPath + "/confirm", Form(("RegistrationId", fixture.PassId.ToString()), ("Version", Convert.ToBase64String(pass!.RowVersion)), ("EventVersion", Convert.ToBase64String(ev.RowVersion)), ("Confirmed", "true"), ("__RequestVerificationToken", otherToken)))
+            : other.PostAsync(actionPath, Form(("Year", "3"), ("Section", "RACE-3A"), ("Terms", "true"), ("__RequestVerificationToken", otherToken))));
+        await AssertHandledAsync(results, allowUnavailable: true); gate.AssertContended();
+        await using var verify = database.CreateContext(); var storedEvent = await verify.Events.AsNoTracking().SingleAsync();
+        if (storedEvent.Status != "Cancelled")
+        {
+            // A booking may win the event rowversion. Cancel again only after reviewing the fresh version.
+            Assert.False(checkIn);
+            using var retry = await admin.PostAsync(eventPath + "/cancel", Cancel(storedEvent.RowVersion));
+            Assert.Equal(HttpStatusCode.Redirect, retry.StatusCode);
+        }
+        storedEvent = await verify.Events.AsNoTracking().SingleAsync();
+        Assert.Equal("Cancelled", storedEvent.Status); Assert.Equal("Isolated cancellation conflict", storedEvent.CancellationReason);
+        await AssertSeatsAsync(verify, fixture.EventId);
+        var storedPass = await verify.EventRegistrations.AsNoTracking().SingleOrDefaultAsync();
+        if (checkIn)
+        {
+            Assert.NotNull(storedPass); Assert.Contains(storedPass.Status, new[] { "NoShow", "Present" });
+            Assert.Equal(storedPass.Status == "Present", storedPass.CheckInTimestamp.HasValue);
+        }
+        // A fresh scan after the cancellation must never admit even a previously valid reservation.
+        var scanToken = await TokenAsync(admin, eventPath + "/scanner");
+        using var lookup = await admin.PostAsync(eventPath + "/scanner/lookup", Form(("query", fixture.Student1.StudentId), ("__RequestVerificationToken", scanToken)));
+        var lookupJson = await lookup.Content.ReadAsStringAsync();
+        Assert.DoesNotContain("\"canConfirm\":true", lookupJson);
+        if (storedPass is not null) Assert.Contains("CancelledWarning", lookupJson);
+        foreach (var response in results) response.Dispose();
+    }
+
+    private static async Task AssertSeatsAsync(ApplicationDbContext db, int eventId)
+    {
+        var seats = await db.Events.Where(e => e.EventId == eventId).Select(e => e.CurrentRegistrations).SingleAsync();
+        Assert.Equal(await db.EventRegistrations.CountAsync(r => r.EventId == eventId && r.Status != "Cancelled"), seats);
+    }
+
     private static void RemoveAccess(ManagedAccountInput input, bool demote)
     {
         if (!demote) { input.Active = false; return; }
@@ -225,10 +342,10 @@ public sealed class ConcurrencyTests(IsolatedSqlServerFixture database) : IClass
     private static async Task<HttpResponseMessage[]> TogetherAsync(Func<Task<HttpResponseMessage>> first, Func<Task<HttpResponseMessage>> second) =>
         await Task.WhenAll(Task.Run(first), Task.Run(second)).WaitAsync(TimeSpan.FromSeconds(45));
 
-    private static async Task AssertHandledAsync(IEnumerable<HttpResponseMessage> results)
+    private static async Task AssertHandledAsync(IEnumerable<HttpResponseMessage> results, bool allowUnavailable = false)
     {
         foreach (var result in results)
-            if ((int)result.StatusCode >= 400)
+            if ((int)result.StatusCode >= 400 && !(allowUnavailable && result.StatusCode == HttpStatusCode.ServiceUnavailable))
                 Assert.Fail($"Unexpected HTTP {(int)result.StatusCode}: {string.Join('\n', (await result.Content.ReadAsStringAsync()).Split('\n').Take(6))}");
     }
 

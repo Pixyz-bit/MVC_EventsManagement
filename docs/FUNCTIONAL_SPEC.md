@@ -51,7 +51,7 @@ Evidence: Login.aspx.cs, Default.aspx, AccessDenied.aspx.cs, Admin.Master.cs, Se
 ### AUTH-02: New-account credentials
 
 - [x] The first administrator uses ASP.NET Core Identity password hashing and a password of 15 to 128 characters. The setup command prompts for confirmation and preserves password whitespace. The new database starts without imported or seeded accounts.
-- [ ] Apply the new-account hashing and password policy to account creation, password change and reset flows as those screens are implemented.
+- [x] Apply the new-account hashing and password policy to account creation, password change and reset flows. Verification is recorded in TESTING.md.
 
 Acceptance: verify new-account hashes, incorrect passwords, malformed hashes, salt regeneration and deliberate whitespace handling. No source-account upgrade or seed transition is required.
 
@@ -100,7 +100,7 @@ Acceptance: invalid fields/dates/capacity write nothing; cancelled/completed eve
 - [x] Cancellation opens a modal with a reason and explicit confirmation, Close/Keep event and Escape dismissal. Failed submissions retain the reason and submitted concurrency token. Require a trimmed 1-500 character reason. Cancel only unfinished Upcoming events. Repeated requests cannot overwrite the original reason.
 - [x] Set event outcome/reason, retaining registrations, timestamps and CurrentRegistrations as history.
 - [x] History includes cancelled events and opens their read-only details with the retained cancellation reason.
-- [ ] Future registration/admission and passes must honor cancelled events and show the reason. Source sends no automatic emails on cancellation.
+- [x] Registration/admission and passes honor cancelled events and show the reason. Repeated cancellation races verify that fresh lookups cannot admit after cancellation; overlapping operations may retain a valid booking/check-in committed before cancellation. Source sends no automatic emails on cancellation.
 
 Acceptance: historical evidence/counts survive, admission/booking stop immediately, repeated/finished-event cancellation fails safely.
 
@@ -223,6 +223,7 @@ Acceptance: lookup never changes status/time; warnings block confirmation; manua
 - [x] Confirm only the selected event's real registration. The conditional write rechecks selected event, registration, both rowversions, lifecycle and eligibility server-side. The client confirmation button is not the security boundary.
 - [x] Atomically transition eligible NoShow to Present and store the Philippine check-in time. Reject not found, duplicate, cancelled pass, inactive/cancelled/completed/ended event. Preserve the source policy allowing check-in before EventStart; no new door-opening restriction was added.
 - [x] Return persisted time/reference/attendee and updated Present count. CurrentRegistrations is unchanged. Verification method/admin identity are not persisted; no stored attendance audit log is claimed.
+- [x] SQL failures, including EF-wrapped deadlocks during cancellation conflicts, return safe unavailable/relookup feedback without automatic retries or admission. Administrator pass-void conflicts return safe roster review feedback.
 
 Acceptance: concurrent confirmations yield one success and stable timestamp; selected-event tampering fails; changes after lookup are revalidated.
 

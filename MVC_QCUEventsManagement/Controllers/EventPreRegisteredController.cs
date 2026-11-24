@@ -30,7 +30,9 @@ public sealed class EventPreRegisteredController(RegistrationService registratio
         catch (KeyNotFoundException) { return NotFound(); }
         catch (ValidationException ex) { TempData["RosterError"] = ex.Message; }
         catch (DbUpdateConcurrencyException) { TempData["RosterError"] = "This roster changed. Review the latest attendee details before trying again."; }
-        catch (DbUpdateException ex) { logger.LogError(ex, "Could not cancel pass {RegistrationId} for event {EventId}", registrationId, id); TempData["RosterError"] = "Could not cancel the pass. Please try again."; }
+        catch (Exception ex) when (ex is DbUpdateException or System.Data.Common.DbException
+            || ex is InvalidOperationException && ex.GetBaseException() is System.Data.Common.DbException)
+        { logger.LogError(ex, "Could not cancel pass {RegistrationId} for event {EventId}", registrationId, id); TempData["RosterError"] = "Could not cancel the pass. Please try again."; }
         if (TempData.ContainsKey("RosterError")) TempData["RosterAttendee"] = registrationId;
         return RedirectToRoute("AdminEventPreRegistered", new { id, query.Q, query.College, query.Program, query.Year, query.Cohort, query.Page, from = query.From == "history" ? "history" : null });
     }
