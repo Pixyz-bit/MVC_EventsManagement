@@ -1,6 +1,10 @@
 # Verification and definition of done
 
-Last updated: 2026-11-24 (Asia/Manila).
+Last updated: 2026-11-25 (Asia/Manila).
+
+2026-11-25 in-app browser workflow: fictional student `PV-mvc-nov24-preview-33` signed in, opened preview event 3593, submitted Year 3 / BSA-3A registration and received owned pass `TCK-3593-02810`. SQL confirmed NoShow/null timestamp and 23 active reservations after booking. The actual Download Pass button was clicked; it returned enabled with no displayed export error or console error. However, the in-app download-event API hung/reset its session (including a bounded retry), and no matching PNG was available in the local Downloads folder. The full exported PNG and its QR have therefore NOT been independently verified; the generated sample QR-sheet decoding recorded below is a different check.
+
+The fictional administrator then returned through the normal portal link after a stale student return URL produced the expected wrong-role denial. Scanner lookup by ticket reference reached Ready for review, explicit Confirm check-in succeeded once, and clearing/relooking up the same reference returned Already checked in with confirmation disabled. SQL verified registration 2810 is Present, timestamp 2026-11-25 16:11:33 Philippine time, and CurrentRegistrations = active-pass count = 23 after the duplicate lookup. This was manual reference lookup in the scanner UI, not a new physical webcam/optical scan. Only the newly created fictional registration was admitted; the 16 practice-sheet passes were not consumed. Both MVC port 5314 and Web Forms port 51717 returned HTTP 200 at their login routes after restart.
 
 Dual-app admin preview (2026-11-24): the separate utility builds with zero warnings/errors and inserts its graphs using a serializable transaction per database. Both applications have 9 batch events, 36 fictional students, an active/inactive admin pair, 18 sponsors and 160 mixed-status registrations. Reservation counters/capacity and NoShow/Present timestamp invariants pass SQL checks. SHA-256 SQL fingerprints confirm all non-batch rows in each of the five tables were unchanged by insertion. A second execution reused the batch with 8 unscanned practice passes per app and preserved credentials/scanned states; it did not create duplicate events/accounts.
 

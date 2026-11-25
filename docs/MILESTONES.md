@@ -1,6 +1,6 @@
 # Milestone plan and progress
 
-Last updated: 2026-11-24 (Asia/Manila).
+Last updated: 2026-11-25 (Asia/Manila).
 
 Related specifications: [scope](PROJECT_SCOPE.md), [architecture](ARCHITECTURE.md), [database and security](DATABASE_AND_SECURITY.md), [design and page references](../DESIGN.md), [skills](SKILLS.md), [functionality](FUNCTIONAL_SPEC.md), [testing](TESTING.md), and [setup](SETUP.md). Documentation ownership and commit rules are in [AGENTS.md](../AGENTS.md).
 
@@ -28,6 +28,8 @@ Page organization now follows one controller, page model and view per applicatio
 Create Event now shares Event Directory's responsive page padding and heading/subheading treatment. Tailwind, layout scanning and the Release build passed; rendered verification of this spacing increment remains pending because Computer Use URL detection blocked browser access. See [testing](TESTING.md).
 
 ## Current handoff
+
+The in-app student registration → owned pass → administrator manual lookup → explicit admission → duplicate rejection flow passed on 2026-11-25 using newly created fictional pass TCK-3593-02810; SQL verified the stored timestamp and stable 23-seat count. Full student PNG-download/QR verification remains blocked by the in-app browser download API hanging/resetting, despite the page reporting no export error. Do not equate this with the already verified generated sample QR sheets. Both apps were restarted and login HTTP 200 confirmed: MVC 5314, Web Forms 51717.
 
 Both local apps now have the authorized `nov24-preview` batch: 9 admin-preview events and 36 students per app, with mixed reservations/attendance and 8 unscanned scanner-practice passes each. Both batches passed preservation/integrity/idempotency checks; 20 authenticated admin-page checks, 16 ValidPending lookups and 16 independent PNG QR decodes passed without confirming admission. Credentials/QR files are private and untracked; see SETUP.md. The broader student full-pass browser download check remains separate.
 

@@ -1,6 +1,8 @@
 # Setup and deployment
 
-Last updated: 2026-11-24 (Asia/Manila).
+Last updated: 2026-11-25 (Asia/Manila).
+
+On 2026-11-25 both stopped local apps were restarted; SQL Server was already running. MVC login returned HTTP 200 at `http://localhost:5314/login`, and Web Forms login returned HTTP 200 at `http://localhost:51717/Frontend/Login/Login.aspx`. The MVC published executable currently uses `obj/event-description-verify` with its matching published webroot and the web-project content root. Browser workflow results and the in-app PNG-download limitation are recorded in TESTING.md.
 
 For the explicitly authorized dual-app local admin preview, run from the MVC repository root (both local apps/SQL catalogs must already exist):
 
